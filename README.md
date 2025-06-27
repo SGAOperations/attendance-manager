@@ -15,7 +15,7 @@ Frontend:
 
 Backend:
 
-- Framework: [Flask](https://nextjs.org/docs)
+- Framework: [Next.js](https://nextjs.org/docs)
 - ORM: [Prisma](https://www.prisma.io/docs)
 - Database: [PostgreSQL](https://www.postgresql.org/docs/) (hosted on [Firebase](https://firebase.google.com/docs))
 
