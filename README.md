@@ -26,6 +26,14 @@ Authentication: TBD
 
 Components: TBD
 
+## Running the Backend
+
+1. Pull the latest version of the backend branch
+2. Create a .env file, contact **Logan Ravinuthala** via slack for the database url and with your Public IPv4 address to be whitelisted
+3. cd into the backend folder and run these two commands:
+a. npm install
+b. npx prisma generate
+
 ## Meet the Team
 
 ```
