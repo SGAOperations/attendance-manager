@@ -51,9 +51,16 @@ export const UsersService = {
         return prisma.role.findMany();
     },
 
-    async createRole(roleType: string) {
-        return prisma.role.create({
-            data: { roleType }
+    async getUsersByRole(roleId: string) {
+        return prisma.user.findMany({
+            where: {
+                role: {
+                    roleType: roleId,
+                },
+            },
+            include: {
+                role: true,
+            },
         });
     },
 };

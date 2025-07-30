@@ -4,36 +4,47 @@ import { prisma } from "../../lib/prisma";
 jest.setTimeout(20000);
 
 describe("UsersService", () => {
-  let roleId: string;
+  let testRoleId: string;
 
   beforeAll(async () => {
-    try {
-      const role = await UsersService.createRole("member");
-      roleId = role.roleId;
-    } catch (err) {
-      console.error("❌ Failed in beforeAll:", err);
-      throw err;
-    }
-  });
+    const role = await prisma.role.create({
+      data: { roleType: "member" },
+    });
+    testRoleId = role.roleId;
 
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
-
-  it("should create a new user", async () => {
-    const newUser = await UsersService.createUser({
+    await UsersService.createUser({
       username: "jdoe",
       email: "jdoe@northeastern.edu",
       firstName: "John",
       lastName: "Doe",
-      roleId: roleId,
+      roleId: testRoleId,
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.user.deleteMany();
+    await prisma.role.deleteMany();
+    await prisma.$disconnect();
+  });
+
+  it("should fetch users by role type", async () => {
+    const users = await UsersService.getUsersByRole("member");
+    expect(users.length).toBeGreaterThan(0);
+    expect(users[0].role.roleType).toBe("member");
+  });
+
+  it("should create a new user", async () => {
+    const newUser = await UsersService.createUser({
+      username: "jdoe2",
+      email: "jdoe2@northeastern.edu",
+      firstName: "Jane",
+      lastName: "Doe",
+      roleId: testRoleId,
     });
 
     expect(newUser).toBeDefined();
-    expect(newUser.username).toBe("jdoe");
-    expect(newUser.email).toBe("jdoe@northeastern.edu");
-    expect(newUser.firstName).toBe("John");
-    expect(newUser.lastName).toBe("Doe");
+    expect(newUser.username).toBe("jdoe2");
+    expect(newUser.email).toBe("jdoe2@northeastern.edu");
   });
 
   it("should fetch all users", async () => {
@@ -42,30 +53,28 @@ describe("UsersService", () => {
   });
 
   it("should fetch a user by id", async () => {
-    const [newUser] = await UsersService.getAllUsers();
-    const fetchedUser = await UsersService.getUserById(newUser.userId);
-    expect(fetchedUser?.userId).toBe(newUser.userId);
+    const [user] = await UsersService.getAllUsers();
+    const fetchedUser = await UsersService.getUserById(user.userId);
+    expect(fetchedUser?.userId).toBe(user.userId);
   });
 
   it("should update a user", async () => {
-    const [newUser] = await UsersService.getAllUsers();
-    const updatedUser = await UsersService.updateUser(newUser.userId, {
-      username: "jdoe2",
-      email: "jdoe2@northeastern.edu",
-      firstName: "Jane",
-      lastName: "Doe",
+    const [user] = await UsersService.getAllUsers();
+    const updatedUser = await UsersService.updateUser(user.userId, {
+      username: "updatedUser",
+      email: "updated@northeastern.edu",
+      firstName: "Updated",
+      lastName: "User",
     });
 
-    expect(updatedUser.username).toBe("jdoe2");
-    expect(updatedUser.email).toBe("jdoe2@northeastern.edu");
-    expect(updatedUser.firstName).toBe("Jane");
-    expect(updatedUser.lastName).toBe("Doe");
+    expect(updatedUser.username).toBe("updatedUser");
+    expect(updatedUser.email).toBe("updated@northeastern.edu");
   });
 
   it("should delete a user", async () => {
-    const [newUser] = await UsersService.getAllUsers();
-    await UsersService.deleteUser(newUser.userId);
-    const deletedUser = await UsersService.getUserById(newUser.userId);
+    const [user] = await UsersService.getAllUsers();
+    await UsersService.deleteUser(user.userId);
+    const deletedUser = await UsersService.getUserById(user.userId);
     expect(deletedUser).toBeNull();
   });
 });
