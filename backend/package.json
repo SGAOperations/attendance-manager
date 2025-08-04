@@ -12,9 +12,12 @@
     "next": "15.3.5"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
+    "jest": "^30.0.5",
     "prisma": "^6.12.0",
+    "ts-jest": "^29.4.0",
     "typescript": "^5"
   }
 }

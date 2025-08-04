@@ -14,14 +14,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Role {
+model Role { // defines the permissions that a user may have in the attendance manager, each role can belong to multiple users
   roleId   String @id @default(uuid())
   roleType String // Valid values: admin, member
 
   users    User[]
 }
 
-model User {
+model User { // verified profile in the attendance manager, each user can have multiple attendance records but only one role
   userId      String       @id @default(uuid())
   username    String
   email       String       @unique
@@ -33,7 +33,7 @@ model User {
   attendance  Attendance[]
 }
 
-model Meeting {
+model Meeting { // an sga meeting that will be tracked using the attendance manager, each meeting can have multiple attendance records
   meetingId String @id @default(uuid())
   name      String
   date      String
@@ -44,7 +44,7 @@ model Meeting {
   attendance Attendance[]
 }
 
-model Attendance {
+model Attendance { // the attendance record for a meeting, each attendance record belongs to one user and may or may not have one request
   attendanceId String @id @default(uuid())
   userId       String
   meetingId    String
@@ -55,7 +55,7 @@ model Attendance {
   request      Request?
 }
 
-model Request {
+model Request { // a member sends a request form to the admin for an excused absence, each request belongs to one attendance record
   requestId     String @id @default(uuid())
   attendanceId  String @unique
   reason        String
