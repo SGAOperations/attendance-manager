@@ -53,6 +53,8 @@ model Attendance {
   user         User    @relation(fields: [userId], references: [userId])
   meeting      Meeting @relation(fields: [meetingId], references: [meetingId])
   request      Request?
+
+  @@unique([userId, meetingId])
 }
 
 model Request {
