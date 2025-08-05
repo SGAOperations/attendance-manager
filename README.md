@@ -35,6 +35,10 @@ a. npm install
 b. npx prisma generate
 c. npx prisma studio
 
+### Running Tests
+Once you're in the backend folder (and connected to the database), you can also run our endpoint tests through Jest by running the following command:
+npx jest --runInBand
+
 ## Meet the Team
 
 ```
