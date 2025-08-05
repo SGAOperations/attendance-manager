@@ -5,14 +5,17 @@ jest.setTimeout(20000);
 
 describe("AttendanceController", () => {
   let testUserId: string;
+  let testUser2Id: string;
   let testMeetingId: string;
+  let testMeeting2Id: string;
   let testAttendanceId: string;
+  let testAttendance2Id: string;
 
   beforeAll(async () => {
-    // Create a test role
+    // Test role
     const role = await prisma.role.create({ data: { roleType: "member" } });
 
-    // Create test user
+    // Test user
     const user = await prisma.user.create({
       data: {
         username: "testuser",
@@ -24,7 +27,18 @@ describe("AttendanceController", () => {
     });
     testUserId = user.userId;
 
-    // Create test meeting
+    const user2 = await prisma.user.create({
+      data: {
+        username: "testuser2",
+        email: "testuser2@example.com",
+        firstName: "Test2",
+        lastName: "User2",
+        roleId: role.roleId,
+      },
+    });
+    testUser2Id = user2.userId;
+
+    // Test meeting
     const meeting = await prisma.meeting.create({
       data: {
         name: "Test Meeting",
@@ -36,6 +50,17 @@ describe("AttendanceController", () => {
     });
     testMeetingId = meeting.meetingId;
 
+    const meeting2 = await prisma.meeting.create({
+      data: {
+        name: "Test Meeting 2",
+        date: "2025-10-04",
+        startTime: "9:00",
+        endTime: "10:00",
+        notes: "Test notes 2",
+      },
+    });
+    testMeeting2Id = meeting2.meetingId;
+
     // Create initial attendance record
     const attendance = await prisma.attendance.create({
       data: {
@@ -45,6 +70,15 @@ describe("AttendanceController", () => {
       },
     });
     testAttendanceId = attendance.attendanceId;
+
+    const attendance2 = await prisma.attendance.create({
+      data: {
+        userId: testUser2Id,
+        meetingId: testMeeting2Id,
+        status: "Pending",
+      },
+    });
+    testAttendance2Id = attendance2.attendanceId;
   });
 
   afterAll(async () => {
@@ -58,8 +92,13 @@ describe("AttendanceController", () => {
   it("should get attendance by userId", async () => {
     const attendance = await AttendanceController.getUserAttendance(testUserId);
     expect(attendance).toBeDefined();
-    expect(attendance.length).toBeGreaterThan(0);
+    expect(attendance.length).toBe(1);
     expect(attendance[0].userId).toBe(testUserId);
+
+    const attendance2 = await AttendanceController.getUserAttendance(testUser2Id);
+    expect(attendance2).toBeDefined();
+    expect(attendance2.length).toBe(1);
+    expect(attendance2[0].userId).toBe(testUser2Id);
   });
 
   it("should get attendance by meetingId", async () => {
@@ -67,19 +106,32 @@ describe("AttendanceController", () => {
       testMeetingId
     );
     expect(attendance).toBeDefined();
-    expect(attendance.length).toBeGreaterThan(0);
+    expect(attendance.length).toBe(1);
     expect(attendance[0].meetingId).toBe(testMeetingId);
+
+    const attendance2 = await AttendanceController.getMeetingAttendance(
+      testMeeting2Id
+    );
+    expect(attendance2).toBeDefined();
+    expect(attendance2.length).toBe(1);
+    expect(attendance2[0].meetingId).toBe(testMeeting2Id);
   });
 
   it("should create a new attendance record", async () => {
     const data = {
       userId: testUserId,
-      meetingId: testMeetingId,
+      meetingId: testMeeting2Id,
       status: "Present",
     };
     const newAttendance = await AttendanceController.createAttendance(data);
     expect(newAttendance).toBeDefined();
     expect(newAttendance.status).toBe("Present");
+
+    const attendance2 = await AttendanceController.getMeetingAttendance(
+      testMeeting2Id
+    );
+    expect(attendance2).toBeDefined();
+    expect(attendance2.length).toBe(2);
   });
 
   it("should update attendance status", async () => {

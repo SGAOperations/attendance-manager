@@ -32,11 +32,12 @@ export const AttendanceService = {
     return prisma.attendance.create({ data });
   },
 
+  // Update attendance status
   async updateAttendance(attendanceId: string, data: { status?: string }) {
     return prisma.attendance.update({
       where: { attendanceId: attendanceId },
       data: {
-        ...data, // This spreads any allowed fields (currently just `status`)
+        ...data,
       },
     });
   },

@@ -57,7 +57,6 @@ export const AttendanceController = {
       throw new Error("Invalid attendance status");
     }
 
-    // Only include valid fields in updateData
     const updateData: Partial<{ status: string }> = {};
     if (data.status) {
       updateData.status = data.status;
