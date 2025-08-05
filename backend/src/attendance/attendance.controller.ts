@@ -1,4 +1,4 @@
-import { UserService } from "./attendance.service";
+import { AttendanceService } from "./attendance.service";
 
 const allowedStatuses = [
   "Pending",
@@ -22,14 +22,14 @@ export const AttendanceController = {
     if (!userId || typeof userId !== "string") {
       throw new Error("Invalid or missing userId");
     }
-    return UserService.getUserAttendance(userId);
+    return AttendanceService.getUserAttendance(userId);
   },
 
   async getMeetingAttendance(meetingId: string) {
     if (!meetingId || typeof meetingId !== "string") {
       throw new Error("Invalid or missing meetingId");
     }
-    return UserService.getMeetingAttendance(meetingId);
+    return AttendanceService.getMeetingAttendance(meetingId);
   },
 
   async createAttendance(data: any) {
@@ -41,7 +41,7 @@ export const AttendanceController = {
     ) {
       throw new Error("Invalid input data for creating attendance");
     }
-    return UserService.createAttendance({
+    return AttendanceService.createAttendance({
       userId: data.userId,
       meetingId: data.meetingId,
       status: data.status,
@@ -52,17 +52,24 @@ export const AttendanceController = {
     if (!attendanceId || typeof attendanceId !== "string") {
       throw new Error("Invalid or missing attendanceId");
     }
+
     if (data.status && !isValidStatus(data.status)) {
       throw new Error("Invalid attendance status");
     }
-    const updateData: Partial<{ status: AttendanceStatus }> = {};
-    return UserService.updateAttendance(attendanceId, updateData);
+
+    // Only include valid fields in updateData
+    const updateData: Partial<{ status: string }> = {};
+    if (data.status) {
+      updateData.status = data.status;
+    }
+
+    return AttendanceService.updateAttendance(attendanceId, updateData);
   },
 
   async deleteAttendance(attendanceId: string) {
     if (!attendanceId || typeof attendanceId !== "string") {
       throw new Error("Invalid or missing attendanceId");
     }
-    return UserService.deleteAttendance(attendanceId);
+    return AttendanceService.deleteAttendance(attendanceId);
   },
 };

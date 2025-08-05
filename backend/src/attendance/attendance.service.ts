@@ -1,6 +1,6 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../lib/prisma";
 
-export const UserService = {
+export const AttendanceService = {
   // Get all attendance records for a user
   async getUserAttendance(userId: string) {
     return prisma.attendance.findMany({
@@ -32,11 +32,12 @@ export const UserService = {
     return prisma.attendance.create({ data });
   },
 
-  // Update an existing attendance record
   async updateAttendance(attendanceId: string, data: { status?: string }) {
     return prisma.attendance.update({
-      where: { attendanceId },
-      data,
+      where: { attendanceId: attendanceId },
+      data: {
+        ...data, // This spreads any allowed fields (currently just `status`)
+      },
     });
   },
 

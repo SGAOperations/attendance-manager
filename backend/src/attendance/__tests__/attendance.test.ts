@@ -1,5 +1,5 @@
 import { AttendanceController } from "../attendance.controller";
-import { prisma } from "../../../lib/prisma";
+import { prisma } from "../../lib/prisma";
 
 jest.setTimeout(20000);
 
@@ -58,7 +58,8 @@ describe("AttendanceController", () => {
   it("should get attendance by userId", async () => {
     const attendance = await AttendanceController.getUserAttendance(testUserId);
     expect(attendance).toBeDefined();
-    expect(attendance.userId).toBe(testUserId);
+    expect(attendance.length).toBeGreaterThan(0);
+    expect(attendance[0].userId).toBe(testUserId);
   });
 
   it("should get attendance by meetingId", async () => {
@@ -66,7 +67,8 @@ describe("AttendanceController", () => {
       testMeetingId
     );
     expect(attendance).toBeDefined();
-    expect(attendance.meetingId).toBe(testMeetingId);
+    expect(attendance.length).toBeGreaterThan(0);
+    expect(attendance[0].meetingId).toBe(testMeetingId);
   });
 
   it("should create a new attendance record", async () => {
