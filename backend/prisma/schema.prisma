@@ -53,6 +53,8 @@ model Attendance { // the attendance record for a meeting, each attendance recor
   user         User    @relation(fields: [userId], references: [userId])
   meeting      Meeting @relation(fields: [meetingId], references: [meetingId])
   request      Request?
+
+  @@unique([userId, meetingId])
 }
 
 model Request { // a member sends a request form to the admin for an excused absence, each request belongs to one attendance record
