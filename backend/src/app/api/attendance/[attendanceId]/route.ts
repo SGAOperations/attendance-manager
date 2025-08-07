@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AttendanceController } from "../../../../attendance/attendance.controller";
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   patch:
+ *     summary: A response code.
+ *     @param {Request} request - The incoming request object, expected to contain a JSON body with attendance data:
+ *     @param {string} id - The ID of the attendance to retrieve
+ *     responses:
+ *       204:
+ *         description: Request complete.
+ *       404:
+ *         description: Attendance not found.
+ */
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { attendanceId: string } },
@@ -20,6 +33,19 @@ export async function PATCH(
   }
 }
 
+/**
+ * @swagger
+ * /api/attendance/{attendanceId}:
+ *   delete:
+ *     summary: A response code.
+ *     @param {Request} request - The incoming request object, expected to contain a JSON body with attendance data:
+ *     @param {string} attendanceId - The ID of the attendance to retrieve
+ *     responses:
+ *       204:
+ *         description: Request complete.
+ *       404:
+ *         description: Attendance not found.
+ */
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { attendanceId: string } },
