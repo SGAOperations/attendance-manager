@@ -54,7 +54,7 @@ describe("MeetingServices", () => {
   it("should fetch a meetings by id", async () => {
     const [newMeeting] = await MeetingService.getAllMeeting();
     const fetchedMeeting = await MeetingService.getMeetingById(
-      newMeeting.meetingId
+      newMeeting.meetingId,
     );
     expect(fetchedMeeting?.meetingId).toBe(newMeeting.meetingId);
   });
@@ -70,7 +70,7 @@ describe("MeetingServices", () => {
         date: "7/29/2025",
         endTime: "8:08:15 PM",
         notes: "notes",
-      }
+      },
     );
 
     expect(updatedMeeting.name).toBe("test");
@@ -85,7 +85,7 @@ describe("MeetingServices", () => {
     const [newMeeting] = await MeetingService.getAllMeeting();
     await MeetingService.deleteMeeting(newMeeting.meetingId);
     const deletedMeeting = await MeetingService.getMeetingById(
-      newMeeting.meetingId
+      newMeeting.meetingId,
     );
     expect(deletedMeeting).toBeNull();
   });

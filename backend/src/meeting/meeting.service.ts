@@ -31,7 +31,7 @@ export const MeetingService = {
       endTime: string;
       notes: string;
       date: string;
-    }>
+    }>,
   ) {
     return prisma.meeting.update({
       where: { meetingId },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AttendanceController } from "../../../attendance/attendance.controller"
+import { AttendanceController } from "../../../attendance/attendance.controller";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "Failed to create attendance" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }

@@ -95,23 +95,22 @@ describe("AttendanceController", () => {
     expect(attendance.length).toBe(1);
     expect(attendance[0].userId).toBe(testUserId);
 
-    const attendance2 = await AttendanceController.getUserAttendance(testUser2Id);
+    const attendance2 =
+      await AttendanceController.getUserAttendance(testUser2Id);
     expect(attendance2).toBeDefined();
     expect(attendance2.length).toBe(1);
     expect(attendance2[0].userId).toBe(testUser2Id);
   });
 
   it("should get attendance by meetingId", async () => {
-    const attendance = await AttendanceController.getMeetingAttendance(
-      testMeetingId
-    );
+    const attendance =
+      await AttendanceController.getMeetingAttendance(testMeetingId);
     expect(attendance).toBeDefined();
     expect(attendance.length).toBe(1);
     expect(attendance[0].meetingId).toBe(testMeetingId);
 
-    const attendance2 = await AttendanceController.getMeetingAttendance(
-      testMeeting2Id
-    );
+    const attendance2 =
+      await AttendanceController.getMeetingAttendance(testMeeting2Id);
     expect(attendance2).toBeDefined();
     expect(attendance2.length).toBe(1);
     expect(attendance2[0].meetingId).toBe(testMeeting2Id);
@@ -127,9 +126,8 @@ describe("AttendanceController", () => {
     expect(newAttendance).toBeDefined();
     expect(newAttendance.status).toBe("Present");
 
-    const attendance2 = await AttendanceController.getMeetingAttendance(
-      testMeeting2Id
-    );
+    const attendance2 =
+      await AttendanceController.getMeetingAttendance(testMeeting2Id);
     expect(attendance2).toBeDefined();
     expect(attendance2.length).toBe(2);
   });
@@ -138,7 +136,7 @@ describe("AttendanceController", () => {
     const updateData = { status: "Excused absence" };
     const updated = await AttendanceController.updateAttendance(
       testAttendanceId,
-      updateData
+      updateData,
     );
     expect(updated).toBeDefined();
     expect(updated.status).toBe("Excused absence");
@@ -148,7 +146,7 @@ describe("AttendanceController", () => {
     await expect(
       AttendanceController.updateAttendance(testAttendanceId, {
         status: "InvalidStatus",
-      })
+      }),
     ).rejects.toThrow("Invalid attendance status");
   });
 

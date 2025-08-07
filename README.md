@@ -35,9 +35,11 @@ a. npm install
 b. npx prisma generate
 c. npx prisma studio
 
-### Running Tests
-Once you're in the backend folder (and connected to the database), you can also run our endpoint tests through Jest by running the following command:
-npx jest --runInBand
+## Linting/Prettier
+To run Prettier, cd into either frontend or backend and run
+```bash
+npx prettier . --write --fix
+```
 
 ## Meet the Team
 
