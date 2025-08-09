@@ -38,7 +38,7 @@ c. npx prisma studio
 ## Linting/Prettier
 To run Prettier, cd into either frontend or backend and run
 ```bash
-npx prettier . --write --fix
+npx prettier . --write
 ```
 
 ## Meet the Team
