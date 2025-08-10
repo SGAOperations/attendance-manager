@@ -46,7 +46,9 @@ This directory contains example API routes for the headless API app.
 For more details, see [route.js file convention](https://nextjs.org/docs/app/api-reference/file-conventions/route).
 
 ### Running Tests
+
 Once you're in the backend folder (and connected to the database), you can also run our endpoint tests through Jest by running the following command:
+
 ```bash
 npx jest --runInBand
 ```

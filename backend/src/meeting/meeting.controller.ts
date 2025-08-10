@@ -17,9 +17,9 @@ export const MeetingController = {
 
   async createMeeting(request: Request) {
     const body = await request.json();
+    console.log("Body", body);
     if (
       !body.name ||
-      !body.meetingId ||
       !body.startTime ||
       !body.date ||
       !body.endTime ||

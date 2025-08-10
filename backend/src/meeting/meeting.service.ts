@@ -2,7 +2,8 @@ import { prisma } from "../lib/prisma";
 
 export const MeetingService = {
   async getAllMeeting() {
-    return prisma.meeting.findMany();
+    const meetings = await prisma.meeting.findMany();
+    return Object.groupBy(meetings, (meeting) => meeting.date);
   },
 
   async getMeetingById(meetingId: string) {
@@ -13,7 +14,6 @@ export const MeetingService = {
 
   async createMeeting(data: {
     name: string;
-    meetingId: string;
     startTime: string;
     date: string;
     endTime: string;
