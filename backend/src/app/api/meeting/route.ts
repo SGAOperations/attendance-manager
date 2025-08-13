@@ -3,7 +3,7 @@ import { MeetingController } from "@/meeting/meeting.controller";
  * @swagger
  * /api/users:
  *   get:
- *     summary: Returns a list of meetings binned by date.
+ *     summary: Returns a list of meetings.
  *     responses:
  *       200:
  *         description: A JSON array of array of meeting objects.

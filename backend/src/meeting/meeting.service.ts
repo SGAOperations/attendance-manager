@@ -13,6 +13,10 @@ function groupBy<T, K extends string | number | symbol>(
 
 export const MeetingService = {
   async getAllMeeting() {
+    return await prisma.meeting.findMany();
+  },
+
+  async getAllMeetingByDate() {
     const meetings = await prisma.meeting.findMany();
     return groupBy(meetings, (meeting) => meeting.date);
   },

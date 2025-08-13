@@ -7,6 +7,11 @@ export const MeetingController = {
     return NextResponse.json(meeting);
   },
 
+  async listMeetingsByDate() {
+    const meeting = await MeetingService.getAllMeetingByDate();
+    return NextResponse.json(meeting);
+  },
+
   async getMeeting(params: { meetingId: string }) {
     const meeting = await MeetingService.getMeetingById(params.meetingId);
     if (!meeting) {
@@ -27,7 +32,7 @@ export const MeetingController = {
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     // body.date = new Date().toLocaleString();
@@ -39,7 +44,7 @@ export const MeetingController = {
     const updates = await request.json();
     const updatedMeeting = await MeetingService.updateMeeting(
       params.meetingId,
-      updates,
+      updates
     );
     return NextResponse.json(updatedMeeting);
   },
@@ -48,7 +53,7 @@ export const MeetingController = {
     await MeetingService.deleteMeeting(params.meetingId);
     return NextResponse.json(
       { message: "User deleted successfully" },
-      { status: 204 },
+      { status: 204 }
     );
   },
 };
