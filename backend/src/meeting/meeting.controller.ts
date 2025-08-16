@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { MeetingService } from "./meeting.service";
+import { NextResponse } from 'next/server';
+import { MeetingService } from './meeting.service';
 
 export const MeetingController = {
   async listMeetings() {
@@ -15,14 +15,14 @@ export const MeetingController = {
   async getMeeting(params: { meetingId: string }) {
     const meeting = await MeetingService.getMeetingById(params.meetingId);
     if (!meeting) {
-      return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Meeting not found' }, { status: 404 });
     }
     return NextResponse.json(meeting);
   },
 
   async createMeeting(request: Request) {
     const body = await request.json();
-    console.log("Body", body);
+    console.log('Body', body);
     if (
       !body.name ||
       !body.startTime ||
@@ -31,7 +31,7 @@ export const MeetingController = {
       !body.notes
     ) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -52,7 +52,7 @@ export const MeetingController = {
   async deleteMeeting(params: { meetingId: string }) {
     await MeetingService.deleteMeeting(params.meetingId);
     return NextResponse.json(
-      { message: "User deleted successfully" },
+      { message: 'User deleted successfully' },
       { status: 204 }
     );
   },

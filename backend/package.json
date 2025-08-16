@@ -6,18 +6,23 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "cross-env NODE_ENV=test dotenv -e .env.test -- jest"
+    "test": "cross-env NODE_ENV=test dotenv -e .env.test -- jest",
+    "lint": "eslint . --ext .ts"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
+    "lint": "^0.8.19",
     "next": "15.3.5"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
     "cross-env": "^10.0.0",
     "dotenv-cli": "^10.0.0",
+    "eslint": "^9.33.0",
     "jest": "^30.0.5",
     "prisma": "^6.12.0",
     "ts-jest": "^29.4.0",
