@@ -45,6 +45,18 @@ This directory contains example API routes for the headless API app.
 
 For more details, see [route.js file convention](https://nextjs.org/docs/app/api-reference/file-conventions/route).
 
+## Migrations with Prisma
+
+Migrations are helpful as they can be used to ensure safe updates to our database.
+
+To run a migration, run 
+```
+bash
+npx prisma migrate dev --name 'name of migration'
+```
+
+This will create a migration file, which will be applied to our database. We can use this migration to safely update our production database as well.
+
 ### Running Tests
 
 Once you're in the backend folder (and connected to the database), you can also run our endpoint tests through Jest by running the following command:
