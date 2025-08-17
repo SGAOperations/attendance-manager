@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "cross-env NODE_ENV=test dotenv -e .env.test -- jest",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts --ignore-path .gitignore"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
