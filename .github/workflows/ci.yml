@@ -31,6 +31,10 @@ jobs:
       - name: Generate Prisma Client
         working-directory: backend
         run: npx prisma generate
+      
+      - name: Style checks
+	run: npm run lint
+	run: npx prettier "src/**/*.{ts,js,json,md}" "prisma/**/*.{ts,js,json,md}" "*.ts" "*.json" 
 
       - name: Run Tests
         working-directory: backend
