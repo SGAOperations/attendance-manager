@@ -4,6 +4,16 @@ import parserTs from '@typescript-eslint/parser';
 /** @type {import("eslint").Linter.FlatConfig} */
 export default [
   {
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.next/**',
+      '**/prisma/**',
+      '**/coverage/**',
+      '**/*.d.ts',
+    ],
+  },
+  {
     files: ['**/*.ts'],
     languageOptions: {
       parser: parserTs,
@@ -23,3 +33,4 @@ export default [
     },
   },
 ];
+
