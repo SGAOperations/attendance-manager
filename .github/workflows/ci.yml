@@ -31,10 +31,17 @@ jobs:
       - name: Generate Prisma Client
         working-directory: backend
         run: npx prisma generate
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: npx prisma generate
       
-      - name: Style checks
-	run: npm run lint
-	run: npx prettier "src/**/*.{ts,js,json,md}" "prisma/**/*.{ts,js,json,md}" "*.ts" "*.json" 
+      - name: Lint
+        working-directory: backend
+        run: npm run lint
+		
+      - name: Prettier
+        working-directory: backend
+        run: npx prettier "src/**/*.{ts,js,json,md}" "prisma/**/*.{ts,js,json,md}" "*.ts" "*.json" 
 
       - name: Run Tests
         working-directory: backend
@@ -73,3 +80,4 @@ jobs:
             --token ${{ secrets.VERCEL_TOKEN }} \
             --org ${{ secrets.VERCEL_ORG_ID }} \
             --project ${{ secrets.VERCEL_PROJECT_ID }}
+
