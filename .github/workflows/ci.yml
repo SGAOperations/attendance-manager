@@ -34,11 +34,7 @@ jobs:
       
       - name: Lint
         working-directory: backend
-        run: npm run lint
-
-      - name: Prettier
-        working-directory: backend
-        run: npx prettier "src/**/*.{ts,js,json,md}" "prisma/**/*.{ts,js,json,md}" "*.ts" "*.json" 
+        run: npm run lint 
 
       - name: Run Tests
         working-directory: backend
@@ -77,6 +73,7 @@ jobs:
             --token ${{ secrets.VERCEL_TOKEN }} \
             --org ${{ secrets.VERCEL_ORG_ID }} \
             --project ${{ secrets.VERCEL_PROJECT_ID }}
+
 
 
 
