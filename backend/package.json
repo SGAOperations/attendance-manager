@@ -12,6 +12,7 @@
   "dependencies": {
     "@prisma/client": "^6.12.0",
     "lint": "^0.8.19",
+    "jose": "^6.0.12",
     "next": "15.3.5"
   },
   "devDependencies": {
