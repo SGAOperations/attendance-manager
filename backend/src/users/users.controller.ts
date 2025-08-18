@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { UsersService } from "./users.service";
+import { NextResponse } from 'next/server';
+import { UsersService } from './users.service';
 
 export const UsersController = {
   async listUsers() {
@@ -10,7 +10,7 @@ export const UsersController = {
   async getUser(params: { userId: string }) {
     const user = await UsersService.getUserById(params.userId);
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     return NextResponse.json(user);
   },
@@ -25,7 +25,7 @@ export const UsersController = {
       !body.roleId
     ) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: 'Missing required fields' },
         { status: 400 },
       );
     }
@@ -42,7 +42,7 @@ export const UsersController = {
   async deleteUser(params: { userId: string }) {
     await UsersService.deleteUser(params.userId);
     return NextResponse.json(
-      { message: "User deleted successfully" },
+      { message: 'User deleted successfully' },
       { status: 204 },
     );
   },

@@ -31,6 +31,10 @@ jobs:
       - name: Generate Prisma Client
         working-directory: backend
         run: npx prisma generate
+      
+      - name: Lint
+        working-directory: backend
+        run: npm run lint 
 
       - name: Run Tests
         working-directory: backend
@@ -69,3 +73,8 @@ jobs:
             --token ${{ secrets.VERCEL_TOKEN }} \
             --org ${{ secrets.VERCEL_ORG_ID }} \
             --project ${{ secrets.VERCEL_PROJECT_ID }}
+
+
+
+
+

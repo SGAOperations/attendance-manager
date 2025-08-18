@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AttendanceController } from "../../../../../attendance/attendance.controller";
+import { NextRequest, NextResponse } from 'next/server';
+import { AttendanceController } from '../../../../../attendance/attendance.controller';
 
 /**
  * @swagger
@@ -23,7 +23,7 @@ export async function GET(
     return NextResponse.json(attendance);
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Failed to fetch meeting attendance" },
+      { error: error.message || 'Failed to fetch meeting attendance' },
       { status: 400 },
     );
   }
