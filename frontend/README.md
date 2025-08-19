@@ -15,16 +15,14 @@ A React TypeScript application for managing student government association activ
 ```
 src/
 ├── components/
-│   ├── auth/          # Authentication components
+│   ├── attendance     # Attendance components
 │   ├── dashboard/     # Dashboard components
 │   ├── layout/        # Layout components (Header, Sidebar)
-│   └── ui/           # Reusable UI components
-├── contexts/         # React contexts (AuthContext)
+│   ├── meetings/      # Meetings components
+│   └── profile/       # Profile components
+├── contexts/         # React contexts
 ├── pages/           # Page components
-├── types/           # TypeScript type definitions
-├── utils/           # Utility functions
-├── hooks/           # Custom React hooks
-└── assets/          # Static assets
+└── types/           # TypeScript type definitions
 ```
 
 ## Getting Started
