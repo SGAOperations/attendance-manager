@@ -1,7 +1,7 @@
-import React from 'react';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import LoginPage from './pages/LoginPage';
-import Layout from './components/layout/Layout';
+import React from "react";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import LoginPage from "./pages/LoginPage";
+import Layout from "./components/layout/Layout";
 
 const AppContent: React.FC = () => {
   const { user } = useAuth();

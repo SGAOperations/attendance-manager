@@ -1,5 +1,5 @@
-import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import React from "react";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -23,9 +23,11 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-4">
             <div className="hidden md:block text-right">
               <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-              <p className="text-xs text-gray-500 capitalize">{user?.role} Account</p>
+              <p className="text-xs text-gray-500 capitalize">
+                {user?.role} Account
+              </p>
             </div>
-            
+
             <div className="relative">
               <button
                 onClick={handleLogout}
@@ -37,12 +39,22 @@ const Header: React.FC = () => {
                   </span>
                 </div>
                 <div className="hidden sm:block">
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <svg
+                    className="w-4 h-4 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </div>
               </button>
-              
+
               {/* Dropdown menu (simplified) */}
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                 <div className="py-1">
@@ -62,4 +74,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header; 
+export default Header;

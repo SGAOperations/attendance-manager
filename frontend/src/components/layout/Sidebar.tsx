@@ -1,37 +1,72 @@
-import React from 'react';
+import React from "react";
 
 interface SidebarProps {
-  activeTab: 'dashboard' | 'meetings' | 'attendance';
-  onTabChange: (tab: 'dashboard' | 'meetings' | 'attendance') => void;
+  activeTab: "dashboard" | "meetings" | "attendance";
+  onTabChange: (tab: "dashboard" | "meetings" | "attendance") => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   const navItems = [
     {
-      id: 'dashboard' as const,
-      label: 'Dashboard',
+      id: "dashboard" as const,
+      label: "Dashboard",
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"
+          />
         </svg>
       ),
     },
     {
-      id: 'meetings' as const,
-      label: 'Meetings',
+      id: "meetings" as const,
+      label: "Meetings",
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       ),
     },
     {
-      id: 'attendance' as const,
-      label: 'Attendance',
+      id: "attendance" as const,
+      label: "Attendance",
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       ),
     },
@@ -48,11 +83,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               onClick={() => onTabChange(item.id)}
               className={`w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                 activeTab === item.id
-                  ? 'bg-[#C8102E] text-white shadow-lg'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-md'
+                  ? "bg-[#C8102E] text-white shadow-lg"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-md"
               }`}
             >
-              <span className={`flex-shrink-0 ${activeTab === item.id ? 'text-white' : 'text-gray-500'}`}>
+              <span
+                className={`flex-shrink-0 ${activeTab === item.id ? "text-white" : "text-gray-500"}`}
+              >
                 {item.icon}
               </span>
               <span className="font-medium">{item.label}</span>
@@ -63,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
           ))}
         </nav>
       </div>
-      
+
       {/* Quick Stats */}
       <div className="p-6 border-t border-gray-200">
         <h3 className="text-sm font-medium text-gray-900 mb-3">Quick Stats</h3>
@@ -86,4 +123,4 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;
