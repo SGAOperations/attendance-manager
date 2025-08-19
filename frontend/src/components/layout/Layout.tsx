@@ -2,63 +2,61 @@ import React, { useState } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Dashboard from '../dashboard/Dashboard';
+import MeetingsPage from '../meetings/MeetingsPage';
+import AttendancePage from '../attendance/AttendancePage';
+import ProfilePage from '../profile/ProfilePage';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Layout: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'meetings' | 'attendance'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'meetings' | 'attendance' | 'profile'>('dashboard');
+  const { user } = useAuth();
+
+  const handleProfileClick = () => {
+    setActiveTab('profile');
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
       case 'meetings':
-        return (
-          <div className="flex-1 p-6 bg-gray-50">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Meetings</h1>
-              <p className="text-gray-600">Manage and schedule your meetings.</p>
-            </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-[#C8102E] bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-[#C8102E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Meetings Management</h2>
-                <p className="text-gray-600">Coming soon...</p>
-              </div>
-            </div>
-          </div>
-        );
+        return <MeetingsPage />;
       case 'attendance':
-        return (
-          <div className="flex-1 p-6 bg-gray-50">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Attendance</h1>
-              <p className="text-gray-600">Track attendance for your meetings.</p>
-            </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-[#A4804A] bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-[#A4804A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+        // Check if user is admin
+        if (user?.email?.includes('admin')) {
+          return <AttendancePage />;
+        } else {
+          return (
+            <div className="flex-1 p-6 bg-gray-50 min-h-screen">
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
+                <p className="text-gray-600">You need admin privileges to access the attendance page.</p>
+              </div>
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">Admin Access Required</h2>
+                  <p className="text-gray-600">Only administrators can view attendance records and manage members.</p>
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Attendance Tracking</h2>
-                <p className="text-gray-600">Coming soon...</p>
               </div>
             </div>
-          </div>
-        );
+          );
+        }
+      case 'profile':
+        return <ProfilePage />;
       default:
         return <Dashboard />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Header onProfileClick={handleProfileClick} />
+      <div className="flex flex-1">
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <main className="flex-1">
           {renderContent()}
