@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AttendanceController } from "../../../../attendance/attendance.controller";
+import { NextRequest, NextResponse } from 'next/server';
+import { AttendanceController } from '../../../../attendance/attendance.controller';
 
 /**
  * @swagger
@@ -27,7 +27,7 @@ export async function PATCH(
     return NextResponse.json(updatedAttendance);
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Failed to update attendance" },
+      { error: error.message || 'Failed to update attendance' },
       { status: 400 },
     );
   }
@@ -55,7 +55,7 @@ export async function DELETE(
     return new Response(null, { status: 204 });
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Failed to delete attendance" },
+      { error: error.message || 'Failed to delete attendance' },
       { status: 400 },
     );
   }

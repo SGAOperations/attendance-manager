@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AttendanceController } from "../../../attendance/attendance.controller";
+import { NextRequest, NextResponse } from 'next/server';
+import { AttendanceController } from '../../../attendance/attendance.controller';
 
 /**
  * @swagger
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(attendance, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Failed to create attendance" },
+      { error: error.message || 'Failed to create attendance' },
       { status: 400 },
     );
   }

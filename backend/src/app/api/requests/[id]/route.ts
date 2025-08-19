@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { RequestController } from "@/request/request.controller";
+import { NextResponse } from 'next/server';
+import { RequestController } from '@/request/request.controller';
 
 export async function GET(
   _req: Request,
@@ -10,7 +10,7 @@ export async function GET(
     return NextResponse.json(request);
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Failed to fetch request" },
+      { error: error.message || 'Failed to fetch request' },
       { status: 400 }
     );
   }
@@ -26,7 +26,7 @@ export async function PUT(
     return NextResponse.json(updated);
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Failed to update request" },
+      { error: error.message || 'Failed to update request' },
       { status: 400 }
     );
   }
@@ -38,10 +38,10 @@ export async function DELETE(
 ) {
   try {
     await RequestController.deleteRequest(params.id);
-    return NextResponse.json({ message: "Request deleted" });
+    return NextResponse.json({ message: 'Request deleted' });
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || "Failed to delete request" },
+      { error: error.message || 'Failed to delete request' },
       { status: 400 }
     );
   }

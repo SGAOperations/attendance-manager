@@ -1,4 +1,4 @@
-import { UsersController } from "@/users/users.controller";
+import { UsersController } from '@/users/users.controller';
 
 /**
  * @swagger

@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma";
+import { prisma } from '../lib/prisma';
 
 export const RequestService = {
   // Create a new request
@@ -30,4 +30,4 @@ export const RequestService = {
       where: { requestId },
     });
   },
-}
+};

@@ -6,6 +6,15 @@ export interface User {
   avatar?: string;
 }
 
+export interface Member {
+  id: string;
+  name: string;
+  email: string;
+  role: 'eboard' | 'member';
+  joinDate: Date;
+  status: 'active' | 'inactive';
+}
+
 export interface Meeting {
   id: string;
   title: string;
@@ -16,6 +25,18 @@ export interface Meeting {
   attendees: string[];
   location?: string;
   type: "in-person" | "virtual";
+}
+
+export interface AttendanceRecord {
+  id: string;
+  meetingId: string;
+  meetingTitle: string;
+  meetingDescription: string;
+  date: Date;
+  time: string;
+  totalMembers: number;
+  attendedMembers: number;
+  attendanceRate: number;
 }
 
 export interface Attendance {
