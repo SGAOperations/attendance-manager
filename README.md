@@ -37,7 +37,7 @@ c. npx prisma studio
 
 ## Running the Frontend
 
-1. Pull the latest versino of the frontend branch
+1. Pull the latest version of the frontend branch
 2. Make sure you have Node.js installed (version 16 or higher)
 3. cd into the frontend folder and run these commands:
 4. npm install
