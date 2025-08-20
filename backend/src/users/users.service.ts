@@ -23,6 +23,7 @@ export const UsersService = {
   }) {
     return prisma.user.create({ data });
   },
+  
 
   async updateUser(
     userId: string,

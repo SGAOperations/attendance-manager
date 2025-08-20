@@ -15,6 +15,7 @@ export const UsersController = {
     return NextResponse.json(user);
   },
 
+  
   async createUser(request: Request) {
     const body = await request.json();
     if (
