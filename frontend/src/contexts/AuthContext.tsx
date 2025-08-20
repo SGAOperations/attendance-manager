@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, LoginCredentials, AuthContextType } from '../types';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { User, LoginCredentials, AuthContextType } from "../types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -23,20 +23,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Mock user data based on email
       const mockUser: User = {
-        id: '1',
+        id: "1",
         email: credentials.email,
-        name: credentials.email.split('@')[0],
-        role: credentials.email.includes('admin') ? 'admin' : 'user',
+        name: credentials.email.split("@")[0],
+        role: credentials.email.includes("admin") ? "admin" : "user",
         avatar: undefined,
       };
-      
+
       setUser(mockUser);
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -55,4 +55,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}; 
+};

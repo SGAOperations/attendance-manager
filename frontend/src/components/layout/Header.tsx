@@ -51,4 +51,4 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
   );
 };
 
-export default Header; 
+export default Header;

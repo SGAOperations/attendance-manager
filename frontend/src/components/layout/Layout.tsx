@@ -17,7 +17,7 @@ const Layout: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
+      case "dashboard":
         return <Dashboard />;
       case 'meetings':
         return <MeetingsPage />;
@@ -58,12 +58,10 @@ const Layout: React.FC = () => {
       <Header onProfileClick={handleProfileClick} />
       <div className="flex flex-1">
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="flex-1">
-          {renderContent()}
-        </main>
+        <main className="flex-1">{renderContent()}</main>
       </div>
     </div>
   );
 };
 
-export default Layout; 
+export default Layout;

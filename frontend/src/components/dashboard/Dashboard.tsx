@@ -1,123 +1,216 @@
-import React, { useState } from 'react';
-import { Meeting } from '../../types';
+import React, { useState, useEffect } from "react";
+
+interface Meeting {
+  meetingId: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  date: string;
+  notes: string;
+}
+
+// Comprehensive dummy meetings data
+const mockMeetings: Meeting[] = [
+  {
+    meetingId: "1",
+    name: "Weekly Executive Board Meeting",
+    notes:
+      "Discuss ongoing projects, budget updates, and upcoming events. All executive board members required to attend.",
+    date: "2025-08-20",
+    startTime: "10:00 AM",
+    endTime: "11:30 AM",
+  },
+  {
+    meetingId: "2",
+    name: "Student Senate General Assembly",
+    notes:
+      "Monthly general assembly meeting. Open to all students. Agenda includes new policy proposals and student concerns.",
+    date: "2025-08-21",
+    startTime: "2:00 PM",
+    endTime: "4:00 PM",
+  },
+  {
+    meetingId: "3",
+    name: "Budget Committee Review",
+    notes:
+      "Review annual budget allocations for student organizations and upcoming fiscal year planning.",
+    date: "2025-08-22",
+    startTime: "9:00 AM",
+    endTime: "10:30 AM",
+  },
+  {
+    meetingId: "4",
+    name: "Virtual Town Hall",
+    notes:
+      "Online town hall meeting to address student concerns and gather feedback on campus initiatives.",
+    date: "2025-08-23",
+    startTime: "6:00 PM",
+    endTime: "7:30 PM",
+  },
+  {
+    meetingId: "5",
+    name: "Committee Chair Meeting",
+    notes:
+      "Monthly meeting of all committee chairs to coordinate activities and share updates.",
+    date: "2025-08-19",
+    startTime: "3:00 PM",
+    endTime: "4:00 PM",
+  },
+  {
+    meetingId: "6",
+    name: "Student Organization Fair Planning",
+    notes:
+      "Planning meeting for the upcoming student organization fair and recruitment events.",
+    date: "2025-08-18",
+    startTime: "1:00 PM",
+    endTime: "2:30 PM",
+  },
+  {
+    meetingId: "7",
+    name: "Policy Review Session",
+    notes:
+      "Review and discuss proposed changes to student government policies and procedures.",
+    date: "2025-08-24",
+    startTime: "11:00 AM",
+    endTime: "12:30 PM",
+  },
+];
+
+// API service functions with endpoints
+const meetingAPI = {
+  async getAllMeetings(): Promise<Meeting[]> {
+    try {
+      const response = await fetch("/api/meeting");
+      console.log("getAllMeetings response status:", response.status);
+      console.log(
+        "getAllMeetings response headers:",
+        response.headers.get("content-type"),
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("getAllMeetings error response:", errorText);
+        throw new Error(
+          `Failed to fetch meetings (${response.status}): ${errorText}`,
+        );
+      }
+
+      const data = await response.json();
+      console.log("getAllMeetings data:", data);
+      return data;
+    } catch (error) {
+      console.error("getAllMeetings error:", error);
+      throw error;
+    }
+  },
+
+  async getMeetingsByDate(): Promise<Record<string, Meeting[]>> {
+    try {
+      const response = await fetch("/api/meeting/by-date");
+      console.log("getMeetingsByDate response status:", response.status);
+      console.log(
+        "getMeetingsByDate response headers:",
+        response.headers.get("content-type"),
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("getMeetingsByDate error response:", errorText);
+        throw new Error(
+          `Failed to fetch meetings by date (${response.status}): ${errorText}`,
+        );
+      }
+
+      const data = await response.json();
+      console.log("getMeetingsByDate data:", data);
+      return data;
+    } catch (error) {
+      console.error("getMeetingsByDate error:", error);
+      throw error;
+    }
+  },
+
+  async getMeeting(meetingId: string): Promise<Meeting> {
+    try {
+      const response = await fetch(`/api/meeting/${meetingId}`);
+      console.log("getMeeting response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("getMeeting error response:", errorText);
+        throw new Error(
+          `Failed to fetch meeting (${response.status}): ${errorText}`,
+        );
+      }
+
+      const data = await response.json();
+      console.log("getMeeting data:", data);
+      return data;
+    } catch (error) {
+      console.error("getMeeting error:", error);
+      throw error;
+    }
+  },
+};
 
 const Dashboard: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [meetingsByDate, setMeetingsByDate] = useState<
+    Record<string, Meeting[]>
+  >({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Comprehensive dummy meetings data
-  const mockMeetings: Meeting[] = [
-    {
-      id: '1',
-      title: 'Weekly Executive Board Meeting',
-      description: 'Discuss ongoing projects, budget updates, and upcoming events. All executive board members required to attend.',
-      date: new Date(2024, 0, 15),
-      startTime: '10:00 AM',
-      endTime: '11:30 AM',
-      attendees: ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'Alex Chen'],
-      location: 'Conference Room A',
-      type: 'in-person',
-    },
-    {
-      id: '2',
-      title: 'Student Senate General Assembly',
-      description: 'Monthly general assembly meeting. Open to all students. Agenda includes new policy proposals and student concerns.',
-      date: new Date(2024, 0, 16),
-      startTime: '2:00 PM',
-      endTime: '4:00 PM',
-      attendees: ['All Senators', 'Student Representatives', 'Faculty Advisors'],
-      location: 'Ballroom',
-      type: 'in-person',
-    },
-    {
-      id: '3',
-      title: 'Budget Committee Review',
-      description: 'Review annual budget allocations for student organizations and upcoming fiscal year planning.',
-      date: new Date(2024, 0, 17),
-      startTime: '9:00 AM',
-      endTime: '10:30 AM',
-      attendees: ['Finance Director', 'Budget Committee Members', 'Treasurer'],
-      location: 'Board Room',
-      type: 'in-person',
-    },
-    {
-      id: '4',
-      title: 'Virtual Town Hall',
-      description: 'Online town hall meeting to address student concerns and gather feedback on campus initiatives.',
-      date: new Date(2024, 0, 18),
-      startTime: '6:00 PM',
-      endTime: '7:30 PM',
-      attendees: ['All Students', 'SGA Representatives', 'Campus Administrators'],
-      location: 'Zoom Meeting',
-      type: 'virtual',
-    },
-    {
-      id: '5',
-      title: 'Committee Chair Meeting',
-      description: 'Monthly meeting of all committee chairs to coordinate activities and share updates.',
-      date: new Date(2024, 0, 19),
-      startTime: '3:00 PM',
-      endTime: '4:00 PM',
-      attendees: ['All Committee Chairs', 'Vice President', 'Secretary'],
-      location: 'Student Center',
-      type: 'in-person',
-    },
-    {
-      id: '6',
-      title: 'Student Organization Fair Planning',
-      description: 'Planning meeting for the upcoming student organization fair and recruitment events.',
-      date: new Date(2024, 0, 20),
-      startTime: '1:00 PM',
-      endTime: '2:30 PM',
-      attendees: ['Events Committee', 'Marketing Team', 'Student Life Staff'],
-      location: 'Meeting Room 3',
-      type: 'in-person',
-    },
-    {
-      id: '7',
-      title: 'Policy Review Session',
-      description: 'Review and discuss proposed changes to student government policies and procedures.',
-      date: new Date(2024, 0, 22),
-      startTime: '11:00 AM',
-      endTime: '12:30 PM',
-      attendees: ['Policy Committee', 'Legal Advisor', 'Executive Board'],
-      location: 'Conference Room B',
-      type: 'in-person',
-    },
-    {
-      id: '8',
-      title: 'Campus Safety Forum',
-      description: 'Open forum to discuss campus safety initiatives and address student concerns about security.',
-      date: new Date(2024, 0, 23),
-      startTime: '5:00 PM',
-      endTime: '6:30 PM',
-      attendees: ['All Students', 'Campus Security', 'SGA Representatives'],
-      location: 'Auditorium',
-      type: 'in-person',
-    },
-    {
-      id: '9',
-      title: 'Virtual Committee Meeting',
-      description: 'Online meeting for remote committee members to discuss ongoing projects and assignments.',
-      date: new Date(2024, 0, 24),
-      startTime: '4:00 PM',
-      endTime: '5:00 PM',
-      attendees: ['Committee Members', 'Committee Chair', 'Advisor'],
-      location: 'Microsoft Teams',
-      type: 'virtual',
-    },
-    {
-      id: '10',
-      title: 'End of Month Review',
-      description: 'Monthly review of all SGA activities, accomplishments, and planning for next month.',
-      date: new Date(2024, 0, 25),
-      startTime: '2:00 PM',
-      endTime: '3:30 PM',
-      attendees: ['Executive Board', 'All Committee Chairs', 'Advisors'],
-      location: 'Conference Room A',
-      type: 'in-person',
-    },
-  ];
+  // Load meetings data on component mount
+  useEffect(() => {
+    const loadMeetings = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Using mock data until database is populated
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Group meetings by date
+        const groupedMeetings = mockMeetings.reduce(
+          (acc, meeting) => {
+            const date = meeting.date;
+            if (!acc[date]) acc[date] = [];
+            acc[date].push(meeting);
+            return acc;
+          },
+          {} as Record<string, Meeting[]>,
+        );
+
+        setMeetings(mockMeetings);
+        setMeetingsByDate(groupedMeetings);
+
+        console.log("Loaded mock meetings:", mockMeetings);
+        console.log("Grouped by date:", groupedMeetings);
+
+        /*
+        const [allMeetings, groupedMeetings] = await Promise.all([
+          meetingAPI.getAllMeetings(),
+          meetingAPI.getMeetingsByDate()
+        ]);
+        
+        setMeetings(allMeetings);
+        setMeetingsByDate(groupedMeetings);
+        */
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load meetings",
+        );
+        console.error("Error loading meetings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMeetings();
+  }, []);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -138,9 +231,9 @@ const Dashboard: React.FC = () => {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
     });
   };
 
@@ -154,23 +247,27 @@ const Dashboard: React.FC = () => {
   };
 
   const hasMeeting = (date: Date) => {
-    return mockMeetings.some(meeting => 
-      meeting.date.toDateString() === date.toDateString()
-    );
+    const dateString = date.toISOString().split("T")[0];
+    return meetingsByDate[dateString] && meetingsByDate[dateString].length > 0;
   };
 
   const getMeetingsForDate = (date: Date) => {
-    return mockMeetings.filter(meeting => 
-      meeting.date.toDateString() === date.toDateString()
-    );
+    const dateString = date.toISOString().split("T")[0];
+    return meetingsByDate[dateString] || [];
   };
 
+  // Get meetings within the next 5 days
   const getUpcomingMeetings = () => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return mockMeetings
-      .filter(meeting => meeting.date >= today)
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
+    const fiveDaysFromNow = new Date();
+    fiveDaysFromNow.setDate(today.getDate() + 5);
+
+    return meetings
+      .filter((meeting) => {
+        const meetingDate = new Date(meeting.date);
+        return meetingDate >= today && meetingDate <= fiveDaysFromNow;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   };
 
   const getDisplayMeetings = () => {
@@ -180,8 +277,60 @@ const Dashboard: React.FC = () => {
     return getUpcomingMeetings();
   };
 
+  const formatMeetingDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   const days = getDaysInMonth(currentDate);
   const displayMeetings = getDisplayMeetings();
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-6 bg-gray-50">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C8102E] mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading meetings...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 p-6 bg-gray-50">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <svg
+              className="w-5 h-5 text-red-400 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p className="text-red-800">Error: {error}</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 text-red-600 hover:text-red-800 text-sm font-medium"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-6 bg-gray-50">
@@ -189,10 +338,9 @@ const Dashboard: React.FC = () => {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h1>
         <p className="text-gray-600">
-          {selectedDate 
+          {selectedDate
             ? `Meetings for ${selectedDate.toLocaleDateString()}`
-            : 'Upcoming meetings and events'
-          }
+            : "Upcoming meetings (next 5 days)"}
         </p>
       </div>
 
@@ -203,32 +351,71 @@ const Dashboard: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900">Calendar</h2>
             <div className="flex space-x-2">
               <button
-                onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+                onClick={() =>
+                  setCurrentDate(
+                    new Date(
+                      currentDate.getFullYear(),
+                      currentDate.getMonth() - 1,
+                    ),
+                  )
+                }
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
               </button>
               <button
-                onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+                onClick={() =>
+                  setCurrentDate(
+                    new Date(
+                      currentDate.getFullYear(),
+                      currentDate.getMonth() + 1,
+                    ),
+                  )
+                }
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </button>
             </div>
           </div>
-          
+
           <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">{formatDate(currentDate)}</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {formatDate(currentDate)}
+            </h3>
             <div className="w-16 h-1 bg-[#C8102E] rounded-full"></div>
           </div>
 
           <div className="grid grid-cols-7 gap-1 mb-4">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+              <div
+                key={day}
+                className="text-center text-sm font-medium text-gray-500 py-2"
+              >
                 {day}
               </div>
             ))}
@@ -238,21 +425,19 @@ const Dashboard: React.FC = () => {
             {days.map((day, index) => (
               <div
                 key={index}
-                className={`aspect-square p-1 ${
-                  !day ? 'bg-gray-50' : ''
-                }`}
+                className={`aspect-square p-1 ${!day ? "bg-gray-50" : ""}`}
               >
                 {day && (
                   <button
                     onClick={() => setSelectedDate(day)}
                     className={`w-full h-full flex flex-col items-center justify-center text-sm rounded-xl transition-all duration-200 ${
                       isToday(day)
-                        ? 'bg-[#C8102E] text-white shadow-lg'
+                        ? "bg-[#C8102E] text-white shadow-lg"
                         : isSelected(day)
-                        ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E] border-2 border-[#C8102E]'
-                        : hasMeeting(day)
-                        ? 'bg-[#A4804A] bg-opacity-10 text-[#A4804A] hover:bg-[#A4804A] hover:bg-opacity-20'
-                        : 'hover:bg-gray-100'
+                          ? "bg-[#C8102E] bg-opacity-10 text-[#C8102E] border-2 border-[#C8102E]"
+                          : hasMeeting(day)
+                            ? "bg-[#A4804A] bg-opacity-10 text-[#A4804A] hover:bg-[#A4804A] hover:bg-opacity-20"
+                            : "hover:bg-gray-100"
                     }`}
                   >
                     <span className="font-medium">{day.getDate()}</span>
@@ -272,7 +457,7 @@ const Dashboard: React.FC = () => {
                 onClick={() => setSelectedDate(null)}
                 className="text-sm text-[#C8102E] hover:text-[#A8102E] font-medium"
               >
-                Show all upcoming meetings
+                Show upcoming meetings (next 5 days)
               </button>
             </div>
           )}
@@ -282,75 +467,113 @@ const Dashboard: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
-              {selectedDate ? 'Scheduled Meetings' : 'Upcoming Meetings'}
+              {selectedDate ? "Scheduled Meetings" : "Upcoming Meetings"}
             </h2>
             <span className="text-sm text-gray-500">
-              {selectedDate 
+              {selectedDate
                 ? selectedDate.toLocaleDateString()
-                : `${displayMeetings.length} meetings`
-              }
+                : `${displayMeetings.length} meetings`}
             </span>
           </div>
-          
+
           <div className="space-y-4 max-h-96 overflow-y-auto">
             {displayMeetings.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <svg
+                    className="w-8 h-8 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
                 <p className="text-gray-500 text-lg font-medium">
-                  {selectedDate ? 'No meetings scheduled' : 'No upcoming meetings'}
+                  {selectedDate
+                    ? "No meetings scheduled"
+                    : "No upcoming meetings"}
                 </p>
                 <p className="text-gray-400 text-sm">
-                  {selectedDate 
+                  {selectedDate
                     ? `for ${selectedDate.toLocaleDateString()}`
-                    : 'Check back later for new meetings'
-                  }
+                    : "in the next 5 days"}
                 </p>
               </div>
             ) : (
-              displayMeetings.map(meeting => (
-                <div key={meeting.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+              displayMeetings.map((meeting) => (
+                <div
+                  key={meeting.meetingId}
+                  className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+                >
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-semibold text-gray-900 text-lg">{meeting.title}</h3>
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                      meeting.type === 'virtual' 
-                        ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E]' 
-                        : 'bg-[#A4804A] bg-opacity-10 text-[#A4804A]'
-                    }`}>
-                      {meeting.type}
+                    <h3 className="font-semibold text-gray-900 text-lg">
+                      {meeting.name}
+                    </h3>
+                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-[#A4804A] bg-opacity-10 text-[#A4804A]">
+                      Meeting
                     </span>
                   </div>
-                  <p className="text-gray-600 mb-3 text-sm">{meeting.description}</p>
+                  <p className="text-gray-600 mb-3 text-sm">{meeting.notes}</p>
                   <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
                     <div className="flex items-center space-x-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
+                        />
                       </svg>
-                      <span>{meeting.date.toLocaleDateString()}</span>
+                      <span>{formatMeetingDate(meeting.date)}</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
-                      <span>{meeting.startTime} - {meeting.endTime}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span>{meeting.location}</span>
+                      <span>
+                        {meeting.startTime} - {meeting.endTime}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-1">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      <svg
+                        className="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
                       </svg>
-                      <span className="text-xs text-gray-500">{meeting.attendees.length} attendees</span>
+                      <span className="text-xs text-gray-500">
+                        Meeting details
+                      </span>
                     </div>
                     <button className="text-[#C8102E] hover:text-[#A8102E] text-sm font-medium">
                       View Details
@@ -366,4 +589,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

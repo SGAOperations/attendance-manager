@@ -36,16 +36,19 @@ src/
 
 1. Clone the repository
 2. Navigate to the project directory:
+
    ```bash
    cd sga
    ```
 
 3. Install dependencies:
+
    ```bash
    npm install
    ```
 
 4. Start the development server:
+
    ```bash
    npm start
    ```
