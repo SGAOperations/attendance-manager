@@ -51,7 +51,6 @@ Migrations are helpful as they can be used to ensure safe updates to our databas
 
 To run a migration, run 
 ```
-bash
 npx prisma migrate dev --name 'name of migration'
 ```
 
