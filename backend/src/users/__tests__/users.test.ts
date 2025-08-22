@@ -14,6 +14,7 @@ describe('UsersService', () => {
 
     await UsersService.createUser({
       username: 'jdoe',
+      password: 'testpassword',
       email: 'jdoe@northeastern.edu',
       firstName: 'John',
       lastName: 'Doe',
@@ -36,6 +37,7 @@ describe('UsersService', () => {
   it('should create a new user', async () => {
     const newUser = await UsersService.createUser({
       username: 'jdoe2',
+      password: 'testpassword',
       email: 'jdoe2@northeastern.edu',
       firstName: 'Jane',
       lastName: 'Doe',
@@ -62,6 +64,7 @@ describe('UsersService', () => {
     const [user] = await UsersService.getAllUsers();
     const updatedUser = await UsersService.updateUser(user.userId, {
       username: 'updatedUser',
+      password: 'testpassword',
       email: 'updated@northeastern.edu',
       firstName: 'Updated',
       lastName: 'User',

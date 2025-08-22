@@ -24,6 +24,7 @@ model Role { // defines the permissions that a user may have in the attendance m
 model User { // verified profile in the attendance manager, each user can have multiple attendance records but only one role
   userId      String       @id @default(uuid())
   username    String
+  password    String
   email       String       @unique
   firstName   String
   lastName    String

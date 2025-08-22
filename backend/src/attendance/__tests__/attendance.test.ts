@@ -19,6 +19,7 @@ describe('AttendanceController', () => {
     const user = await prisma.user.create({
       data: {
         username: 'testuser',
+        password: 'testpassword',
         email: 'testuser@example.com',
         firstName: 'Test',
         lastName: 'User',
@@ -30,6 +31,7 @@ describe('AttendanceController', () => {
     const user2 = await prisma.user.create({
       data: {
         username: 'testuser2',
+        password: 'testpassword2',
         email: 'testuser2@example.com',
         firstName: 'Test2',
         lastName: 'User2',
