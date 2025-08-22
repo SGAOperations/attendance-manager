@@ -19,6 +19,7 @@ export const UsersController = {
     const body = await request.json();
     if (
       !body.username ||
+      !body.password ||
       !body.email ||
       !body.firstName ||
       !body.lastName ||

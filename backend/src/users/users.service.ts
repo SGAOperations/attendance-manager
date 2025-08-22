@@ -16,6 +16,7 @@ export const UsersService = {
 
   async createUser(data: {
     username: string;
+    password: string;
     email: string;
     firstName: string;
     lastName: string;
@@ -29,6 +30,7 @@ export const UsersService = {
     userId: string,
     updates: Partial<{
       username: string;
+      password: string;
       email: string;
       firstName: string;
       lastName: string;
