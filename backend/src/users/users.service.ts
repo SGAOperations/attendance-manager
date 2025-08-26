@@ -14,12 +14,20 @@ export const UsersService = {
     });
   },
 
+  async getUserByEmail(userEmail: string) {
+    return prisma.user.findUnique({
+      where: { email: userEmail },
+      include: { role: true },
+    });
+  },
+
   async createUser(data: {
     username: string;
     email: string;
     firstName: string;
     lastName: string;
     roleId: string;
+    password: string;
   }) {
     return prisma.user.create({ data });
   },
@@ -32,7 +40,7 @@ export const UsersService = {
       firstName: string;
       lastName: string;
       roleId: string;
-    }>,
+    }>
   ) {
     return prisma.user.update({
       where: { userId },
@@ -48,6 +56,12 @@ export const UsersService = {
 
   async getRoles() {
     return prisma.role.findMany();
+  },
+
+  async getRolesByRoleId(roleId: string) {
+    return prisma.role.findUnique({
+      where: { roleId: roleId },
+    });
   },
 
   async getUsersByRole(roleId: string) {

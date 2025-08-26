@@ -18,6 +18,7 @@ describe("UsersService", () => {
       firstName: "John",
       lastName: "Doe",
       roleId: testRoleId,
+      password: "pass",
     });
   });
 
@@ -40,6 +41,7 @@ describe("UsersService", () => {
       firstName: "Jane",
       lastName: "Doe",
       roleId: testRoleId,
+      password: "pass",
     });
 
     expect(newUser).toBeDefined();

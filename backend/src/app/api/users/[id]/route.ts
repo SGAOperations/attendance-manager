@@ -1,4 +1,10 @@
 import { UsersController } from "@/users/users.controller";
+import {
+  isUserEmailPass,
+  isUserId,
+  UserEmailPass,
+  UserId,
+} from "@/utils/user_utils";
 
 /**
  * @swagger
@@ -13,12 +19,17 @@ import { UsersController } from "@/users/users.controller";
  *       404:
  *         description: User not found.
  */
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } },
-) {
+
+export async function GET(request: Request, { params }: { params: UserId }) {
   return UsersController.getUser({ userId: params.id });
 }
+
+// export async function GET(
+//   request: Request,
+//   { params }: { params: { email: string } }
+// ) {
+//   return UsersController.getUser({ userId: params.id });
+// }
 
 /**
  * @swagger
@@ -35,7 +46,7 @@ export async function GET(
  */
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   return UsersController.updateUser(request, { userId: params.id });
 }
@@ -55,7 +66,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   return UsersController.deleteUser({ userId: params.id });
 }

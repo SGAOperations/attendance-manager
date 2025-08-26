@@ -15,6 +15,42 @@ export const UsersController = {
     return NextResponse.json(user);
   },
 
+  async checkUserExists(params: { userEmail: string; userPassword: string }) {
+    const user = await UsersService.getUserByEmail(params.userEmail);
+    if (!user) {
+      return NextResponse.json({
+        exists: false,
+        user: null,
+      });
+    }
+    if (user.password === params.userPassword) {
+      // Don't need to send a confirmed password back to the user
+      const { password, roleId, ...userData } = user;
+      // userData.role = userData.role;
+      const res = NextResponse.json({
+        exists: true,
+        user: userData,
+      });
+      res.headers.append("Access-Control-Allow-Credentials", "true");
+      res.headers.append("Access-Control-Allow-Origin", "*"); // replace this your actual origin
+      res.headers.append(
+        "Access-Control-Allow-Methods",
+        "GET,DELETE,PATCH,POST,PUT"
+      );
+      res.headers.append(
+        "Access-Control-Allow-Headers",
+        "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+      );
+      console.log(res);
+      return res;
+    } else {
+      return NextResponse.json(
+        { error: "Incorrect Password" },
+        { status: 400 }
+      );
+    }
+  },
+
   async createUser(request: Request) {
     const body = await request.json();
     if (
@@ -22,11 +58,12 @@ export const UsersController = {
       !body.email ||
       !body.firstName ||
       !body.lastName ||
-      !body.roleId
+      !body.roleId ||
+      !body.password
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 },
+        { status: 400 }
       );
     }
     const newUser = await UsersService.createUser(body);
@@ -43,7 +80,7 @@ export const UsersController = {
     await UsersService.deleteUser(params.userId);
     return NextResponse.json(
       { message: "User deleted successfully" },
-      { status: 204 },
+      { status: 204 }
     );
   },
 };

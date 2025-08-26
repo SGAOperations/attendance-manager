@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, LoginCredentials, AuthContextType } from '../types';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { User, LoginCredentials, AuthContextType, UserDetails } from "../types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -22,21 +22,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      let url =
+        "http://localhost:4000/users?" +
+        new URLSearchParams({
+          email: credentials.email,
+          password: credentials.password,
+        }).toString();
+      console.log(url);
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.error(
+          `Response status: ${res.status}\n. Response Msg: ${await res.text}`
+        );
+        throw new Error(
+          `Response status: ${res.status}\n. Response Msg: ${await res.text}`
+        );
+      }
+
+      let user_details: UserDetails = await res.json();
+      if (!user_details.exists) {
+        console.error("User does not exist");
+        return;
+      }
+      if (
+        !(
+          user_details.user.role.roleType === "admin" ||
+          user_details.user.role.roleType === "user"
+        )
+      ) {
+        console.error("Incorrect Roles");
+        return;
+      }
       // Mock user data based on email
-      const mockUser: User = {
-        id: '1',
+      const user: User = {
+        id: user_details.user.userId,
         email: credentials.email,
-        name: credentials.email.split('@')[0],
-        role: credentials.email.includes('admin') ? 'admin' : 'user',
+        name: user_details.user.firstName + user_details.user.lastName,
+        role: user_details.user.role.roleType,
         avatar: undefined,
       };
-      
-      setUser(mockUser);
+
+      setUser(user);
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -55,4 +83,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}; 
+};
