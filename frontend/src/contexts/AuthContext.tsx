@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       let url =
-        "http://localhost:4000/users?" +
+        "api/users?" +
         new URLSearchParams({
           email: credentials.email,
           password: credentials.password,
@@ -40,6 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       let user_details: UserDetails = await res.json();
+      console.log(user_details);
       if (!user_details.exists) {
         console.error("User does not exist");
         return;
