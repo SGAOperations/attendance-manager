@@ -170,27 +170,6 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Using mock data until database is populated
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Group meetings by date
-        const groupedMeetings = mockMeetings.reduce(
-          (acc, meeting) => {
-            const date = meeting.date;
-            if (!acc[date]) acc[date] = [];
-            acc[date].push(meeting);
-            return acc;
-          },
-          {} as Record<string, Meeting[]>,
-        );
-
-        setMeetings(mockMeetings);
-        setMeetingsByDate(groupedMeetings);
-
-        console.log("Loaded mock meetings:", mockMeetings);
-        console.log("Grouped by date:", groupedMeetings);
-
-        /*
         const [allMeetings, groupedMeetings] = await Promise.all([
           meetingAPI.getAllMeetings(),
           meetingAPI.getMeetingsByDate()
@@ -198,7 +177,7 @@ const Dashboard: React.FC = () => {
         
         setMeetings(allMeetings);
         setMeetingsByDate(groupedMeetings);
-        */
+        
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load meetings",
@@ -263,11 +242,14 @@ const Dashboard: React.FC = () => {
     fiveDaysFromNow.setDate(today.getDate() + 5);
 
     return meetings
-      .filter((meeting) => {
+      .filter((meeting: Meeting) => {
         const meetingDate = new Date(meeting.date);
         return meetingDate >= today && meetingDate <= fiveDaysFromNow;
       })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort(
+        (a: Meeting, b: Meeting) =>
+          new Date(a.date).getTime() - new Date(b.date).getTime(),
+      );
   };
 
   const getDisplayMeetings = () => {
@@ -277,13 +259,16 @@ const Dashboard: React.FC = () => {
     return getUpcomingMeetings();
   };
 
-  const formatMeetingDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
+  function formatMeetingDate(dateString: string) {
+    const [year, month, day] = dateString.split('-');
+    const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    
+    return localDate.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
     });
-  };
+  }
 
   const days = getDaysInMonth(currentDate);
   const displayMeetings = getDisplayMeetings();

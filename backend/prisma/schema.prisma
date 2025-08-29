@@ -11,7 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL_TEST")
 }
 
 model Role {
@@ -21,14 +21,14 @@ model Role {
   users User[]
 }
 
-model User {
-  userId    String @id @default(uuid())
-  username  String
-  email     String @unique
-  firstName String
-  lastName  String
-  roleId    String
-  password  String
+model User { // verified profile in the attendance manager, each user can have multiple attendance records but only one role
+  userId      String       @id @default(uuid())
+  username    String
+  password    String
+  email       String       @unique
+  firstName   String
+  lastName    String
+  roleId      String
 
   role       Role         @relation(fields: [roleId], references: [roleId])
   attendance Attendance[]
