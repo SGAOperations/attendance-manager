@@ -56,6 +56,8 @@ npx prisma migrate dev --name 'name of migration'
 
 This will create a migration file, which will be applied to our database. We can use this migration to safely update our production database as well.
 
+To check that the database is valid, run npx prettier validate
+
 ### Running Tests
 
 Once you're in the backend folder (and connected to the database), you can also run our endpoint tests through Jest by running the following command:

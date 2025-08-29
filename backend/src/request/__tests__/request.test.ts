@@ -23,6 +23,7 @@ describe('RequestController', () => {
         firstName: 'Request',
         lastName: 'User',
         roleId: testRoleId,
+        password: 'password',
       },
     });
     testUserId = user.userId;
@@ -71,20 +72,27 @@ describe('RequestController', () => {
   it('should get a request by requestId', async () => {
     const request = await RequestController.getRequest(testRequestId);
     expect(request).toBeDefined();
-    if (!request) throw new Error('Request not found');  // <-- guard clause
+    if (!request) throw new Error('Request not found'); // <-- guard clause
 
     expect(request.requestId).toBe(testRequestId);
     expect(request.reason).toBe('Initial test reason');
     expect(request.attendanceId).toBe(testAttendanceId);
-    });
-
+  });
 
   it('should create a new request', async () => {
-
+    const newMeeting = await prisma.meeting.create({
+      data: {
+        name: 'Request Meeting 2',
+        date: '2025-09-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        notes: 'Additional meeting for requests',
+      },
+    });
     const attendance2 = await prisma.attendance.create({
       data: {
         userId: testUserId,
-        meetingId: testMeetingId,
+        meetingId: newMeeting.meetingId,
         status: 'Pending',
       },
     });
@@ -100,7 +108,7 @@ describe('RequestController', () => {
     expect(newRequest.attendanceId).toBe(testAttendanceId2);
   });
 
-  it('should update a request\'s reason', async () => {
+  it('should update a requests reason', async () => {
     const newReason = 'Updated reason';
     const updated = await RequestController.updateRequest(testRequestId, {
       reason: newReason,
@@ -111,27 +119,39 @@ describe('RequestController', () => {
 
   it('should throw error when updating with invalid reason', async () => {
     await expect(
-      RequestController.updateRequest(testRequestId, { reason: ' ' }),
+      RequestController.updateRequest(testRequestId, { reason: ' ' })
     ).rejects.toThrow('Invalid request reason');
   });
 
   it('should throw error when creating with invalid data', async () => {
     await expect(RequestController.createRequest({})).rejects.toThrow(
-      'Invalid input data for creating request',
+      'Invalid input data for creating request'
     );
     await expect(
-      RequestController.createRequest({ attendanceId: testAttendanceId }),
+      RequestController.createRequest({ attendanceId: testAttendanceId })
     ).rejects.toThrow('Invalid input data for creating request');
     await expect(
-      RequestController.createRequest({ attendanceId: testAttendanceId, reason: '' }),
+      RequestController.createRequest({
+        attendanceId: testAttendanceId,
+        reason: '',
+      })
     ).rejects.toThrow('Invalid input data for creating request');
   });
 
   it('should delete a request', async () => {
-     const attendance2 = await prisma.attendance.create({
+    const newMeeting = await prisma.meeting.create({
+      data: {
+        name: 'Request Meeting 2',
+        date: '2025-09-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        notes: 'Additional meeting for requests',
+      },
+    });
+    const attendance2 = await prisma.attendance.create({
       data: {
         userId: testUserId,
-        meetingId: testMeetingId,
+        meetingId: newMeeting.meetingId,
         status: 'Pending',
       },
     });
