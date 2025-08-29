@@ -19,6 +19,7 @@ describe('RequestController', () => {
     const user = await prisma.user.create({
       data: {
         username: 'requestuser',
+        password: 'testpassword',
         email: 'requestuser@example.com',
         firstName: 'Request',
         lastName: 'User',
