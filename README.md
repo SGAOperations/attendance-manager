@@ -60,3 +60,12 @@ Anusha Narang
 Daniel K
 Logan Ravinuthala
 ```
+
+## Todos
+- [ ] Have a locally hosted database for dev instead of on Render
+
+- [ ] Refactor code to match common NestJS design
+
+- [ ] Add pipeline checks for frontend
+
+- [ ] Deploy on Vercel

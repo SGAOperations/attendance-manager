@@ -14,11 +14,11 @@ datasource db {
   url      = env("DATABASE_URL_TEST")
 }
 
-model Role { // defines the permissions that a user may have in the attendance manager, each role can belong to multiple users
+model Role {
   roleId   String @id @default(uuid())
   roleType String // Valid values: admin, member
 
-  users    User[]
+  users User[]
 }
 
 model User { // verified profile in the attendance manager, each user can have multiple attendance records but only one role
@@ -30,11 +30,11 @@ model User { // verified profile in the attendance manager, each user can have m
   lastName    String
   roleId      String
 
-  role        Role         @relation(fields: [roleId], references: [roleId])
-  attendance  Attendance[]
+  role       Role         @relation(fields: [roleId], references: [roleId])
+  attendance Attendance[]
 }
 
-model Meeting { // an sga meeting that will be tracked using the attendance manager, each meeting can have multiple attendance records
+model Meeting {
   meetingId String @id @default(uuid())
   name      String
   date      String
@@ -45,23 +45,23 @@ model Meeting { // an sga meeting that will be tracked using the attendance mana
   attendance Attendance[]
 }
 
-model Attendance { // the attendance record for a meeting, each attendance record belongs to one user and may or may not have one request
+model Attendance {
   attendanceId String @id @default(uuid())
   userId       String
   meetingId    String
   status       String // Valid values: Pending, Present, Pending absence, Excused absence, Unexcused absence
 
-  user         User    @relation(fields: [userId], references: [userId])
-  meeting      Meeting @relation(fields: [meetingId], references: [meetingId])
-  request      Request?
+  user    User     @relation(fields: [userId], references: [userId])
+  meeting Meeting  @relation(fields: [meetingId], references: [meetingId])
+  request Request?
 
   @@unique([userId, meetingId])
 }
 
-model Request { // a member sends a request form to the admin for an excused absence, each request belongs to one attendance record
-  requestId     String @id @default(uuid())
-  attendanceId  String @unique
-  reason        String
+model Request {
+  requestId    String @id @default(uuid())
+  attendanceId String @unique
+  reason       String
 
-  attendance    Attendance @relation(fields: [attendanceId], references: [attendanceId])
+  attendance Attendance @relation(fields: [attendanceId], references: [attendanceId])
 }

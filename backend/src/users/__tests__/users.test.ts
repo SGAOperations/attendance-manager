@@ -19,6 +19,7 @@ describe('UsersService', () => {
       firstName: 'John',
       lastName: 'Doe',
       roleId: testRoleId,
+      password: 'password',
     });
   });
 
@@ -42,6 +43,7 @@ describe('UsersService', () => {
       firstName: 'Jane',
       lastName: 'Doe',
       roleId: testRoleId,
+      password: 'password',
     });
 
     expect(newUser).toBeDefined();
@@ -68,6 +70,7 @@ describe('UsersService', () => {
       email: 'updated@northeastern.edu',
       firstName: 'Updated',
       lastName: 'User',
+      password: 'password',
     });
 
     expect(updatedUser.username).toBe('updatedUser');
