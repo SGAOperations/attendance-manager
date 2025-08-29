@@ -20,6 +20,7 @@ export const UsersService = {
     firstName: string;
     lastName: string;
     roleId: string;
+    password: string;
   }) {
     return prisma.user.create({ data });
   },
@@ -32,7 +33,8 @@ export const UsersService = {
       firstName: string;
       lastName: string;
       roleId: string;
-    }>,
+      password: string;
+    }>
   ) {
     return prisma.user.update({
       where: { userId },
