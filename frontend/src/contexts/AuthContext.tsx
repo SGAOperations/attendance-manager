@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       let url =
-        "api/users?" +
+        "/api/users?" +
         new URLSearchParams({
           email: credentials.email,
           password: credentials.password,
