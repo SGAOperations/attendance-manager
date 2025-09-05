@@ -15,6 +15,7 @@ export const UsersService = {
   },
 
   async getUserByEmail(userEmail: string) {
+    console.log(userEmail);
     return prisma.user.findUnique({
       where: { email: userEmail },
       include: { role: true },

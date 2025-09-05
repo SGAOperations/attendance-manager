@@ -14,6 +14,7 @@ CREATE TABLE "User" (
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "roleId" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("userId")
 );

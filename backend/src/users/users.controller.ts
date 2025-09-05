@@ -17,6 +17,7 @@ export const UsersController = {
 
   async checkUserExists(params: { userEmail: string; userPassword: string }) {
     const user = await UsersService.getUserByEmail(params.userEmail);
+    console.log(user);
     if (!user) {
       return NextResponse.json({
         exists: false,
@@ -41,7 +42,7 @@ export const UsersController = {
         "Access-Control-Allow-Headers",
         "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
       );
-      console.log(res);
+      console.log("Res:", res);
       return res;
     } else {
       return NextResponse.json(

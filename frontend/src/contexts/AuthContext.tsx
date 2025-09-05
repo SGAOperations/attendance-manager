@@ -21,13 +21,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
+    console.log(decodeURIComponent(credentials.email));
     try {
-      let url =
-        "/api/users?" +
-        new URLSearchParams({
-          email: credentials.email,
-          password: credentials.password,
-        }).toString();
+      let url = `/api/users?email=${decodeURIComponent(
+        credentials.email
+      )}&password=${credentials.password}`;
       console.log(url);
       const res = await fetch(url);
       if (!res.ok) {

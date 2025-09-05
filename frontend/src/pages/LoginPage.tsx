@@ -8,19 +8,27 @@ const LoginPage: React.FC = () => {
     email: "",
     password: "",
   });
+
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
   const [error, setError] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!credentials.email || !credentials.password) {
+    if (!email || !password) {
       setError("Please fill in all fields");
       return;
     }
 
+    console.log(email);
     try {
-      await login(credentials);
+      await login({
+        email: email,
+        password: password,
+      });
     } catch (error) {
       setError("Login failed. Please try again.");
     }
@@ -28,6 +36,7 @@ const LoginPage: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log("Target: ", e.target.value);
     setCredentials((prev) => ({
       ...prev,
       [name]: value,
@@ -79,8 +88,8 @@ const LoginPage: React.FC = () => {
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
                   placeholder="Enter your email"
-                  value={credentials.email}
-                  onChange={handleInputChange}
+                  // value={credentials.email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
@@ -116,8 +125,8 @@ const LoginPage: React.FC = () => {
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
                   placeholder="Enter your password"
-                  value={credentials.password}
-                  onChange={handleInputChange}
+                  // value={credentials.password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
             </div>
