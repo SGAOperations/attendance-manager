@@ -1,10 +1,122 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Member, AttendanceRecord } from '../../types';
+
+interface MeetingRecord {
+  meetingId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  name: string;
+  notes: string;
+  totalMembers: number,
+  attendedMembers: number;
+  percentage: number;
+}
+
+interface Attendance {
+  attendanceId: string,
+  userId: string,
+  meetingId: string,
+  status: string,
+}
+
+// API service functions with endpoints
+const meetingAPI = {
+  async getAllMeetings(): Promise<MeetingRecord[]> {
+    try {
+      const response = await fetch("/api/meeting");
+      console.log("getAllMeetings response status:", response.status);
+      console.log(
+        "getAllMeetings response headers:",
+        response.headers.get("content-type"),
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("getAllMeetings error response:", errorText);
+        throw new Error(
+          `Failed to fetch meetings (${response.status}): ${errorText}`,
+        );
+      }
+
+      const data = await response.json();
+      console.log("getAllMeetings data:", data);
+      return data;
+    } catch (error) {
+      console.error("getAllMeetings error:", error);
+      throw error;
+    }
+  },
+
+  async getAttendances(meetingId: string): Promise<Attendance[]> {
+    try {
+      const response = await fetch(`/api/attendance/meeting/${meetingId}`);
+      console.log("getAttendance response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("getMeeting error response:", errorText);
+        throw new Error(
+          `Failed to fetch meeting (${response.status}): ${errorText}`,
+        );
+      }
+
+      const data = await response.json();
+      console.log("getMeeting data:", data);
+      return data;
+    } catch (error) {
+      console.error("getMeeting error:", error);
+      throw error;
+    }
+  },
+};
 
 const AttendancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'members' | 'history'>('members');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showBulkAddModal, setShowBulkAddModal] = useState(false);
+  const [meetings, setMeetings] = useState<MeetingRecord[]>([]);
+const [meetingsWithAttendance, setMeetingsWithAttendance] = useState<MeetingRecord[]>([]);
+
+useEffect(() => {
+  const loadMeetings = async () => {
+    try {
+      const allMeetings = await meetingAPI.getAllMeetings();
+      setMeetings(allMeetings);
+    } catch (err) {
+      console.error("Error loading meetings:", err);
+    }
+  };
+
+  loadMeetings();
+}, []);
+
+useEffect(() => {
+  if (meetings.length === 0) return;
+
+  const updateMeetingsWithAttendance = async () => {
+    const updatedMeetings: MeetingRecord[] = [];
+
+    for (const meeting of meetings) {
+      const attendances = await meetingAPI.getAttendances(meeting.meetingId);
+
+      const totalMembers = attendances.length;
+      const attendedMembers = attendances.filter(a => a.status === 'Present').length;
+      const percentage = totalMembers === 0 ? 0 : Math.round((attendedMembers / totalMembers) * 100);
+
+      updatedMeetings.push({
+        ...meeting,
+        totalMembers,
+        attendedMembers,
+        percentage,
+      });
+    }
+
+    setMeetingsWithAttendance(updatedMeetings);
+  };
+
+  updateMeetingsWithAttendance();
+}, [meetings]);
 
   // Mock data for SGA members
   const mockMembers: Member[] = [
@@ -75,74 +187,74 @@ const AttendancePage: React.FC = () => {
   ];
 
   // Mock data for attendance history - matching meetings page data
-  const mockAttendanceRecords: AttendanceRecord[] = [
-    {
-      id: '1',
-      meetingId: '1',
-      meetingTitle: 'General Meeting',
-      meetingDescription: 'First General Meeting of the semester',
-      date: new Date('2025-01-07'),
-      time: '6:00-7:00 PM',
-      totalMembers: 42,
-      attendedMembers: 35,
-      attendanceRate: 83.3,
-    },
-    {
-      id: '2',
-      meetingId: '2',
-      meetingTitle: 'General Meeting',
-      meetingDescription: 'Second General Meeting of the semester',
-      date: new Date('2025-01-14'),
-      time: '6:00-7:00 PM',
-      totalMembers: 42,
-      attendedMembers: 38,
-      attendanceRate: 90.5,
-    },
-    {
-      id: '3',
-      meetingId: '3',
-      meetingTitle: 'General Meeting',
-      meetingDescription: 'Third General Meeting of the semester',
-      date: new Date('2025-01-21'),
-      time: '6:00-7:00 PM',
-      totalMembers: 42,
-      attendedMembers: 32,
-      attendanceRate: 76.2,
-    },
-    {
-      id: '4',
-      meetingId: '4',
-      meetingTitle: 'General Meeting',
-      meetingDescription: 'Fourth General Meeting of the semester',
-      date: new Date('2025-01-28'),
-      time: '6:00-7:00 PM',
-      totalMembers: 42,
-      attendedMembers: 0,
-      attendanceRate: 0,
-    },
-    {
-      id: '5',
-      meetingId: '5',
-      meetingTitle: 'General Meeting',
-      meetingDescription: 'Fifth General Meeting of the semester',
-      date: new Date('2025-02-04'),
-      time: '6:00-7:00 PM',
-      totalMembers: 42,
-      attendedMembers: 40,
-      attendanceRate: 95.2,
-    },
-    {
-      id: '6',
-      meetingId: '6',
-      meetingTitle: 'General Meeting',
-      meetingDescription: 'Sixth General Meeting of the semester',
-      date: new Date('2025-02-11'),
-      time: '6:00-7:00 PM',
-      totalMembers: 42,
-      attendedMembers: 37,
-      attendanceRate: 88.1,
-    },
-  ];
+  // const mockAttendanceRecords: MeetingRecord[] = [
+  //   {
+  //     id: '1',
+  //     meetingId: '1',
+  //     meetingTitle: 'General Meeting',
+  //     meetingDescription: 'First General Meeting of the semester',
+  //     date: new Date('2025-01-07'),
+  //     time: '6:00-7:00 PM',
+  //     totalMembers: 42,
+  //     attendedMembers: 35,
+  //     attendanceRate: 83.3,
+  //   },
+  //   {
+  //     id: '2',
+  //     meetingId: '2',
+  //     meetingTitle: 'General Meeting',
+  //     meetingDescription: 'Second General Meeting of the semester',
+  //     date: new Date('2025-01-14'),
+  //     time: '6:00-7:00 PM',
+  //     totalMembers: 42,
+  //     attendedMembers: 38,
+  //     attendanceRate: 90.5,
+  //   },
+  //   {
+  //     id: '3',
+  //     meetingId: '3',
+  //     meetingTitle: 'General Meeting',
+  //     meetingDescription: 'Third General Meeting of the semester',
+  //     date: new Date('2025-01-21'),
+  //     time: '6:00-7:00 PM',
+  //     totalMembers: 42,
+  //     attendedMembers: 32,
+  //     attendanceRate: 76.2,
+  //   },
+  //   {
+  //     id: '4',
+  //     meetingId: '4',
+  //     meetingTitle: 'General Meeting',
+  //     meetingDescription: 'Fourth General Meeting of the semester',
+  //     date: new Date('2025-01-28'),
+  //     time: '6:00-7:00 PM',
+  //     totalMembers: 42,
+  //     attendedMembers: 0,
+  //     attendanceRate: 0,
+  //   },
+  //   {
+  //     id: '5',
+  //     meetingId: '5',
+  //     meetingTitle: 'General Meeting',
+  //     meetingDescription: 'Fifth General Meeting of the semester',
+  //     date: new Date('2025-02-04'),
+  //     time: '6:00-7:00 PM',
+  //     totalMembers: 42,
+  //     attendedMembers: 40,
+  //     attendanceRate: 95.2,
+  //   },
+  //   {
+  //     id: '6',
+  //     meetingId: '6',
+  //     meetingTitle: 'General Meeting',
+  //     meetingDescription: 'Sixth General Meeting of the semester',
+  //     date: new Date('2025-02-11'),
+  //     time: '6:00-7:00 PM',
+  //     totalMembers: 42,
+  //     attendedMembers: 37,
+  //     attendanceRate: 88.1,
+  //   },
+  // ];
 
   const eboardMembers = mockMembers.filter(m => m.role === 'eboard');
   const regularMembers = mockMembers.filter(m => m.role === 'member');
@@ -243,22 +355,22 @@ const AttendancePage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockAttendanceRecords.map((record) => (
-                    <tr key={record.id} className="border-b border-gray-200 hover:bg-gray-50">
+                  {meetingsWithAttendance.map((record) => (
+                    <tr key={record.meetingId} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="py-3 px-4">
-                        <div className="text-sm text-gray-900">{record.date.toLocaleDateString()}</div>
-                        <div className="text-xs text-gray-500">{record.time}</div>
+                        <div className="text-sm text-gray-900">{record.date}</div>
+                        <div className="text-xs text-gray-500">{record.startTime} - {record.endTime}</div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="text-sm font-medium text-gray-900">{record.meetingTitle}</div>
+                        <div className="text-sm font-medium text-gray-900">{record.name}</div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="text-sm text-gray-600">{record.meetingDescription}</div>
+                        <div className="text-sm text-gray-600">{record.notes}</div>
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="text-sm font-medium text-gray-900">{record.attendedMembers}</div>
                         <div className="text-xs text-gray-500">of {record.totalMembers}</div>
-                        <div className="text-xs text-[#C8102E] font-medium">{record.attendanceRate}%</div>
+                        <div className="text-xs text-[#C8102E] font-medium">{record.percentage}%</div>
                       </td>
                       <td className="py-3 px-4 text-center">
                         <button className="px-3 py-1 bg-green-500 text-white text-xs rounded-lg hover:bg-green-600 transition-colors">
