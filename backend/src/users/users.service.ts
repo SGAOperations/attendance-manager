@@ -14,6 +14,14 @@ export const UsersService = {
     });
   },
 
+  async getUserByEmail(userEmail: string) {
+    console.log(userEmail);
+    return prisma.user.findUnique({
+      where: { email: userEmail },
+      include: { role: true },
+    });
+  },
+
   async createUser(data: {
     username: string;
     password: string;
@@ -35,7 +43,6 @@ export const UsersService = {
       firstName: string;
       lastName: string;
       roleId: string;
-      password: string;
     }>
   ) {
     return prisma.user.update({
@@ -52,6 +59,12 @@ export const UsersService = {
 
   async getRoles() {
     return prisma.role.findMany();
+  },
+
+  async getRolesByRoleId(roleId: string) {
+    return prisma.role.findUnique({
+      where: { roleId: roleId },
+    });
   },
 
   async getUsersByRole(roleId: string) {

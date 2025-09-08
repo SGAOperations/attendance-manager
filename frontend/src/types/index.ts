@@ -10,9 +10,9 @@ export interface Member {
   id: string;
   name: string;
   email: string;
-  role: 'eboard' | 'member';
+  role: "eboard" | "member";
   joinDate: Date;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 export interface Meeting {
@@ -57,4 +57,23 @@ export interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+}
+
+export interface RoleData {
+  roleId: string;
+  roleType: string;
+}
+
+export interface UserData {
+  userId: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: RoleData;
+}
+
+export interface UserDetails {
+  exists: true;
+  user: UserData;
 }
