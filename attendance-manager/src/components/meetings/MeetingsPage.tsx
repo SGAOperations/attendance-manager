@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Member } from '../../types';
 
 interface MeetingRecord {
   id: string;
@@ -13,6 +14,34 @@ interface MeetingRecord {
 
 const MeetingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'past' | 'upcoming'>('past');
+  const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
+  const [newMeeting, setNewMeeting] = useState({
+    name: '',
+    date: '',
+    startTime: '',
+    endTime: '',
+    selectedAttendees: [] as string[],
+  });
+
+  // Mock data for SGA members (for attendee selection) - only Renee and Justin
+  const mockMembers: Member[] = [
+    {
+      id: '1',
+      name: 'Renee Cai',
+      email: 'cai.renee@northeastern.edu',
+      role: 'eboard',
+      joinDate: new Date('2024-01-15'),
+      status: 'active',
+    },
+    {
+      id: '2',
+      name: 'Justin Kim',
+      email: 'kim.justin@northeastern.edu',
+      role: 'eboard',
+      joinDate: new Date('2024-01-20'),
+      status: 'active',
+    },
+  ];
 
   // Mock data for meetings and attendance - reduced to 6 rows for mockup
   const mockMeetings: MeetingRecord[] = [
@@ -181,6 +210,16 @@ const MeetingsPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Create Meeting Button */}
+          <div className="mt-6">
+            <button
+              onClick={() => setShowCreateMeetingModal(true)}
+              className="w-full px-4 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl"
+            >
+              + Create New Meeting
+            </button>
+          </div>
         </div>
 
         {/* Right Panel - Meeting History */}
@@ -274,6 +313,139 @@ const MeetingsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Create Meeting Modal */}
+      {showCreateMeetingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">Create New Meeting</h3>
+            <form className="space-y-6">
+              {/* Meeting Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Meeting Name</label>
+                <input
+                  type="text"
+                  value={newMeeting.name}
+                  onChange={(e) => setNewMeeting(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  placeholder="Enter meeting name"
+                  required
+                />
+              </div>
+
+              {/* Date and Time */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={newMeeting.date}
+                    onChange={(e) => setNewMeeting(prev => ({ ...prev, date: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                  <input
+                    type="time"
+                    value={newMeeting.startTime}
+                    onChange={(e) => setNewMeeting(prev => ({ ...prev, startTime: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                  <input
+                    type="time"
+                    value={newMeeting.endTime}
+                    onChange={(e) => setNewMeeting(prev => ({ ...prev, endTime: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Attendees Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Select Attendees</label>
+                <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-3">
+                  {mockMembers.map((member) => (
+                    <label key={member.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newMeeting.selectedAttendees.includes(member.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewMeeting(prev => ({
+                              ...prev,
+                              selectedAttendees: [...prev.selectedAttendees, member.id]
+                            }));
+                          } else {
+                            setNewMeeting(prev => ({
+                              ...prev,
+                              selectedAttendees: prev.selectedAttendees.filter(id => id !== member.id)
+                            }));
+                          }
+                        }}
+                        className="w-4 h-4 text-[#C8102E] border-gray-300 rounded focus:ring-[#C8102E]"
+                      />
+                      <div className="w-8 h-8 bg-[#C8102E] rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-semibold">
+                          {member.name.charAt(0)}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                        <p className="text-xs text-gray-500">{member.email}</p>
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                          member.role === 'eboard' 
+                            ? 'bg-[#A4804A] text-white' 
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {member.role === 'eboard' ? 'Eboard' : 'Member'}
+                        </span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  {newMeeting.selectedAttendees.length} member(s) selected
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-4 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateMeetingModal(false);
+                    setNewMeeting({ name: '', date: '', startTime: '', endTime: '', selectedAttendees: [] });
+                  }}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // Here you would typically save the meeting to your backend
+                    console.log('Creating meeting:', newMeeting);
+                    alert('Meeting created successfully! (This is a demo)');
+                    setShowCreateMeetingModal(false);
+                    setNewMeeting({ name: '', date: '', startTime: '', endTime: '', selectedAttendees: [] });
+                  }}
+                >
+                  Create Meeting
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
