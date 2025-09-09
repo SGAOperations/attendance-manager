@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Member } from '../../types';
 
 interface MeetingRecord {
   id: string;
@@ -41,7 +42,7 @@ const MeetingsPage: React.FC = () => {
       status: 'active',
     },
   ];
-  
+
   // Mock data for meetings and attendance - reduced to 6 rows for mockup
   const mockMeetings: MeetingRecord[] = [
     {
@@ -209,9 +210,8 @@ const MeetingsPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
 
-         {/* Create Meeting Button */}
+          {/* Create Meeting Button */}
           <div className="mt-6">
             <button
               onClick={() => setShowCreateMeetingModal(true)}
@@ -221,7 +221,7 @@ const MeetingsPage: React.FC = () => {
             </button>
           </div>
         </div>
-      
+
         {/* Right Panel - Meeting History */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
@@ -313,9 +313,8 @@ const MeetingsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
 
-     {/* Create Meeting Modal */}
+      {/* Create Meeting Modal */}
       {showCreateMeetingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
