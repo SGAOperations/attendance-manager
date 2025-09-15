@@ -14,16 +14,28 @@ datasource db {
   url      = env("DATABASE_URL_TEST")
 }
 
+enum RoleType {
+  EBOARD
+  MEMBER
+}
+
+enum AttendanceStatus {
+  PENDING
+  PRESENT
+  PENDING_ABSENCE
+  EXCUSED_ABSENCE
+  UNEXCUSED_ABSENCE
+}
+
 model Role {
   roleId   String @id @default(uuid())
-  roleType String // Valid values: admin, member
+  roleType RoleType
 
   users User[]
 }
 
 model User {
   userId    String @id @default(uuid())
-  username  String
   email     String @unique
   firstName String
   lastName  String
@@ -49,7 +61,7 @@ model Attendance {
   attendanceId String @id @default(uuid())
   userId       String
   meetingId    String
-  status       String // Valid values: Pending, Present, Pending absence, Excused absence, Unexcused absence
+  status       AttendanceStatus
 
   user    User     @relation(fields: [userId], references: [userId])
   meeting Meeting  @relation(fields: [meetingId], references: [meetingId])

@@ -1,3 +1,4 @@
+import { RoleType } from '@/generated/prisma';
 import { prisma } from '../lib/prisma';
 
 export const UsersService = {
@@ -23,7 +24,6 @@ export const UsersService = {
   },
 
   async createUser(data: {
-    username: string;
     password: string;
     email: string;
     firstName: string;
@@ -36,7 +36,6 @@ export const UsersService = {
   async updateUser(
     userId: string,
     updates: Partial<{
-      username: string;
       password: string;
       email: string;
       firstName: string;
@@ -70,7 +69,7 @@ export const UsersService = {
     return prisma.user.findMany({
       where: {
         role: {
-          roleType: roleId,
+          roleType: roleId as RoleType,
         },
       },
       include: {
