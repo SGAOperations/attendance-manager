@@ -7,6 +7,15 @@ export const UsersController = {
     return NextResponse.json(users);
   },
 
+  async listUsersSantizied() {
+    const users = await UsersService.getAllUsers();
+    const sanitizedUsers = users.map(user => {
+      const { username, email, password, ...safeUser } = user;
+      return safeUser;
+    });
+    return NextResponse.json(sanitizedUsers);
+  },
+
   async getUser(params: { userId: string }) {
     const user = await UsersService.getUserById(params.userId);
     if (!user) {
@@ -21,7 +30,7 @@ export const UsersController = {
     if (!user) {
       return NextResponse.json({
         exists: false,
-        user: null,
+        user: null
       });
     }
     if (user.password === params.userPassword) {
@@ -29,7 +38,7 @@ export const UsersController = {
       const { password, roleId, ...userData } = user;
       const res = NextResponse.json({
         exists: true,
-        user: userData,
+        user: userData
       });
       res.headers.append('Access-Control-Allow-Credentials', 'true');
       res.headers.append('Access-Control-Allow-Origin', '*');
@@ -81,5 +90,5 @@ export const UsersController = {
       { message: 'User deleted successfully' },
       { status: 204 }
     );
-  },
+  }
 };
