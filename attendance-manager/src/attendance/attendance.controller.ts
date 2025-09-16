@@ -1,11 +1,11 @@
 import { AttendanceService } from './attendance.service';
 
 const allowedStatuses = [
-  'Pending',
-  'Present',
-  'Pending absence',
-  'Excused absence',
-  'Unexcused absence',
+  'PENDING',
+  'PRESENT',
+  'PENDING_ABSENCE',
+  'EXCUSED_ABSENCE',
+  'UNEXCUSED_ABSENCE',
 ] as const;
 
 type AttendanceStatus = (typeof allowedStatuses)[number];

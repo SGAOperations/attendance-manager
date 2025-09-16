@@ -13,31 +13,27 @@ describe('AttendanceController', () => {
 
   beforeAll(async () => {
     // Test role
-    const role = await prisma.role.create({ data: { roleType: 'member' } });
+    const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
 
     // Test user
     const user = await prisma.user.create({
       data: {
-        username: 'testuser',
         password: 'testpassword',
         email: 'testuser@example.com',
         firstName: 'Test',
         lastName: 'User',
         roleId: role.roleId,
-        password: 'password',
       },
     });
     testUserId = user.userId;
 
     const user2 = await prisma.user.create({
       data: {
-        username: 'testuser2',
         password: 'testpassword2',
         email: 'testuser2@example.com',
         firstName: 'Test2',
         lastName: 'User2',
         roleId: role.roleId,
-        password: 'password',
       },
     });
     testUser2Id = user2.userId;
@@ -70,7 +66,7 @@ describe('AttendanceController', () => {
       data: {
         userId: testUserId,
         meetingId: testMeetingId,
-        status: 'Pending',
+        status: 'PENDING',
       },
     });
     testAttendanceId = attendance.attendanceId;
@@ -79,7 +75,7 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser2Id,
         meetingId: testMeeting2Id,
-        status: 'Pending',
+        status: 'PENDING',
       },
     });
     testAttendance2Id = attendance2.attendanceId;
@@ -127,11 +123,11 @@ describe('AttendanceController', () => {
     const data = {
       userId: testUserId,
       meetingId: testMeeting2Id,
-      status: 'Present',
+      status: 'PRESENT',
     };
     const newAttendance = await AttendanceController.createAttendance(data);
     expect(newAttendance).toBeDefined();
-    expect(newAttendance.status).toBe('Present');
+    expect(newAttendance.status).toBe('PRESENT');
 
     const attendance2 = await AttendanceController.getMeetingAttendance(
       testMeeting2Id
@@ -141,19 +137,19 @@ describe('AttendanceController', () => {
   });
 
   it('should update attendance status', async () => {
-    const updateData = { status: 'Excused absence' };
+    const updateData = { status: 'EXCUSED_ABSENCE' };
     const updated = await AttendanceController.updateAttendance(
       testAttendanceId,
       updateData
     );
     expect(updated).toBeDefined();
-    expect(updated.status).toBe('Excused absence');
+    expect(updated.status).toBe('EXCUSED_ABSENCE');
   });
 
   it('should throw error for invalid status update', async () => {
     await expect(
       AttendanceController.updateAttendance(testAttendanceId, {
-        status: 'InvalidStatus',
+        status: 'INVALID_STATUS',
       })
     ).rejects.toThrow('Invalid attendance status');
   });
@@ -164,7 +160,7 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser2Id,
         meetingId: testMeetingId,
-        status: 'Pending',
+        status: 'PENDING',
       },
     });
 

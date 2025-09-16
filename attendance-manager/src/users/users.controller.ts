@@ -54,13 +54,11 @@ export const UsersController = {
   async createUser(request: Request) {
     const body = await request.json();
     if (
-      !body.username ||
       !body.password ||
       !body.email ||
       !body.firstName ||
       !body.lastName ||
-      !body.roleId ||
-      !body.password
+      !body.roleId
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },

@@ -12,19 +12,17 @@ describe('RequestController', () => {
 
   beforeAll(async () => {
     // Create a test role
-    const role = await prisma.role.create({ data: { roleType: 'member' } });
+    const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
     testRoleId = role.roleId;
 
     // Create a test user
     const user = await prisma.user.create({
       data: {
-        username: 'requestuser',
         password: 'testpassword',
         email: 'requestuser@example.com',
         firstName: 'Request',
         lastName: 'User',
         roleId: testRoleId,
-        password: 'password',
       },
     });
     testUserId = user.userId;
@@ -46,7 +44,7 @@ describe('RequestController', () => {
       data: {
         userId: testUserId,
         meetingId: testMeetingId,
-        status: 'Pending',
+        status: 'PENDING',
       },
     });
     testAttendanceId = attendance.attendanceId;
@@ -94,7 +92,7 @@ describe('RequestController', () => {
       data: {
         userId: testUserId,
         meetingId: newMeeting.meetingId,
-        status: 'Pending',
+        status: 'PENDING',
       },
     });
     const testAttendanceId2 = attendance2.attendanceId;
@@ -153,7 +151,7 @@ describe('RequestController', () => {
       data: {
         userId: testUserId,
         meetingId: newMeeting.meetingId,
-        status: 'Pending',
+        status: 'PENDING',
       },
     });
     const testAttendanceId2 = attendance2.attendanceId;

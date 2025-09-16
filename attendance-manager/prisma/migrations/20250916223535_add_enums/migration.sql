@@ -1,7 +1,13 @@
+-- CreateEnum
+CREATE TYPE "RoleType" AS ENUM ('EBOARD', 'MEMBER');
+
+-- CreateEnum
+CREATE TYPE "AttendanceStatus" AS ENUM ('PENDING', 'PRESENT', 'PENDING_ABSENCE', 'EXCUSED_ABSENCE', 'UNEXCUSED_ABSENCE');
+
 -- CreateTable
 CREATE TABLE "Role" (
     "roleId" TEXT NOT NULL,
-    "roleType" TEXT NOT NULL,
+    "roleType" "RoleType" NOT NULL,
 
     CONSTRAINT "Role_pkey" PRIMARY KEY ("roleId")
 );
@@ -9,7 +15,6 @@ CREATE TABLE "Role" (
 -- CreateTable
 CREATE TABLE "User" (
     "userId" TEXT NOT NULL,
-    "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
@@ -36,7 +41,7 @@ CREATE TABLE "Attendance" (
     "attendanceId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "meetingId" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "AttendanceStatus" NOT NULL,
 
     CONSTRAINT "Attendance_pkey" PRIMARY KEY ("attendanceId")
 );
@@ -52,6 +57,9 @@ CREATE TABLE "Request" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Attendance_userId_meetingId_key" ON "Attendance"("userId", "meetingId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Request_attendanceId_key" ON "Request"("attendanceId");

@@ -8,12 +8,11 @@ describe('UsersService', () => {
 
   beforeAll(async () => {
     const role = await prisma.role.create({
-      data: { roleType: 'member' },
+      data: { roleType: 'MEMBER' },
     });
     testRoleId = role.roleId;
 
     await UsersService.createUser({
-      username: 'jdoe',
       email: 'jdoe@northeastern.edu',
       firstName: 'John',
       lastName: 'Doe',
@@ -29,14 +28,13 @@ describe('UsersService', () => {
   });
 
   it('should fetch users by role type', async () => {
-    const users = await UsersService.getUsersByRole('member');
+    const users = await UsersService.getUsersByRole('MEMBER');
     expect(users.length).toBeGreaterThan(0);
-    expect(users[0].role.roleType).toBe('member');
+    expect(users[0].role.roleType).toBe('MEMBER');
   });
 
   it('should create a new user', async () => {
     const newUser = await UsersService.createUser({
-      username: 'jdoe2',
       email: 'jdoe2@northeastern.edu',
       firstName: 'Jane',
       lastName: 'Doe',
@@ -45,7 +43,6 @@ describe('UsersService', () => {
     });
 
     expect(newUser).toBeDefined();
-    expect(newUser.username).toBe('jdoe2');
     expect(newUser.email).toBe('jdoe2@northeastern.edu');
   });
 
@@ -63,14 +60,12 @@ describe('UsersService', () => {
   it('should update a user', async () => {
     const [user] = await UsersService.getAllUsers();
     const updatedUser = await UsersService.updateUser(user.userId, {
-      username: 'updatedUser',
       email: 'updated@northeastern.edu',
       firstName: 'Updated',
       lastName: 'User',
       password: 'password',
     });
 
-    expect(updatedUser.username).toBe('updatedUser');
     expect(updatedUser.email).toBe('updated@northeastern.edu');
   });
 
