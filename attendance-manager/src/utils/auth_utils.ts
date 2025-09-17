@@ -31,8 +31,8 @@ export const login = async (
     }
     if (
       !(
-        user_details.user.role.roleType === 'admin' ||
-        user_details.user.role.roleType === 'user'
+        user_details.user.role.roleType === 'EBOARD' ||
+        user_details.user.role.roleType === 'MEMBER'
       )
     ) {
       console.error('Incorrect Roles');
