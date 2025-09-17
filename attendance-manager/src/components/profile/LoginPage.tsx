@@ -1,7 +1,7 @@
-'use client'
+'use client';
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { LoginCredentials } from '../types';
+import { User, LoginCredentials } from '@/types';
+import { login } from '@/utils/auth_utils';
 
 interface SignupCredentials {
   firstName: string;
@@ -12,19 +12,22 @@ interface SignupCredentials {
 }
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
-    password: '',
+    password: ''
   });
-  const [signupCredentials, setSignupCredentials] = useState<SignupCredentials>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  const [signupCredentials, setSignupCredentials] = useState<SignupCredentials>(
+    {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }
+  );
   const [error, setError] = useState<string>('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,13 +42,19 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        await login(credentials);
+        await login(credentials, setIsLoading, setUser);
       } catch (error) {
         setError('Login failed. Please try again.');
       }
     } else {
       // Signup logic
-      if (!signupCredentials.firstName || !signupCredentials.lastName || !signupCredentials.email || !signupCredentials.password || !signupCredentials.confirmPassword) {
+      if (
+        !signupCredentials.firstName ||
+        !signupCredentials.lastName ||
+        !signupCredentials.email ||
+        !signupCredentials.password ||
+        !signupCredentials.confirmPassword
+      ) {
         setError('Please fill in all fields');
         return;
       }
@@ -61,11 +70,17 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        await login({
-          email: signupCredentials.email,
-          password: signupCredentials.password,
-        });
-        alert(`Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Your account has been created successfully.`);
+        await login(
+          {
+            email: signupCredentials.email,
+            password: signupCredentials.password
+          },
+          setIsLoading,
+          setUser
+        );
+        alert(
+          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Your account has been created successfully.`
+        );
       } catch (error) {
         setError('Signup failed. Please try again.');
       }
@@ -77,12 +92,12 @@ const LoginPage: React.FC = () => {
     if (isLoginMode) {
       setCredentials(prev => ({
         ...prev,
-        [name]: value,
+        [name]: value
       }));
     } else {
       setSignupCredentials(prev => ({
         ...prev,
-        [name]: value,
+        [name]: value
       }));
     }
   };
@@ -90,7 +105,13 @@ const LoginPage: React.FC = () => {
   const resetForms = () => {
     setError('');
     setCredentials({ email: '', password: '' });
-    setSignupCredentials({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+    setSignupCredentials({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
   };
 
   const handleModeChange = (isLogin: boolean) => {
@@ -133,10 +154,9 @@ const LoginPage: React.FC = () => {
             {isLoginMode ? 'Welcome Back' : 'Join SGA'}
           </h2>
           <p className="text-gray-600 text-lg">
-            {isLoginMode 
-              ? 'Sign in to your SGA Dashboard' 
-              : 'Create your SGA Dashboard account'
-            }
+            {isLoginMode
+              ? 'Sign in to your SGA Dashboard'
+              : 'Create your SGA Dashboard account'}
           </p>
         </div>
 
@@ -147,13 +167,26 @@ const LoginPage: React.FC = () => {
             {!isLoginMode && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-white mb-2">
+                  <label
+                    htmlFor="firstName"
+                    className="block text-sm font-medium text-white mb-2"
+                  >
                     First Name
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
                       </svg>
                     </div>
                     <input
@@ -170,13 +203,26 @@ const LoginPage: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-white mb-2">
+                  <label
+                    htmlFor="lastName"
+                    className="block text-sm font-medium text-white mb-2"
+                  >
                     Last Name
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
                       </svg>
                     </div>
                     <input
@@ -197,13 +243,26 @@ const LoginPage: React.FC = () => {
 
             {/* Email field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-white mb-2"
+              >
                 Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                    />
                   </svg>
                 </div>
                 <input
@@ -214,7 +273,9 @@ const LoginPage: React.FC = () => {
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
                   placeholder="Enter your email"
-                  value={isLoginMode ? credentials.email : signupCredentials.email}
+                  value={
+                    isLoginMode ? credentials.email : signupCredentials.email
+                  }
                   onChange={handleInputChange}
                 />
               </div>
@@ -222,24 +283,45 @@ const LoginPage: React.FC = () => {
 
             {/* Password field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-white mb-2"
+              >
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
                   </svg>
                 </div>
                 <input
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete={isLoginMode ? "current-password" : "new-password"}
+                  autoComplete={
+                    isLoginMode ? 'current-password' : 'new-password'
+                  }
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
-                  placeholder={isLoginMode ? "Enter your password" : "Create a password"}
-                  value={isLoginMode ? credentials.password : signupCredentials.password}
+                  placeholder={
+                    isLoginMode ? 'Enter your password' : 'Create a password'
+                  }
+                  value={
+                    isLoginMode
+                      ? credentials.password
+                      : signupCredentials.password
+                  }
                   onChange={handleInputChange}
                 />
               </div>
@@ -248,13 +330,26 @@ const LoginPage: React.FC = () => {
             {/* Confirm Password field - only for signup */}
             {!isLoginMode && (
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-2">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-white mb-2"
+                >
                   Confirm Password
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                   </div>
                   <input
@@ -276,8 +371,18 @@ const LoginPage: React.FC = () => {
               <div className="bg-red-900 border border-red-700 rounded-xl p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="h-5 w-5 text-red-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                   </div>
                   <div className="ml-3">
@@ -295,24 +400,40 @@ const LoginPage: React.FC = () => {
               >
                 {isLoading ? (
                   <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     {isLoginMode ? 'Signing in...' : 'Creating account...'}
                   </div>
+                ) : isLoginMode ? (
+                  'Sign In'
                 ) : (
-                  isLoginMode ? 'Sign In' : 'Create Account'
+                  'Create Account'
                 )}
               </button>
             </div>
 
             <div className="text-center">
               <p className="text-sm text-gray-400">
-                {isLoginMode 
-                  ? "Use any email with 'admin' for admin access" 
-                  : "Password must be at least 6 characters long"
-                }
+                {isLoginMode
+                  ? "Use any email with 'admin' for admin access"
+                  : 'Password must be at least 6 characters long'}
               </p>
             </div>
           </form>
@@ -321,7 +442,8 @@ const LoginPage: React.FC = () => {
         {/* Footer */}
         <div className="text-center">
           <p className="text-sm text-gray-500">
-            © 2025 Northeastern University Student Government Association. All rights reserved.
+            © 2025 Northeastern University Student Government Association. All
+            rights reserved.
           </p>
         </div>
       </div>
@@ -329,4 +451,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;
