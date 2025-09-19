@@ -42,7 +42,9 @@ const LoginPage: React.FC = () => {
       }
 
       try {
+        console.log('Logging in...');
         await login(credentials, setIsLoading, setUser);
+        console.log('Logged in :)');
       } catch (error) {
         setError('Login failed. Please try again.');
       }
