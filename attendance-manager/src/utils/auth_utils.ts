@@ -31,13 +31,14 @@ export const login = async (
     }
     if (
       !(
-        user_details.user.role.roleType === 'EBOARD' ||
-        user_details.user.role.roleType === 'MEMBER'
+        user_details.user.role.roleType === 'user' ||
+        user_details.user.role.roleType === 'admin'
       )
     ) {
       console.error('Incorrect Roles');
       return;
     }
+
     // Mock user data based on email
     const user: User = {
       id: user_details.user.userId,

@@ -2,7 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: "user" | "admin";
+  role: 'user' | 'admin';
   avatar?: string;
 }
 
@@ -10,9 +10,9 @@ export interface Member {
   id: string;
   name: string;
   email: string;
-  role: "eboard" | "member";
+  role: 'eboard' | 'member';
   joinDate: Date;
-  status: "active" | "inactive";
+  status: 'active' | 'inactive';
 }
 
 export interface Meeting {
@@ -24,7 +24,7 @@ export interface Meeting {
   endTime: string;
   attendees: string[];
   location?: string;
-  type: "in-person" | "virtual";
+  type: 'in-person' | 'virtual';
 }
 
 export interface AttendanceRecord {
@@ -43,7 +43,7 @@ export interface Attendance {
   id: string;
   userId: string;
   meetingId: string;
-  status: "present" | "absent" | "late";
+  status: 'present' | 'absent' | 'late';
   timestamp: Date;
 }
 
