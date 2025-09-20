@@ -275,8 +275,8 @@ useEffect(() => {
   //   },
   // ];
   
-  const eboardMembers = users.filter(m => m.role.roleType === 'admin');
-  const regularMembers = users.filter(m => m.role.roleType === 'member');
+  const eboardMembers = users.filter(m => m.role.roleType === 'EBOARD');
+  const regularMembers = users.filter(m => m.role.roleType === 'MEMBER');
 
   return (
     <div className="flex-1 p-6 bg-gray-50">
@@ -327,7 +327,7 @@ useEffect(() => {
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{member.firstName}{member.lastName}</p>
+                    <p className="text-sm font-medium text-gray-900">{member.firstName} {member.lastName}</p>
                     <p className="text-xs text-gray-500">{member.email}</p>
                   </div>
                 </div>
@@ -347,7 +347,7 @@ useEffect(() => {
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{member.firstName}{member.lastName}</p>
+                    <p className="text-sm font-medium text-gray-900">{member.firstName} {member.lastName}</p>
                     <p className="text-xs text-gray-500">{member.email}</p>
                   </div>
                 </div>
