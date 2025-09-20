@@ -54,7 +54,7 @@ export const login = async (
     };
 
     setUser(user);
-    router.push('/dashboard');
+    router.push('/homepage');
   } catch (error) {
     console.error('Login failed:', error);
     throw error;
