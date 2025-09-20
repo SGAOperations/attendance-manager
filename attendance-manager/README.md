@@ -49,12 +49,15 @@ For more details, see [route.js file convention](https://nextjs.org/docs/app/api
 
 Migrations are helpful as they can be used to ensure safe updates to our database.
 
-To run a migration, run 
-```
+To run a migration, run
+
+```sh
 npx prisma migrate dev --name 'name of migration'
 ```
 
 This will create a migration file, which will be applied to our database. We can use this migration to safely update our production database as well.
+
+If you the prisma/schema.prisma to reflect the generated/prisma/schema.prisma, run `npx prisma generate`
 
 To check that the database is valid, run npx prettier validate
 

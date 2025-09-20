@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { User, LoginCredentials } from '@/types';
 import { login } from '@/utils/auth_utils';
+import { useRouter } from 'next/navigation';
 
 interface SignupCredentials {
   firstName: string;
@@ -12,6 +13,8 @@ interface SignupCredentials {
 }
 
 const LoginPage: React.FC = () => {
+  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -43,10 +46,10 @@ const LoginPage: React.FC = () => {
 
       try {
         console.log('Logging in...');
-        await login(credentials, setIsLoading, setUser);
-        console.log('Logged in :)');
+        await login(credentials, setIsLoading, setUser, router);
+        // console.log('Logged in :)');
       } catch (error) {
-        setError('Login failed. Please try again.');
+        setError('Login failed. Please try again.\n Error msg: ' + error);
       }
     } else {
       // Signup logic
@@ -78,7 +81,8 @@ const LoginPage: React.FC = () => {
             password: signupCredentials.password
           },
           setIsLoading,
-          setUser
+          setUser,
+          router
         );
         alert(
           `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Your account has been created successfully.`

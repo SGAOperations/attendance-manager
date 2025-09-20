@@ -1,10 +1,15 @@
+'use client';
+
 import { LoginCredentials, User, UserDetails } from '@/types';
+import { redirect } from 'next/navigation';
 import { Dispatch, SetStateAction } from 'react';
+import { useRouter } from 'next/navigation';
 
 export const login = async (
   credentials: LoginCredentials,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
-  setUser: Dispatch<SetStateAction<User | null>>
+  setUser: Dispatch<SetStateAction<User | null>>,
+  router: ReturnType<typeof useRouter>
 ) => {
   setIsLoading(true);
   console.log(decodeURIComponent(credentials.email));
@@ -49,6 +54,7 @@ export const login = async (
     };
 
     setUser(user);
+    router.push('/attendance');
   } catch (error) {
     console.error('Login failed:', error);
     throw error;
