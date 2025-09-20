@@ -4,14 +4,14 @@ import { prisma } from '../lib/prisma';
 export const UsersService = {
   async getAllUsers() {
     return prisma.user.findMany({
-      include: { role: true },
+      include: { role: true }
     });
   },
 
   async getUserById(userId: string) {
     return prisma.user.findUnique({
       where: { userId },
-      include: { role: true },
+      include: { role: true }
     });
   },
 
@@ -19,7 +19,7 @@ export const UsersService = {
     console.log(userEmail);
     return prisma.user.findUnique({
       where: { email: userEmail },
-      include: { role: true },
+      include: { role: true }
     });
   },
 
@@ -45,13 +45,13 @@ export const UsersService = {
   ) {
     return prisma.user.update({
       where: { userId },
-      data: updates,
+      data: updates
     });
   },
 
   async deleteUser(userId: string) {
     return prisma.user.delete({
-      where: { userId },
+      where: { userId }
     });
   },
 
@@ -61,7 +61,7 @@ export const UsersService = {
 
   async getRolesByRoleId(roleId: string) {
     return prisma.role.findUnique({
-      where: { roleId: roleId },
+      where: { roleId: roleId }
     });
   },
 
@@ -69,12 +69,12 @@ export const UsersService = {
     return prisma.user.findMany({
       where: {
         role: {
-          roleType: roleId as RoleType,
-        },
+          roleType: roleId as RoleType
+        }
       },
       include: {
-        role: true,
-      },
+        role: true
+      }
     });
-  },
+  }
 };
