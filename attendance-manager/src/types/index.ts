@@ -8,11 +8,12 @@ export interface User {
 
 export interface Member {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  role: 'eboard' | 'member';
   joinDate: Date;
   status: 'active' | 'inactive';
+  role: { [key: string]: string };
 }
 
 export interface Meeting {

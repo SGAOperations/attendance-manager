@@ -55,17 +55,39 @@ const meetingAPI = {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("getMeeting error response:", errorText);
+        console.log("getAttendances error response:", errorText);
         throw new Error(
           `Failed to fetch meeting (${response.status}): ${errorText}`,
         );
       }
 
       const data = await response.json();
-      console.log("getMeeting data:", data);
+      console.log("getAttendances data:", data);
       return data;
     } catch (error) {
-      console.error("getMeeting error:", error);
+      console.error("getAttendances error:", error);
+      throw error;
+    }
+  },
+
+  async getUsers(): Promise<Member[]> {
+    try {
+      const response = await fetch(`/api/users/only-name`);
+      console.log("getAttendance response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("getUsers error response:", errorText);
+        throw new Error(
+          `Failed to fetch meeting (${response.status}): ${errorText}`,
+        );
+      }
+
+      const data = await response.json();
+      console.log("getUsers data:", data);
+      return data;
+    } catch (error) {
+      console.error("getUsers error:", error);
       throw error;
     }
   },
@@ -77,7 +99,7 @@ const AttendancePage: React.FC = () => {
   const [showBulkAddModal, setShowBulkAddModal] = useState(false);
   const [meetings, setMeetings] = useState<MeetingRecord[]>([]);
 const [meetingsWithAttendance, setMeetingsWithAttendance] = useState<MeetingRecord[]>([]);
-
+  const [users, setUsers] = useState<Member[]>([])
 useEffect(() => {
   const loadMeetings = async () => {
     try {
@@ -89,6 +111,19 @@ useEffect(() => {
   };
 
   loadMeetings();
+}, []);
+
+useEffect(() => {
+  const loadUsers = async () => {
+    try {
+      const allUsers = await meetingAPI.getUsers();
+      setUsers(allUsers)
+    } catch (err) {
+      console.error("Error loading meetings:", err);
+    }
+  };
+
+  loadUsers();
 }, []);
 
 useEffect(() => {
@@ -119,72 +154,56 @@ useEffect(() => {
 }, [meetings]);
 
   // Mock data for SGA members
-  const mockMembers: Member[] = [
-    {
-      id: '1',
-      name: 'Renee Cai',
-      email: 'cai.renee@northeastern.edu',
-      role: 'eboard',
-      joinDate: new Date('2024, 0, 15'),
-      status: 'active',
-    },
-    {
-      id: '2',
-      name: 'Justin Kim',
-      email: 'kim.justin@northeastern.edu',
-      role: 'eboard',
-      joinDate: new Date('2024, 0, 20'),
-      status: 'active',
-    },
-    {
-      id: '3',
-      name: 'Renee Cai',
-      email: 'cai.renee@northeastern.edu',
-      role: 'member',
-      joinDate: new Date('2024, 0, 25'),
-      status: 'active',
-    },
-    {
-      id: '4',
-      name: 'Justin Kim',
-      email: 'kim.justin@northeastern.edu',
-      role: 'member',
-      joinDate: new Date('2024, 1, 1'),
-      status: 'active',
-    },
-    {
-      id: '5',
-      name: 'Renee Cai',
-      email: 'cai.renee@northeastern.edu',
-      role: 'member',
-      joinDate: new Date('2024, 1, 5'),
-      status: 'active',
-    },
-    {
-      id: '6',
-      name: 'Justin Kim',
-      email: 'kim.justin@northeastern.edu',
-      role: 'member',
-      joinDate: new Date('2024, 1, 10'),
-      status: 'active',
-    },
-    {
-      id: '7',
-      name: 'Renee Cai',
-      email: 'cai.renee@northeastern.edu',
-      role: 'member',
-      joinDate: new Date('2024, 1, 15'),
-      status: 'active',
-    },
-    {
-      id: '8',
-      name: 'Justin Kim',
-      email: 'kim.justin@northeastern.edu',
-      role: 'member',
-      joinDate: new Date('2024, 1, 20'),
-      status: 'active',
-    },
-  ];
+  // const mockMembers: Member[] = [
+  //   {
+  //     id: '1',
+  //     name: 'Renee Cai',
+  //     email: 'cai.renee@northeastern.edu',
+  //     role: 'eboard',
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Justin Kim',
+  //     email: 'kim.justin@northeastern.edu',
+  //     role: 'eboard',
+  //   },
+  //   {
+  //     id: '3',
+  //     name: 'Renee Cai',
+  //     email: 'cai.renee@northeastern.edu',
+  //     role: 'member',
+  //   },
+  //   {
+  //     id: '4',
+  //     name: 'Justin Kim',
+  //     email: 'kim.justin@northeastern.edu',
+  //     role: 'member',
+  //   },
+  //   {
+  //     id: '5',
+  //     name: 'Renee Cai',
+  //     email: 'cai.renee@northeastern.edu',
+  //     role: 'member',
+  //   },
+  //   {
+  //     id: '6',
+  //     name: 'Justin Kim',
+  //     email: 'kim.justin@northeastern.edu',
+  //     role: 'member',
+  //   },
+  //   {
+  //     id: '7',
+  //     name: 'Renee Cai',
+  //     email: 'cai.renee@northeastern.edu',
+  //     role: 'member',
+  //   },
+  //   {
+  //     id: '8',
+  //     name: 'Justin Kim',
+  //     email: 'kim.justin@northeastern.edu',
+  //     role: 'member',
+  //   },
+  // ];
 
   // Mock data for attendance history - matching meetings page data
   // const mockAttendanceRecords: MeetingRecord[] = [
@@ -255,9 +274,9 @@ useEffect(() => {
   //     attendanceRate: 88.1,
   //   },
   // ];
-
-  const eboardMembers = mockMembers.filter(m => m.role === 'eboard');
-  const regularMembers = mockMembers.filter(m => m.role === 'member');
+  
+  const eboardMembers = users.filter(m => m.role.roleType === 'EBOARD');
+  const regularMembers = users.filter(m => m.role.roleType === 'MEMBER');
 
   return (
     <div className="flex-1 p-6 bg-gray-50">
@@ -304,11 +323,11 @@ useEffect(() => {
                 <div key={member.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <div className="w-10 h-10 bg-[#C8102E] rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-semibold">
-                      {member.name.charAt(0)}
+                      {member.firstName.charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                    <p className="text-sm font-medium text-gray-900">{member.firstName} {member.lastName}</p>
                     <p className="text-xs text-gray-500">{member.email}</p>
                   </div>
                 </div>
@@ -324,11 +343,11 @@ useEffect(() => {
                 <div key={member.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <div className="w-10 h-10 bg-[#C8102E] rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-semibold">
-                      {member.name.charAt(0)}
+                      {member.firstName.charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                    <p className="text-sm font-medium text-gray-900">{member.firstName} {member.lastName}</p>
                     <p className="text-xs text-gray-500">{member.email}</p>
                   </div>
                 </div>
