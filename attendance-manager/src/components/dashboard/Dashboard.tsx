@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from 'react';
+import { UserContext } from '../profile/LoginPage';
+import { User } from '@/types';
 
 interface Meeting {
   meetingId: string;
@@ -12,120 +14,120 @@ interface Meeting {
 // Comprehensive dummy meetings data
 const mockMeetings: Meeting[] = [
   {
-    meetingId: "1",
-    name: "Weekly Executive Board Meeting",
+    meetingId: '1',
+    name: 'Weekly Executive Board Meeting',
     notes:
-      "Discuss ongoing projects, budget updates, and upcoming events. All executive board members required to attend.",
-    date: "2025-08-20",
-    startTime: "10:00 AM",
-    endTime: "11:30 AM",
+      'Discuss ongoing projects, budget updates, and upcoming events. All executive board members required to attend.',
+    date: '2025-08-20',
+    startTime: '10:00 AM',
+    endTime: '11:30 AM'
   },
   {
-    meetingId: "2",
-    name: "Student Senate General Assembly",
+    meetingId: '2',
+    name: 'Student Senate General Assembly',
     notes:
-      "Monthly general assembly meeting. Open to all students. Agenda includes new policy proposals and student concerns.",
-    date: "2025-08-21",
-    startTime: "2:00 PM",
-    endTime: "4:00 PM",
+      'Monthly general assembly meeting. Open to all students. Agenda includes new policy proposals and student concerns.',
+    date: '2025-08-21',
+    startTime: '2:00 PM',
+    endTime: '4:00 PM'
   },
   {
-    meetingId: "3",
-    name: "Budget Committee Review",
+    meetingId: '3',
+    name: 'Budget Committee Review',
     notes:
-      "Review annual budget allocations for student organizations and upcoming fiscal year planning.",
-    date: "2025-08-22",
-    startTime: "9:00 AM",
-    endTime: "10:30 AM",
+      'Review annual budget allocations for student organizations and upcoming fiscal year planning.',
+    date: '2025-08-22',
+    startTime: '9:00 AM',
+    endTime: '10:30 AM'
   },
   {
-    meetingId: "4",
-    name: "Virtual Town Hall",
+    meetingId: '4',
+    name: 'Virtual Town Hall',
     notes:
-      "Online town hall meeting to address student concerns and gather feedback on campus initiatives.",
-    date: "2025-08-23",
-    startTime: "6:00 PM",
-    endTime: "7:30 PM",
+      'Online town hall meeting to address student concerns and gather feedback on campus initiatives.',
+    date: '2025-08-23',
+    startTime: '6:00 PM',
+    endTime: '7:30 PM'
   },
   {
-    meetingId: "5",
-    name: "Committee Chair Meeting",
+    meetingId: '5',
+    name: 'Committee Chair Meeting',
     notes:
-      "Monthly meeting of all committee chairs to coordinate activities and share updates.",
-    date: "2025-08-19",
-    startTime: "3:00 PM",
-    endTime: "4:00 PM",
+      'Monthly meeting of all committee chairs to coordinate activities and share updates.',
+    date: '2025-08-19',
+    startTime: '3:00 PM',
+    endTime: '4:00 PM'
   },
   {
-    meetingId: "6",
-    name: "Student Organization Fair Planning",
+    meetingId: '6',
+    name: 'Student Organization Fair Planning',
     notes:
-      "Planning meeting for the upcoming student organization fair and recruitment events.",
-    date: "2025-08-18",
-    startTime: "1:00 PM",
-    endTime: "2:30 PM",
+      'Planning meeting for the upcoming student organization fair and recruitment events.',
+    date: '2025-08-18',
+    startTime: '1:00 PM',
+    endTime: '2:30 PM'
   },
   {
-    meetingId: "7",
-    name: "Policy Review Session",
+    meetingId: '7',
+    name: 'Policy Review Session',
     notes:
-      "Review and discuss proposed changes to student government policies and procedures.",
-    date: "2025-08-24",
-    startTime: "11:00 AM",
-    endTime: "12:30 PM",
-  },
+      'Review and discuss proposed changes to student government policies and procedures.',
+    date: '2025-08-24',
+    startTime: '11:00 AM',
+    endTime: '12:30 PM'
+  }
 ];
 
 // API service functions with endpoints
 const meetingAPI = {
   async getAllMeetings(): Promise<Meeting[]> {
     try {
-      const response = await fetch("/api/meeting");
-      console.log("getAllMeetings response status:", response.status);
+      const response = await fetch('/api/meeting');
+      console.log('getAllMeetings response status:', response.status);
       console.log(
-        "getAllMeetings response headers:",
-        response.headers.get("content-type"),
+        'getAllMeetings response headers:',
+        response.headers.get('content-type')
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("getAllMeetings error response:", errorText);
+        console.log('getAllMeetings error response:', errorText);
         throw new Error(
-          `Failed to fetch meetings (${response.status}): ${errorText}`,
+          `Failed to fetch meetings (${response.status}): ${errorText}`
         );
       }
 
       const data = await response.json();
-      console.log("getAllMeetings data:", data);
+      console.log('getAllMeetings data:', data);
       return data;
     } catch (error) {
-      console.error("getAllMeetings error:", error);
+      console.error('getAllMeetings error:', error);
       throw error;
     }
   },
 
   async getMeetingsByDate(): Promise<Record<string, Meeting[]>> {
     try {
-      const response = await fetch("/api/meeting/by-date");
-      console.log("getMeetingsByDate response status:", response.status);
+      const response = await fetch('/api/meeting/by-date');
+      console.log('getMeetingsByDate response status:', response.status);
       console.log(
-        "getMeetingsByDate response headers:",
-        response.headers.get("content-type"),
+        'getMeetingsByDate response headers:',
+        response.headers.get('content-type')
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("getMeetingsByDate error response:", errorText);
+        console.log('getMeetingsByDate error response:', errorText);
         throw new Error(
-          `Failed to fetch meetings by date (${response.status}): ${errorText}`,
+          `Failed to fetch meetings by date (${response.status}): ${errorText}`
         );
       }
 
       const data = await response.json();
-      console.log("getMeetingsByDate data:", data);
+      console.log('getMeetingsByDate data:', data);
       return data;
     } catch (error) {
-      console.error("getMeetingsByDate error:", error);
+      console.error('getMeetingsByDate error:', error);
       throw error;
     }
   },
@@ -133,27 +135,29 @@ const meetingAPI = {
   async getMeeting(meetingId: string): Promise<Meeting> {
     try {
       const response = await fetch(`/api/meeting/${meetingId}`);
-      console.log("getMeeting response status:", response.status);
+      console.log('getMeeting response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("getMeeting error response:", errorText);
+        console.log('getMeeting error response:', errorText);
         throw new Error(
-          `Failed to fetch meeting (${response.status}): ${errorText}`,
+          `Failed to fetch meeting (${response.status}): ${errorText}`
         );
       }
 
       const data = await response.json();
-      console.log("getMeeting data:", data);
+      console.log('getMeeting data:', data);
       return data;
     } catch (error) {
-      console.error("getMeeting error:", error);
+      console.error('getMeeting error:', error);
       throw error;
     }
-  },
+  }
 };
 
 const Dashboard: React.FC = () => {
+  const user = useContext<User>(UserContext);
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -174,15 +178,14 @@ const Dashboard: React.FC = () => {
           meetingAPI.getAllMeetings(),
           meetingAPI.getMeetingsByDate()
         ]);
-        
+
         setMeetings(allMeetings);
         setMeetingsByDate(groupedMeetings);
-        
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load meetings",
+          err instanceof Error ? err.message : 'Failed to load meetings'
         );
-        console.error("Error loading meetings:", err);
+        console.error('Error loading meetings:', err);
       } finally {
         setLoading(false);
       }
@@ -210,9 +213,9 @@ const Dashboard: React.FC = () => {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
     });
   };
 
@@ -226,12 +229,12 @@ const Dashboard: React.FC = () => {
   };
 
   const hasMeeting = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
+    const dateString = date.toISOString().split('T')[0];
     return meetingsByDate[dateString] && meetingsByDate[dateString].length > 0;
   };
 
   const getMeetingsForDate = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
+    const dateString = date.toISOString().split('T')[0];
     return meetingsByDate[dateString] || [];
   };
 
@@ -248,7 +251,7 @@ const Dashboard: React.FC = () => {
       })
       .sort(
         (a: Meeting, b: Meeting) =>
-          new Date(a.date).getTime() - new Date(b.date).getTime(),
+          new Date(a.date).getTime() - new Date(b.date).getTime()
       );
   };
 
@@ -261,8 +264,12 @@ const Dashboard: React.FC = () => {
 
   function formatMeetingDate(dateString: string) {
     const [year, month, day] = dateString.split('-');
-    const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    
+    const localDate = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day)
+    );
+
     return localDate.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
@@ -319,13 +326,14 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="flex-1 p-6 bg-gray-50">
+      <div>{user.email}</div>
       {/* Header Section */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Dashboard</h1>
         <p className="text-gray-600">
           {selectedDate
             ? `Meetings for ${selectedDate.toLocaleDateString()}`
-            : "Upcoming meetings (next 5 days)"}
+            : 'Upcoming meetings (next 5 days)'}
         </p>
       </div>
 
@@ -340,8 +348,8 @@ const Dashboard: React.FC = () => {
                   setCurrentDate(
                     new Date(
                       currentDate.getFullYear(),
-                      currentDate.getMonth() - 1,
-                    ),
+                      currentDate.getMonth() - 1
+                    )
                   )
                 }
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors"
@@ -365,8 +373,8 @@ const Dashboard: React.FC = () => {
                   setCurrentDate(
                     new Date(
                       currentDate.getFullYear(),
-                      currentDate.getMonth() + 1,
-                    ),
+                      currentDate.getMonth() + 1
+                    )
                   )
                 }
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors"
@@ -396,7 +404,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-7 gap-1 mb-4">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
               <div
                 key={day}
                 className="text-center text-sm font-medium text-gray-500 py-2"
@@ -410,19 +418,19 @@ const Dashboard: React.FC = () => {
             {days.map((day, index) => (
               <div
                 key={index}
-                className={`aspect-square p-1 ${!day ? "bg-gray-50" : ""}`}
+                className={`aspect-square p-1 ${!day ? 'bg-gray-50' : ''}`}
               >
                 {day && (
                   <button
                     onClick={() => setSelectedDate(day)}
                     className={`w-full h-full flex flex-col items-center justify-center text-sm rounded-xl transition-all duration-200 ${
                       isToday(day)
-                        ? "bg-[#C8102E] text-white shadow-lg"
+                        ? 'bg-[#C8102E] text-white shadow-lg'
                         : isSelected(day)
-                          ? "bg-[#C8102E] bg-opacity-10 text-[#C8102E] border-2 border-[#C8102E]"
-                          : hasMeeting(day)
-                            ? "bg-[#A4804A] bg-opacity-10 text-[#A4804A] hover:bg-[#A4804A] hover:bg-opacity-20"
-                            : "hover:bg-gray-100"
+                        ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E] border-2 border-[#C8102E]'
+                        : hasMeeting(day)
+                        ? 'bg-[#A4804A] bg-opacity-10 text-[#A4804A] hover:bg-[#A4804A] hover:bg-opacity-20'
+                        : 'hover:bg-gray-100'
                     }`}
                   >
                     <span className="font-medium">{day.getDate()}</span>
@@ -452,7 +460,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
-              {selectedDate ? "Scheduled Meetings" : "Upcoming Meetings"}
+              {selectedDate ? 'Scheduled Meetings' : 'Upcoming Meetings'}
             </h2>
             <span className="text-sm text-gray-500">
               {selectedDate
@@ -481,17 +489,17 @@ const Dashboard: React.FC = () => {
                 </div>
                 <p className="text-gray-500 text-lg font-medium">
                   {selectedDate
-                    ? "No meetings scheduled"
-                    : "No upcoming meetings"}
+                    ? 'No meetings scheduled'
+                    : 'No upcoming meetings'}
                 </p>
                 <p className="text-gray-400 text-sm">
                   {selectedDate
                     ? `for ${selectedDate.toLocaleDateString()}`
-                    : "in the next 5 days"}
+                    : 'in the next 5 days'}
                 </p>
               </div>
             ) : (
-              displayMeetings.map((meeting) => (
+              displayMeetings.map(meeting => (
                 <div
                   key={meeting.meetingId}
                   className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
