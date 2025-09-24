@@ -27,6 +27,38 @@ export interface Meeting {
   type: 'in-person' | 'virtual';
 }
 
+export interface MeetingApiData {
+  meetingId: string;
+  name: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  notes: string;
+  attendance: AttendanceApiData[];
+}
+
+export interface AttendanceApiData {
+  attendanceId: string;
+  userId: string;
+  meetingId: string;
+  status:
+    | 'PENDING'
+    | 'PRESENT'
+    | 'PENDING_ABSENCE'
+    | 'EXCUSED_ABSENCE'
+    | 'UNEXCUSED ABSENCE';
+  user: UserApiData;
+}
+
+export interface UserApiData {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roleId: string;
+  password: string;
+}
+
 export interface AttendanceRecord {
   id: string;
   meetingId: string;
@@ -40,10 +72,15 @@ export interface AttendanceRecord {
 }
 
 export interface Attendance {
-  id: string;
+  attendanceId: string;
   userId: string;
   meetingId: string;
-  status: 'present' | 'absent' | 'late';
+  status:
+    | 'PENDING'
+    | 'PRESENT'
+    | 'PENDING_ABSENCE'
+    | 'EXCUSED_ABSENCE'
+    | 'UNEXCUSED ABSENCE';
   timestamp: Date;
 }
 

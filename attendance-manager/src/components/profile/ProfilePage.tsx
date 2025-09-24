@@ -25,7 +25,9 @@ const ProfilePage: React.FC = () => {
       {/* Header Section */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Profile</h1>
-        <p className="text-gray-600">View and manage your account information</p>
+        <p className="text-gray-600">
+          View and manage your account information
+        </p>
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -45,28 +47,36 @@ const ProfilePage: React.FC = () => {
           {/* Profile Information */}
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name
+              </label>
               <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
                 {user.name}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
               <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
                 {user.email}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Account Role</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account Role
+              </label>
               <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 capitalize">
                 {user.role}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Account Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account Status
+              </label>
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
                 <span className="text-green-700 font-medium">Active</span>
@@ -75,7 +85,11 @@ const ProfilePage: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className={`flex space-x-4 mt-8 pt-6 border-t border-gray-200 ${user?.email?.includes('admin') ? '' : 'justify-center'}`}>
+          <div
+            className={`flex space-x-4 mt-8 pt-6 border-t border-gray-200 ${
+              user?.email?.includes('admin') ? '' : 'justify-center'
+            }`}
+          >
             {user?.email?.includes('admin') && (
               <button
                 onClick={() => setIsEditing(!isEditing)}
@@ -97,7 +111,9 @@ const ProfilePage: React.FC = () => {
 
         {/* Additional Info Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Account Information
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Member Since:</span>
@@ -123,8 +139,12 @@ const ProfilePage: React.FC = () => {
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Sign Out</h3>
-            <p className="text-gray-600 mb-6">Are you sure you want to sign out of your account?</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Confirm Sign Out
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to sign out of your account?
+            </p>
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowLogoutModal(false)}

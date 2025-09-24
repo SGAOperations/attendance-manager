@@ -13,7 +13,13 @@ function groupBy<T, K extends string | number | symbol>(
 
 export const MeetingService = {
   async getAllMeeting() {
-    return await prisma.meeting.findMany();
+    return await prisma.meeting.findMany({
+      include: { attendance: {
+        include: {
+          user: true
+        }
+      } }
+    });
   },
 
   async getAllMeetingByDate() {

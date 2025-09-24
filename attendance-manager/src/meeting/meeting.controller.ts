@@ -55,5 +55,5 @@ export const MeetingController = {
       { message: 'User deleted successfully' },
       { status: 204 }
     );
-  },
+  }
 };
