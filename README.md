@@ -71,4 +71,4 @@ Logan Ravinuthala
 - [ ] Deploy on Vercel
 - [ ] Bulk Add Members
 - [ ] Add documentation on linking Linear to GitHub
-      
+- [ ] Unit test for both frontend and backend
