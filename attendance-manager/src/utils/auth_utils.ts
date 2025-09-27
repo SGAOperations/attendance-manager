@@ -1,14 +1,13 @@
 'use client';
 
 import { LoginCredentials, User, UserDetails } from '@/types';
-import { redirect } from 'next/navigation';
-import { Dispatch, SetStateAction } from 'react';
 import { useRouter } from 'next/navigation';
+import { Dispatch, SetStateAction } from 'react';
 
 export const login = async (
   credentials: LoginCredentials,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
-  setUser: Dispatch<SetStateAction<User | null>>,
+  setUser: Dispatch<SetStateAction<User>>,
   router: ReturnType<typeof useRouter>
 ) => {
   setIsLoading(true);
