@@ -26,25 +26,37 @@ Authentication: TBD
 
 Components: TBD
 
-## Running the Backend
+## Setting up the development environment
 
-1. Pull the latest version of the backend branch
-2. Create a .env file, contact **Logan Ravinuthala** via slack for the database url and with your Public IPv4 address (if not on NU-Wave wifi) to be whitelisted
-3. cd into the backend folder and run these three commands:
-a. npm install
-b. npx prisma generate
-c. npx prisma studio
+Prerequisites: make sure everything is installed
 
-## Running the Frontend
+1. [node/npm](https://nodejs.org/en)
+   - To check if it's installed: `node -v` and `npm -v`
+   - To install: for [mac/linux](https://github.com/nvm-sh/nvm) and [windows](https://github.com/coreybutler/nvm-windows) (setup instructions are in the link under the `Installing and Updating` and `Installation & Upgrades` sections, respectively)
 
-1. Pull the latest version of the frontend branch
-2. Make sure you have Node.js installed (version 16 or higher)
-3. cd into the frontend folder and run these commands:
-4. npm install
-5. npm start
+First, clone the repo and `cd` into the directory
+
+```bash
+git clone https://github.com/SGAOperationalAffairs/new-attendance-manager.git
+cd new-attendance-manager
+cd attendance-manager
+```
+
+Then, install the dependencies
+
+```bash
+npm install
+```
+
+## Running the app
+
+To run both the frontend and backend run 
+```bash
+npm run dev
+```
 
 ## Linting/Prettier
-To run Prettier, cd into either frontend or backend and run
+To run Prettier
 ```bash
 npx prettier . --write
 ```
@@ -52,13 +64,12 @@ npx prettier . --write
 ## Meet the Team
 
 ```
-Justin Kim
 Jake Wu-Chen
-Maggie Chua
 Yujin Park
 Anusha Narang
-Daniel K
+Daniel Kaplan
 Logan Ravinuthala
+Natalia Ivanov
 ```
 
 ## Todos
@@ -66,7 +77,7 @@ Logan Ravinuthala
 
 - [ ] Refactor code to match common NextJS design
 
-- [ ] Add pipeline checks for frontend
+- [ ] Clean up pipeline checks
 
 - [ ] Deploy on Vercel
 - [ ] Bulk Add Members
