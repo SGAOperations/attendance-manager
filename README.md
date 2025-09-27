@@ -83,3 +83,4 @@ Natalia Ivanov
 - [ ] Bulk Add Members
 - [ ] Add documentation on linking Linear to GitHub
 - [ ] Unit test for both frontend and backend
+- [ ] Allow users to make requests and admin to approve/deny requests
