@@ -73,6 +73,10 @@ Natalia Ivanov
 ```
 
 ## Todos
+- [ ] Add functionality for doing attendance and confirming
+- [ ] Add functionality for making requests
+- [ ] Differentiate full body meeting and regular meeting
+- [ ] Allow adming to change individual attendance
 - [ ] Have a locally hosted database for dev instead of on Render
 
 - [ ] Refactor code to match common NextJS design
