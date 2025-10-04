@@ -115,3 +115,5 @@ export interface UserDetails {
   exists: true;
   user: UserData;
 }
+
+export type MeetingType = 'FULL_BODY' | 'REGULAR';

@@ -13,6 +13,7 @@ describe('UsersService', () => {
     testRoleId = role.roleId;
 
     await UsersService.createUser({
+      nuid: '001234567',
       email: 'jdoe@northeastern.edu',
       firstName: 'John',
       lastName: 'Doe',
@@ -35,6 +36,7 @@ describe('UsersService', () => {
 
   it('should create a new user', async () => {
     const newUser = await UsersService.createUser({
+      nuid: '001234568',
       email: 'jdoe2@northeastern.edu',
       firstName: 'Jane',
       lastName: 'Doe',
@@ -44,6 +46,7 @@ describe('UsersService', () => {
 
     expect(newUser).toBeDefined();
     expect(newUser.email).toBe('jdoe2@northeastern.edu');
+    expect(newUser.nuid).toBe('001234568');
   });
 
   it('should fetch all users', async () => {

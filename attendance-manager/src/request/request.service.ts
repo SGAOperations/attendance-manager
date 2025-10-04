@@ -1,8 +1,14 @@
 import { prisma } from '../lib/prisma';
+import { AttendanceMode, TimeAdjustment } from '../generated/prisma';
 
 export const RequestService = {
   // Create a new request
-  async createRequest(data: { attendanceId: string; reason: string }) {
+  async createRequest(data: { 
+    attendanceId: string; 
+    reason: string;
+    attendanceMode: AttendanceMode;
+    timeAdjustment?: TimeAdjustment;
+  }) {
     return prisma.request.create({
       data,
     });
@@ -16,8 +22,12 @@ export const RequestService = {
     });
   },
 
-  // Update request reason
-  async updateRequest(requestId: string, data: { reason?: string }) {
+  // Update request
+  async updateRequest(requestId: string, data: { 
+    reason?: string;
+    attendanceMode?: AttendanceMode;
+    timeAdjustment?: TimeAdjustment | null;
+  }) {
     return prisma.request.update({
       where: { requestId },
       data,

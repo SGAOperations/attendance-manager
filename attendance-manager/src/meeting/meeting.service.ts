@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma';
+import { MeetingType } from '../types';
 
 function groupBy<T, K extends string | number | symbol>(
   items: T[],
@@ -14,11 +15,13 @@ function groupBy<T, K extends string | number | symbol>(
 export const MeetingService = {
   async getAllMeeting() {
     return await prisma.meeting.findMany({
-      include: { attendance: {
-        include: {
-          user: true
-        }
-      } }
+      include: { 
+        attendance: {
+          include: {
+            user: true
+          }
+        } 
+      }
     });
   },
 
@@ -39,6 +42,7 @@ export const MeetingService = {
     date: string;
     endTime: string;
     notes: string;
+    type: MeetingType;
   }) {
     return prisma.meeting.create({ data });
   },
@@ -52,6 +56,7 @@ export const MeetingService = {
       endTime: string;
       notes: string;
       date: string;
+      type: MeetingType;
     }>
   ) {
     return prisma.meeting.update({

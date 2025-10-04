@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma';
+import { AttendanceStatus } from '../generated/prisma';
 
 export const AttendanceService = {
   // Get all attendance records for a user
@@ -27,13 +28,13 @@ export const AttendanceService = {
   async createAttendance(data: {
     userId: string;
     meetingId: string;
-    status: string;
+    status: AttendanceStatus;
   }) {
     return prisma.attendance.create({ data });
   },
 
   // Update attendance status
-  async updateAttendance(attendanceId: string, data: { status?: string }) {
+  async updateAttendance(attendanceId: string, data: { status?: AttendanceStatus }) {
     return prisma.attendance.update({
       where: { attendanceId: attendanceId },
       data: {

@@ -13,13 +13,25 @@ export const RequestController = {
       !data ||
       typeof data.attendanceId !== 'string' ||
       typeof data.reason !== 'string' ||
-      !data.reason.trim()
+      !data.reason.trim() ||
+      !data.attendanceMode ||
+      (data.attendanceMode !== 'ONLINE' && data.attendanceMode !== 'IN_PERSON')
     ) {
       throw new Error('Invalid input data for creating request');
     }
+
+    // Validate timeAdjustment if provided
+    if (data.timeAdjustment && 
+        data.timeAdjustment !== 'ARRIVING_LATE' && 
+        data.timeAdjustment !== 'LEAVING_EARLY') {
+      throw new Error('Invalid timeAdjustment value');
+    }
+
     return RequestService.createRequest({
       attendanceId: data.attendanceId,
       reason: data.reason.trim(),
+      attendanceMode: data.attendanceMode,
+      timeAdjustment: data.timeAdjustment || undefined,
     });
   },
 
@@ -35,9 +47,30 @@ export const RequestController = {
       throw new Error('Invalid request reason');
     }
 
-    const updateData: Partial<{ reason: string }> = {};
+    // Validate attendanceMode if provided
+    if (data.attendanceMode && 
+        data.attendanceMode !== 'ONLINE' && 
+        data.attendanceMode !== 'IN_PERSON') {
+      throw new Error('Invalid attendanceMode value');
+    }
+
+    // Validate timeAdjustment if provided
+    if (data.timeAdjustment && 
+        data.timeAdjustment !== 'ARRIVING_LATE' && 
+        data.timeAdjustment !== 'LEAVING_EARLY' &&
+        data.timeAdjustment !== null) {
+      throw new Error('Invalid timeAdjustment value');
+    }
+
+    const updateData: any = {};
     if (data.reason) {
       updateData.reason = data.reason.trim();
+    }
+    if (data.attendanceMode) {
+      updateData.attendanceMode = data.attendanceMode;
+    }
+    if ('timeAdjustment' in data) {
+      updateData.timeAdjustment = data.timeAdjustment;
     }
 
     return RequestService.updateRequest(requestId, updateData);

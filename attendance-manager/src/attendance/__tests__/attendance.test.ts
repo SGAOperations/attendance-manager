@@ -18,6 +18,7 @@ describe('AttendanceController', () => {
     // Test user
     const user = await prisma.user.create({
       data: {
+        nuid: '001234569',
         password: 'testpassword',
         email: 'testuser@example.com',
         firstName: 'Test',
@@ -29,6 +30,7 @@ describe('AttendanceController', () => {
 
     const user2 = await prisma.user.create({
       data: {
+        nuid: '001234570',
         password: 'testpassword2',
         email: 'testuser2@example.com',
         firstName: 'Test2',
@@ -46,6 +48,7 @@ describe('AttendanceController', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
+        type: 'REGULAR',
       },
     });
     testMeetingId = meeting.meetingId;
@@ -57,6 +60,7 @@ describe('AttendanceController', () => {
         startTime: '9:00',
         endTime: '10:00',
         notes: 'Test notes 2',
+        type: 'FULL_BODY',
       },
     });
     testMeeting2Id = meeting2.meetingId;
@@ -66,7 +70,7 @@ describe('AttendanceController', () => {
       data: {
         userId: testUserId,
         meetingId: testMeetingId,
-        status: 'PENDING',
+        status: 'EXCUSED_ABSENCE',
       },
     });
     testAttendanceId = attendance.attendanceId;
@@ -75,7 +79,7 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser2Id,
         meetingId: testMeeting2Id,
-        status: 'PENDING',
+        status: 'PRESENT',
       },
     });
     testAttendance2Id = attendance2.attendanceId;
@@ -137,13 +141,13 @@ describe('AttendanceController', () => {
   });
 
   it('should update attendance status', async () => {
-    const updateData = { status: 'EXCUSED_ABSENCE' };
+    const updateData = { status: 'UNEXCUSED_ABSENCE' };
     const updated = await AttendanceController.updateAttendance(
       testAttendanceId,
       updateData
     );
     expect(updated).toBeDefined();
-    expect(updated.status).toBe('EXCUSED_ABSENCE');
+    expect(updated.status).toBe('UNEXCUSED_ABSENCE');
   });
 
   it('should throw error for invalid status update', async () => {
@@ -160,7 +164,7 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser2Id,
         meetingId: testMeetingId,
-        status: 'PENDING',
+        status: 'PRESENT',
       },
     });
 
