@@ -45,6 +45,14 @@ This directory contains example API routes for the headless API app.
 
 For more details, see [route.js file convention](https://nextjs.org/docs/app/api-reference/file-conventions/route).
 
+## Getting Up To Date DB Schema
+
+The second you pull from main, in order to be up to date with any database changes (while on NUWave campus wifi), make sure you run:
+
+```sh
+npx prisma generate
+```
+
 ## Migrations with Prisma
 
 Migrations are helpful as they can be used to ensure safe updates to our database.
