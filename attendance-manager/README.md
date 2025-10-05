@@ -50,6 +50,11 @@ For more details, see [route.js file convention](https://nextjs.org/docs/app/api
 The second you pull from main, in order to be up to date with any database changes (while on NUWave campus wifi), make sure you run:
 
 ```sh
+npx prisma db pull
+
+```
+Followed by:
+```sh
 npx prisma generate
 ```
 
