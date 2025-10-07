@@ -10,7 +10,7 @@ export const UsersController = {
   async listUsersSantizied() {
     const users = await UsersService.getAllUsers();
     const sanitizedUsers = users.map(user => {
-      const { username, email, password, ...safeUser } = user;
+      const { email, password, ...safeUser } = user;
       return safeUser;
     });
     return NextResponse.json(sanitizedUsers);
@@ -34,7 +34,6 @@ export const UsersController = {
       });
     }
     if (user.password === params.userPassword) {
-      // Don't need to send a confirmed password back to the user
       const { password, roleId, ...userData } = user;
       const res = NextResponse.json({
         exists: true,
@@ -63,6 +62,7 @@ export const UsersController = {
   async createUser(request: Request) {
     const body = await request.json();
     if (
+      !body.nuid || // Added validation
       !body.password ||
       !body.email ||
       !body.firstName ||

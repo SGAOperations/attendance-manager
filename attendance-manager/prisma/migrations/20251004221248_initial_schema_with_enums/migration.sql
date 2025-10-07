@@ -2,7 +2,16 @@
 CREATE TYPE "RoleType" AS ENUM ('EBOARD', 'MEMBER');
 
 -- CreateEnum
-CREATE TYPE "AttendanceStatus" AS ENUM ('PENDING', 'PRESENT', 'PENDING_ABSENCE', 'EXCUSED_ABSENCE', 'UNEXCUSED_ABSENCE');
+CREATE TYPE "AttendanceStatus" AS ENUM ('PRESENT', 'UNEXCUSED_ABSENCE', 'EXCUSED_ABSENCE');
+
+-- CreateEnum
+CREATE TYPE "MeetingType" AS ENUM ('FULL_BODY', 'REGULAR');
+
+-- CreateEnum
+CREATE TYPE "AttendanceMode" AS ENUM ('ONLINE', 'IN_PERSON');
+
+-- CreateEnum
+CREATE TYPE "TimeAdjustment" AS ENUM ('ARRIVING_LATE', 'LEAVING_EARLY');
 
 -- CreateTable
 CREATE TABLE "Role" (
@@ -15,6 +24,7 @@ CREATE TABLE "Role" (
 -- CreateTable
 CREATE TABLE "User" (
     "userId" TEXT NOT NULL,
+    "nuid" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
@@ -32,6 +42,7 @@ CREATE TABLE "Meeting" (
     "startTime" TEXT NOT NULL,
     "endTime" TEXT NOT NULL,
     "notes" TEXT NOT NULL,
+    "type" "MeetingType" NOT NULL,
 
     CONSTRAINT "Meeting_pkey" PRIMARY KEY ("meetingId")
 );
@@ -51,9 +62,14 @@ CREATE TABLE "Request" (
     "requestId" TEXT NOT NULL,
     "attendanceId" TEXT NOT NULL,
     "reason" TEXT NOT NULL,
+    "attendanceMode" "AttendanceMode" NOT NULL,
+    "timeAdjustment" "TimeAdjustment",
 
     CONSTRAINT "Request_pkey" PRIMARY KEY ("requestId")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_nuid_key" ON "User"("nuid");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
@@ -75,4 +91,3 @@ ALTER TABLE "Attendance" ADD CONSTRAINT "Attendance_userId_fkey" FOREIGN KEY ("u
 
 -- AddForeignKey
 ALTER TABLE "Request" ADD CONSTRAINT "Request_attendanceId_fkey" FOREIGN KEY ("attendanceId") REFERENCES "Attendance"("attendanceId") ON DELETE RESTRICT ON UPDATE CASCADE;
-

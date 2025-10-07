@@ -1,9 +1,7 @@
 import { AttendanceService } from './attendance.service';
 
 const allowedStatuses = [
-  'PENDING',
   'PRESENT',
-  'PENDING_ABSENCE',
   'EXCUSED_ABSENCE',
   'UNEXCUSED_ABSENCE',
 ] as const;
@@ -52,16 +50,16 @@ export const AttendanceController = {
     if (!attendanceId || typeof attendanceId !== 'string') {
       throw new Error('Invalid or missing attendanceId');
     }
-
+  
     if (data.status && !isValidStatus(data.status)) {
       throw new Error('Invalid attendance status');
     }
-
-    const updateData: Partial<{ status: string }> = {};
+  
+    const updateData: Partial<{ status: AttendanceStatus }> = {};
     if (data.status) {
-      updateData.status = data.status;
+      updateData.status = data.status as AttendanceStatus;
     }
-
+  
     return AttendanceService.updateAttendance(attendanceId, updateData);
   },
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { MeetingService } from './meeting.service';
+import { MeetingType } from '@/generated/prisma';
 
 export const MeetingController = {
   async listMeetings() {
@@ -23,25 +24,45 @@ export const MeetingController = {
   async createMeeting(request: Request) {
     const body = await request.json();
     console.log('Body', body);
+    
+    // Validate required fields
     if (
       !body.name ||
       !body.startTime ||
       !body.date ||
       !body.endTime ||
-      !body.notes
+      !body.notes ||
+      !body.type
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
-    // body.date = new Date().toLocaleString();
+
+    // Validate type enum
+    if (!Object.values(MeetingType).includes(body.type)) {
+      return NextResponse.json(
+        { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
+        { status: 400 }
+      );
+    }
+
     const newMeeting = await MeetingService.createMeeting(body);
     return NextResponse.json(newMeeting, { status: 201 });
   },
 
   async updateMeeting(request: Request, params: { meetingId: string }) {
     const updates = await request.json();
+    
+    // Validate type enum if provided
+    if (updates.type && !Object.values(MeetingType).includes(updates.type)) {
+      return NextResponse.json(
+        { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
+        { status: 400 }
+      );
+    }
+
     const updatedMeeting = await MeetingService.updateMeeting(
       params.meetingId,
       updates
@@ -52,7 +73,7 @@ export const MeetingController = {
   async deleteMeeting(params: { meetingId: string }) {
     await MeetingService.deleteMeeting(params.meetingId);
     return NextResponse.json(
-      { message: 'User deleted successfully' },
+      { message: 'Meeting deleted successfully' },
       { status: 204 }
     );
   }
