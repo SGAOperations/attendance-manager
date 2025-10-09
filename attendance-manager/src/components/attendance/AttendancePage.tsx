@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Member, AttendanceRecord } from '@/types';
+import { Member } from '@/types';
 
 interface MeetingRecord {
   meetingId: string;
@@ -24,26 +24,26 @@ interface Attendance {
 const meetingAPI = {
   async getAllMeetings(): Promise<MeetingRecord[]> {
     try {
-      const response = await fetch("/api/meeting");
-      console.log("getAllMeetings response status:", response.status);
+      const response = await fetch('/api/meeting');
+      console.log('getAllMeetings response status:', response.status);
       console.log(
-        "getAllMeetings response headers:",
-        response.headers.get("content-type"),
+        'getAllMeetings response headers:',
+        response.headers.get('content-type'),
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("getAllMeetings error response:", errorText);
+        console.log('getAllMeetings error response:', errorText);
         throw new Error(
           `Failed to fetch meetings (${response.status}): ${errorText}`,
         );
       }
 
       const data = await response.json();
-      console.log("getAllMeetings data:", data);
+      console.log('getAllMeetings data:', data);
       return data;
     } catch (error) {
-      console.error("getAllMeetings error:", error);
+      console.error('getAllMeetings error:', error);
       throw error;
     }
   },
@@ -51,43 +51,43 @@ const meetingAPI = {
   async getAttendances(meetingId: string): Promise<Attendance[]> {
     try {
       const response = await fetch(`/api/attendance/meeting/${meetingId}`);
-      console.log("getAttendance response status:", response.status);
+      console.log('getAttendance response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("getAttendances error response:", errorText);
+        console.log('getAttendances error response:', errorText);
         throw new Error(
           `Failed to fetch meeting (${response.status}): ${errorText}`,
         );
       }
 
       const data = await response.json();
-      console.log("getAttendances data:", data);
+      console.log('getAttendances data:', data);
       return data;
     } catch (error) {
-      console.error("getAttendances error:", error);
+      console.error('getAttendances error:', error);
       throw error;
     }
   },
 
   async getUsers(): Promise<Member[]> {
     try {
-      const response = await fetch(`/api/users/only-name`);
-      console.log("getAttendance response status:", response.status);
+      const response = await fetch('/api/users/only-name');
+      console.log('getAttendance response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("getUsers error response:", errorText);
+        console.log('getUsers error response:', errorText);
         throw new Error(
           `Failed to fetch meeting (${response.status}): ${errorText}`,
         );
       }
 
       const data = await response.json();
-      console.log("getUsers data:", data);
+      console.log('getUsers data:', data);
       return data;
     } catch (error) {
-      console.error("getUsers error:", error);
+      console.error('getUsers error:', error);
       throw error;
     }
   },
@@ -99,14 +99,14 @@ const AttendancePage: React.FC = () => {
   const [showBulkAddModal, setShowBulkAddModal] = useState(false);
   const [meetings, setMeetings] = useState<MeetingRecord[]>([]);
 const [meetingsWithAttendance, setMeetingsWithAttendance] = useState<MeetingRecord[]>([]);
-  const [users, setUsers] = useState<Member[]>([])
+  const [users, setUsers] = useState<Member[]>([]);
 useEffect(() => {
   const loadMeetings = async () => {
     try {
       const allMeetings = await meetingAPI.getAllMeetings();
       setMeetings(allMeetings);
     } catch (err) {
-      console.error("Error loading meetings:", err);
+      console.error('Error loading meetings:', err);
     }
   };
 
@@ -117,9 +117,9 @@ useEffect(() => {
   const loadUsers = async () => {
     try {
       const allUsers = await meetingAPI.getUsers();
-      setUsers(allUsers)
+      setUsers(allUsers);
     } catch (err) {
-      console.error("Error loading meetings:", err);
+      console.error('Error loading meetings:', err);
     }
   };
 
@@ -152,128 +152,6 @@ useEffect(() => {
 
   updateMeetingsWithAttendance();
 }, [meetings]);
-
-  // Mock data for SGA members
-  // const mockMembers: Member[] = [
-  //   {
-  //     id: '1',
-  //     name: 'Renee Cai',
-  //     email: 'cai.renee@northeastern.edu',
-  //     role: 'eboard',
-  //   },
-  //   {
-  //     id: '2',
-  //     name: 'Justin Kim',
-  //     email: 'kim.justin@northeastern.edu',
-  //     role: 'eboard',
-  //   },
-  //   {
-  //     id: '3',
-  //     name: 'Renee Cai',
-  //     email: 'cai.renee@northeastern.edu',
-  //     role: 'member',
-  //   },
-  //   {
-  //     id: '4',
-  //     name: 'Justin Kim',
-  //     email: 'kim.justin@northeastern.edu',
-  //     role: 'member',
-  //   },
-  //   {
-  //     id: '5',
-  //     name: 'Renee Cai',
-  //     email: 'cai.renee@northeastern.edu',
-  //     role: 'member',
-  //   },
-  //   {
-  //     id: '6',
-  //     name: 'Justin Kim',
-  //     email: 'kim.justin@northeastern.edu',
-  //     role: 'member',
-  //   },
-  //   {
-  //     id: '7',
-  //     name: 'Renee Cai',
-  //     email: 'cai.renee@northeastern.edu',
-  //     role: 'member',
-  //   },
-  //   {
-  //     id: '8',
-  //     name: 'Justin Kim',
-  //     email: 'kim.justin@northeastern.edu',
-  //     role: 'member',
-  //   },
-  // ];
-
-  // Mock data for attendance history - matching meetings page data
-  // const mockAttendanceRecords: MeetingRecord[] = [
-  //   {
-  //     id: '1',
-  //     meetingId: '1',
-  //     meetingTitle: 'General Meeting',
-  //     meetingDescription: 'First General Meeting of the semester',
-  //     date: new Date('2025-01-07'),
-  //     time: '6:00-7:00 PM',
-  //     totalMembers: 42,
-  //     attendedMembers: 35,
-  //     attendanceRate: 83.3,
-  //   },
-  //   {
-  //     id: '2',
-  //     meetingId: '2',
-  //     meetingTitle: 'General Meeting',
-  //     meetingDescription: 'Second General Meeting of the semester',
-  //     date: new Date('2025-01-14'),
-  //     time: '6:00-7:00 PM',
-  //     totalMembers: 42,
-  //     attendedMembers: 38,
-  //     attendanceRate: 90.5,
-  //   },
-  //   {
-  //     id: '3',
-  //     meetingId: '3',
-  //     meetingTitle: 'General Meeting',
-  //     meetingDescription: 'Third General Meeting of the semester',
-  //     date: new Date('2025-01-21'),
-  //     time: '6:00-7:00 PM',
-  //     totalMembers: 42,
-  //     attendedMembers: 32,
-  //     attendanceRate: 76.2,
-  //   },
-  //   {
-  //     id: '4',
-  //     meetingId: '4',
-  //     meetingTitle: 'General Meeting',
-  //     meetingDescription: 'Fourth General Meeting of the semester',
-  //     date: new Date('2025-01-28'),
-  //     time: '6:00-7:00 PM',
-  //     totalMembers: 42,
-  //     attendedMembers: 0,
-  //     attendanceRate: 0,
-  //   },
-  //   {
-  //     id: '5',
-  //     meetingId: '5',
-  //     meetingTitle: 'General Meeting',
-  //     meetingDescription: 'Fifth General Meeting of the semester',
-  //     date: new Date('2025-02-04'),
-  //     time: '6:00-7:00 PM',
-  //     totalMembers: 42,
-  //     attendedMembers: 40,
-  //     attendanceRate: 95.2,
-  //   },
-  //   {
-  //     id: '6',
-  //     meetingId: '6',
-  //     meetingTitle: 'General Meeting',
-  //     meetingDescription: 'Sixth General Meeting of the semester',
-  //     date: new Date('2025-02-11'),
-  //     time: '6:00-7:00 PM',
-  //     totalMembers: 42,
-  //     attendedMembers: 37,
-  //     attendanceRate: 88.1,
-  //   },
-  // ];
   
   const eboardMembers = users.filter(m => m.role.roleType === 'EBOARD');
   const regularMembers = users.filter(m => m.role.roleType === 'MEMBER');

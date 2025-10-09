@@ -1,11 +1,11 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import { AuthProvider } from '@/contexts/AuthContext'
+import type { Metadata } from 'next';
+import './globals.css';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
   title: 'SGA Dashboard',
   description: 'Student Government Association Attendance Management System',
-}
+};
 
 export default function RootLayout({
   children,
@@ -20,5 +20,5 @@ export default function RootLayout({
         </AuthProvider>
       </body>
     </html>
-  )
+  );
 }

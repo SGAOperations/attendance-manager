@@ -10,7 +10,7 @@ export const UsersController = {
   async listUsersSantizied() {
     const users = await UsersService.getAllUsers();
     const sanitizedUsers = users.map(user => {
-      const { email, password, ...safeUser } = user;
+      const { email: _email, password: _password, ...safeUser } = user;
       return safeUser;
     });
     return NextResponse.json(sanitizedUsers);
@@ -34,7 +34,7 @@ export const UsersController = {
       });
     }
     if (user.password === params.userPassword) {
-      const { password, roleId, ...userData } = user;
+      const { password: _password, roleId: _roleId, ...userData } = user;
       const res = NextResponse.json({
         exists: true,
         user: userData

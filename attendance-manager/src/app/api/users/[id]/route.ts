@@ -1,8 +1,5 @@
 import { UsersController } from '@/users/users.controller';
 import {
-  isUserEmailPass,
-  isUserId,
-  UserEmailPass,
   UserId,
 } from '@/utils/user_utils';
 

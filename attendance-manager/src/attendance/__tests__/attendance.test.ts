@@ -9,7 +9,6 @@ describe('AttendanceController', () => {
   let testMeetingId: string;
   let testMeeting2Id: string;
   let testAttendanceId: string;
-  let testAttendance2Id: string;
 
   beforeAll(async () => {
     // Test role
@@ -75,14 +74,14 @@ describe('AttendanceController', () => {
     });
     testAttendanceId = attendance.attendanceId;
 
-    const attendance2 = await prisma.attendance.create({
+    // Create attendance record for testUser2Id
+    await prisma.attendance.create({
       data: {
         userId: testUser2Id,
         meetingId: testMeeting2Id,
         status: 'PRESENT',
       },
     });
-    testAttendance2Id = attendance2.attendanceId;
   });
 
   afterAll(async () => {

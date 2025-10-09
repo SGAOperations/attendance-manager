@@ -8,9 +8,9 @@ export interface UserEmailPass {
 }
 
 export function isUserId(obj: any): obj is UserId {
-  return "id" in obj;
+  return 'id' in obj;
 }
 
 export function isUserEmailPass(obj: any): obj is UserEmailPass {
-  return "email" in obj && "pass" in obj;
+  return 'email' in obj && 'pass' in obj;
 }
