@@ -209,7 +209,8 @@ const MeetingsPage: React.FC = () => {
                   Attended Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {attendedMeetings}
+                  {/* {attendedMeetings} */}
+                  Coming Soon!
                 </p>
               </div>
 
@@ -228,7 +229,8 @@ const MeetingsPage: React.FC = () => {
                   Missed Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {missedMeetings}
+                  {/* {missedMeetings} */}
+                  Coming Soon!
                 </p>
               </div>
 
@@ -247,7 +249,8 @@ const MeetingsPage: React.FC = () => {
                   Upcoming Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {upcomingMeetings}
+                  {/* {upcomingMeetings} */}
+                  Coming Soon!
                 </p>
               </div>
             </div>

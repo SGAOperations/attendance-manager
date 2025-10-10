@@ -8,18 +8,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Roles define user permissions in the system
 model Role {
   roleId   String   @id @default(uuid())
-  roleType RoleType // EBOARD for executive board members, MEMBER for regular members
+  roleType RoleType
   users    User[]
 }
 
-// Users represent verified profiles in the attendance system
-// Each user can have multiple attendance records but only one role
 model User {
   userId     String       @id @default(uuid())
-  nuid       String       @unique // Northeastern University ID
+  nuid       String       @unique
   email      String       @unique
   firstName  String
   lastName   String
@@ -29,68 +26,59 @@ model User {
   role       Role         @relation(fields: [roleId], references: [roleId])
 }
 
-// Meetings are events that require attendance tracking
 model Meeting {
   meetingId  String       @id @default(uuid())
   name       String
-  date       String // Stored as ISO date string (YYYY-MM-DD)
-  startTime  String // Stored as formatted time string (e.g., "10:00 AM")
-  endTime    String // Stored as formatted time string (e.g., "11:30 AM")
-  notes      String // Additional meeting details or agenda
-  type       MeetingType // FULL_BODY for all-member meetings, REGULAR for standard meetings
+  date       String
+  startTime  String
+  endTime    String
+  notes      String
+  type       MeetingType
   attendance Attendance[]
 }
 
-// Attendance records link users to meetings with their attendance status
-// Each user can only have one attendance record per meeting
 model Attendance {
   attendanceId String           @id @default(uuid())
   userId       String
   meetingId    String
-  status       AttendanceStatus // PRESENT, UNEXCUSED_ABSENCE, or EXCUSED_ABSENCE
+  status       AttendanceStatus
   meeting      Meeting          @relation(fields: [meetingId], references: [meetingId])
   user         User             @relation(fields: [userId], references: [userId])
-  request      Request? // Optional request for excused absence
+  request      Request?
 
-  @@unique([userId, meetingId]) // Ensures one attendance record per user per meeting
+  @@unique([userId, meetingId])
 }
 
-// Requests are submitted by users to excuse an absence or modify attendance
 model Request {
-  requestId      String            @id @default(uuid())
-  attendanceId   String            @unique
-  reason         String // Explanation for the absence or attendance modification
-  attendanceMode AttendanceMode // Whether attending ONLINE or IN_PERSON
-  timeAdjustment TimeAdjustment? // Optional: ARRIVING_LATE or LEAVING_EARLY
-  attendance     Attendance        @relation(fields: [attendanceId], references: [attendanceId])
+  requestId      String          @id @default(uuid())
+  attendanceId   String          @unique
+  reason         String
+  attendanceMode AttendanceMode
+  timeAdjustment TimeAdjustment?
+  attendance     Attendance      @relation(fields: [attendanceId], references: [attendanceId])
 }
 
-// Role types available in the system
 enum RoleType {
-  EBOARD // Executive board member with admin privileges
-  MEMBER // Regular member
+  EBOARD
+  MEMBER
 }
 
-// Possible attendance statuses
 enum AttendanceStatus {
-  PRESENT // User attended the meeting
-  UNEXCUSED_ABSENCE // User did not attend and has no approved excuse
-  EXCUSED_ABSENCE // User did not attend but has an approved excuse
+  PRESENT
+  UNEXCUSED_ABSENCE
+  EXCUSED_ABSENCE
 }
 
-// Types of meetings
 enum MeetingType {
-  FULL_BODY // All-member meeting (mandatory attendance)
-  REGULAR // Standard meeting
+  FULL_BODY
+  REGULAR
 }
 
-// Mode of attendance for requests
 enum AttendanceMode {
   ONLINE
   IN_PERSON
 }
 
-// Time adjustments for attendance requests
 enum TimeAdjustment {
   ARRIVING_LATE
   LEAVING_EARLY
