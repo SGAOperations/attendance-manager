@@ -37,17 +37,19 @@ const MeetingsPage: React.FC = () => {
   const mockMembers: Member[] = [
     {
       id: '1',
-      name: 'Renee Cai',
+      firstName: 'Renee',
+      lastName: 'Cai',
       email: 'cai.renee@northeastern.edu',
-      role: 'eboard',
+      role: { roleType: 'EBOARD' }, // Object with roleType property
       joinDate: new Date('2024-01-15'),
       status: 'active'
     },
     {
       id: '2',
-      name: 'Justin Kim',
+      firstName: 'Justin',
+      lastName: 'Kim',
       email: 'kim.justin@northeastern.edu',
-      role: 'eboard',
+      role: { roleType: 'EBOARD' }, // Object with roleType property
       joinDate: new Date('2024-01-20'),
       status: 'active'
     }
@@ -509,22 +511,22 @@ const MeetingsPage: React.FC = () => {
                       />
                       <div className="w-8 h-8 bg-[#C8102E] rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-semibold">
-                          {member.name.charAt(0)}
+                          {member.firstName.charAt(0)}
                         </span>
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">
-                          {member.name}
+                          {member.firstName} {member.lastName}
                         </p>
                         <p className="text-xs text-gray-500">{member.email}</p>
                         <span
                           className={`inline-block px-2 py-1 text-xs rounded-full ${
-                            member.role === 'eboard'
+                            member.role.roleType === 'EBOARD'
                               ? 'bg-[#A4804A] text-white'
                               : 'bg-gray-100 text-gray-600'
                           }`}
                         >
-                          {member.role === 'eboard' ? 'Eboard' : 'Member'}
+                          {member.role.roleType === 'EBOARD' ? 'Eboard' : 'Member'}
                         </span>
                       </div>
                     </label>

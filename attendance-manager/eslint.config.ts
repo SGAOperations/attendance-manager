@@ -14,13 +14,16 @@ export default [
     ],
   },
   {
-    files: ['**/*.ts'],
+    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: parserTs,
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
         project: './tsconfig.json',
+        ecmaFeatures: {
+          jsx: true,
+        },
       },
     },
     plugins: {
@@ -29,8 +32,13 @@ export default [
     rules: {
       semi: ['error', 'always'],
       quotes: ['error', 'single'],
-      '@typescript-eslint/no-unused-vars': ['warn'],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ];
-

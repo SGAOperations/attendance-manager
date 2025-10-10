@@ -2,8 +2,6 @@
 import React, { createContext, useState } from 'react';
 import { User, LoginCredentials } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-// import { useRouter } from 'next/navigation';
-// import { login } from '@/utils/auth_utils';
 
 const defaultUser: User = {
   id: '',
@@ -26,7 +24,7 @@ const LoginPage: React.FC = () => {
   // const router = useRouter();
   const { login, isLoading } = useAuth();
   // const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<User>({
+  const [user, _setUser] = useState<User>({
     id: '',
     email: '',
     name: '',
@@ -98,7 +96,8 @@ const LoginPage: React.FC = () => {
           `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Your account has been created successfully.`
         );
       } catch (error) {
-        setError('Signup failed. Please try again.');
+        console.error('Login error:', error);
+        setError('Invalid email or password');
       }
     }
   };
@@ -449,7 +448,7 @@ const LoginPage: React.FC = () => {
               <div className="text-center">
                 <p className="text-sm text-gray-400">
                   {isLoginMode
-                    ? "Use any email with 'admin' for admin access"
+                    ? 'Use any email with \'admin\' for admin access'
                     : 'Password must be at least 6 characters long'}
                 </p>
               </div>

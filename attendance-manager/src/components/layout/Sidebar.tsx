@@ -12,8 +12,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
 
   const navItems = [
     {
-      id: "dashboard" as const,
-      label: "Dashboard",
+      id: 'dashboard' as const,
+      label: 'Dashboard',
       icon: (
         <svg
           className="w-6 h-6"
@@ -38,8 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       adminOnly: false,
     },
     {
-      id: "meetings" as const,
-      label: "Meetings",
+      id: 'meetings' as const,
+      label: 'Meetings',
       icon: (
         <svg
           className="w-6 h-6"
@@ -58,8 +58,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       adminOnly: false,
     },
     {
-      id: "attendance" as const,
-      label: "Attendance",
+      id: 'attendance' as const,
+      label: 'Attendance',
       icon: (
         <svg
           className="w-6 h-6"

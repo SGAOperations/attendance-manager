@@ -17,7 +17,7 @@ const Layout: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "dashboard":
+      case 'dashboard':
         return <Dashboard />;
       case 'meetings':
         return <MeetingsPage />;
