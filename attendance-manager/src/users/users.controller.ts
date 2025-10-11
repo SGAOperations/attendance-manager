@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { UsersService } from './users.service';
+import { RoleType } from '@/generated/prisma';
 
 export const UsersController = {
   async listUsers() {
@@ -27,6 +28,14 @@ export const UsersController = {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     return NextResponse.json(user);
+  },
+
+  async getRoleId(params: { role: RoleType }) {
+    const roleId = await UsersService.getRoleIdByRoleType(params.role);
+    if (!roleId) {
+      return NextResponse.json({ error: 'Role not found' }, { status: 404 });
+    }
+    return roleId;
   },
 
   async checkUserExists(params: { userEmail: string; userPassword: string }) {
@@ -71,14 +80,15 @@ export const UsersController = {
       !body.password ||
       !body.email ||
       !body.firstName ||
-      !body.lastName ||
-      !body.roleId
+      !body.lastName
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
+    const roleId = await UsersService.getRoleIdByRoleType(RoleType.MEMBER);
+    body.roleId = roleId;
     const newUser = await UsersService.createUser(body);
     return NextResponse.json(newUser, { status: 201 });
   },
