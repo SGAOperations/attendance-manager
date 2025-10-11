@@ -9,6 +9,8 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   const { user } = useAuth();
   const isAdmin = user?.email?.includes('admin');
+  // check based on role, not based on email having admin
+  // check if role is admin
 
   const navItems = [
     {

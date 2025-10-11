@@ -16,6 +16,7 @@ interface SignupCredentials {
   firstName: string;
   lastName: string;
   email: string;
+  nuid: string;
   password: string;
   confirmPassword: string;
 }
@@ -40,6 +41,7 @@ const LoginPage: React.FC = () => {
       firstName: '',
       lastName: '',
       email: '',
+      nuid: '',
       password: '',
       confirmPassword: ''
     }
@@ -88,10 +90,25 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        await login({
-          email: signupCredentials.email,
-          password: signupCredentials.password
-        });
+        const { confirmPassword, ...safeCredentials } = signupCredentials;
+        console.log('credentials', safeCredentials);
+        const roleId = 'ba10acec-0019-4c03-9006-ba380b71b6c3';
+        const response = await fetch('/api/users', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({...safeCredentials, roleId}),
+});
+console.log('here', response);
+if (!response.ok) {
+  const errorData = await response.json();
+  setError(errorData.message || 'Signup failed. Please try again.');
+  return;
+}
+
+const result = await response.json();
+console.log('User created:', result);
         alert(
           `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Your account has been created successfully.`
         );
@@ -124,6 +141,7 @@ const LoginPage: React.FC = () => {
       firstName: '',
       lastName: '',
       email: '',
+      nuid: '',
       password: '',
       confirmPassword: ''
     });
@@ -297,6 +315,45 @@ const LoginPage: React.FC = () => {
                 </div>
               </div>
 
+              {!isLoginMode && (
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium text-white mb-2"
+                  >
+                    NUID
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <input
+                      id="nuid"
+                      name="nuid"
+                      type="text"
+                      autoComplete="off"
+                      required={!isLoginMode}
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
+                      placeholder="NUID"
+                      value={signupCredentials.nuid}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Password field */}
               <div>
                 <label
@@ -413,6 +470,7 @@ const LoginPage: React.FC = () => {
                   type="submit"
                   disabled={isLoading}
                   className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-[#C8102E] hover:bg-[#A8102E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C8102E] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                  onClick={() => {console.log('clicked');}}
                 >
                   {isLoading ? (
                     <div className="flex items-center">

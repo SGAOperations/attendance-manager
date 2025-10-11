@@ -1,10 +1,17 @@
 import { RoleType } from '@/generated/prisma';
 import { prisma } from '../lib/prisma';
+import { Prisma } from '@prisma/client';
 
 export const UsersService = {
   async getAllUsers() {
     return prisma.user.findMany({
       include: { role: true }
+    });
+  },
+
+  async getAllRoles() {
+    return prisma.role.findMany({
+      include: {}
     });
   },
 
@@ -32,6 +39,10 @@ export const UsersService = {
     roleId: string;
   }) {
     return prisma.user.create({ data });
+  },
+
+  async createRole(data: { roleType: RoleType }) {
+    return prisma.role.create({ data });
   },
 
   async updateUser(
