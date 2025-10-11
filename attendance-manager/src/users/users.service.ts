@@ -45,6 +45,14 @@ export const UsersService = {
     return prisma.role.create({ data });
   },
 
+  async getRoleIdByRoleType(roleType: RoleType) {
+    const role = await prisma.role.findFirst({
+      where: { roleType },
+      select: { roleId: true }
+    });
+    return role?.roleId;
+  },
+
   async updateUser(
     userId: string,
     updates: Partial<{

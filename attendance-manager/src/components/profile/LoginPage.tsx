@@ -92,13 +92,12 @@ const LoginPage: React.FC = () => {
       try {
         const { confirmPassword, ...safeCredentials } = signupCredentials;
         console.log('credentials', safeCredentials);
-        const roleId = 'ba10acec-0019-4c03-9006-ba380b71b6c3';
         const response = await fetch('/api/users', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
   },
-  body: JSON.stringify({...safeCredentials, roleId}),
+  body: JSON.stringify({...safeCredentials}),
 });
 console.log('here', response);
 if (!response.ok) {
