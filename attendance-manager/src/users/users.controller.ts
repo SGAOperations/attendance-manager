@@ -7,6 +7,11 @@ export const UsersController = {
     return NextResponse.json(users);
   },
 
+  async listRoles() {
+    const roles = await UsersService.getAllRoles();
+    return NextResponse.json(roles);
+  },
+
   async listUsersSantizied() {
     const users = await UsersService.getAllUsers();
     const sanitizedUsers = users.map(user => {
@@ -76,6 +81,12 @@ export const UsersController = {
     }
     const newUser = await UsersService.createUser(body);
     return NextResponse.json(newUser, { status: 201 });
+  },
+
+  async createRole(request: Request) {
+    const body = await request.json();
+    const newRole = await UsersService.createRole(body);
+    return NextResponse.json(newRole, { status: 201 });
   },
 
   async updateUser(request: Request, params: { userId: string }) {
