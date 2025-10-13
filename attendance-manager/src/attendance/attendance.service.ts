@@ -1,6 +1,23 @@
 import { AttendanceStatus } from '@/generated/prisma';
 import { prisma } from '../lib/prisma';
 
+function convertToAttendanceStatus(status: string): AttendanceStatus {
+  switch (status) {
+    case 'PENDING':
+      return AttendanceStatus.PENDING;
+    case 'PRESENT':
+      return AttendanceStatus.PRESENT;
+    case 'PENDING_ABSENCE':
+      return AttendanceStatus.PENDING_ABSENCE;
+    case 'EXCUSED_ABSENCE':
+      return AttendanceStatus.EXCUSED_ABSENCE;
+    case 'UNEXCUSED_ABSENCE':
+      return AttendanceStatus.UNEXCUSED_ABSENCE;
+    default:
+      throw new Error(`Invalid attendance status: ${status}`);
+  }
+}
+
 function isAttendanceStatus(status: string): status is AttendanceStatus {
   return Object.values(AttendanceStatus).includes(status as AttendanceStatus);
 }
@@ -60,11 +77,11 @@ export const AttendanceService = {
     status: string
   ) {
     if (!isAttendanceStatus(status)) {
-      throw new Error(`Invalid attendance status: ${status}`);
+      throw new Error('Invalid attendance status');
     }
     const attendanceRecord = await prisma.attendance.update({
       where: { attendanceId, userId },
-      data: { status }
+      data: { status: convertToAttendanceStatus(status) }
     });
     if (!attendanceRecord) {
       throw new Error('Attendance record not found for this user');
