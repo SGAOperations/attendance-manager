@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MeetingApiData, Member } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface MeetingRecord {
   id: string;
@@ -13,6 +14,7 @@ interface MeetingRecord {
 }
 
 const MeetingsPage: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'past' | 'upcoming'>('past');
   const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
   const [newMeeting, setNewMeeting] = useState({
@@ -23,6 +25,9 @@ const MeetingsPage: React.FC = () => {
     selectedAttendees: [] as string[]
   });
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
+  
+  // Check if user is admin (EBOARD)
+  const isAdmin = user?.role === 'EBOARD';
 
   useEffect(() => {
     fetch('/api/meeting')
@@ -256,15 +261,17 @@ const MeetingsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Create Meeting Button */}
-          <div className="mt-6">
-            <button
-              onClick={() => setShowCreateMeetingModal(true)}
-              className="w-full px-4 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl"
-            >
-              + Create New Meeting
-            </button>
-          </div>
+          {/* Create Meeting Button - Only for Admins */}
+          {isAdmin && (
+            <div className="mt-6">
+              <button
+                onClick={() => setShowCreateMeetingModal(true)}
+                className="w-full px-4 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl"
+              >
+                + Create New Meeting
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right Panel - Meeting History */}
