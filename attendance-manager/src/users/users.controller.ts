@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { UsersService } from './users.service';
 import { RoleType } from '@/generated/prisma';
+import { AttendanceService } from '@/attendance/attendance.service';
 
 export const UsersController = {
   async listUsers() {
@@ -111,5 +112,41 @@ export const UsersController = {
       { message: 'User deleted successfully' },
       { status: 204 }
     );
+  },
+
+  async updateAttendence(request: Request) {
+    const body = await request.json();
+    if (!body.email || !body.attendenceId || body.attendance === undefined) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+    const validStatuses = [
+      'PENDING',
+      'PRESENT',
+      'PENDING_ABSENCE',
+      'EXCUSED_ABSENCE',
+      'UNEXCUSED_ABSENCE'
+    ];
+    if (!validStatuses.includes(body.attendance)) {
+      return NextResponse.json(
+        { error: 'Invalid attendance value' },
+        { status: 400 }
+      );
+    }
+    const user = await UsersService.getUserByEmail(body.email);
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    await AttendanceService.updateAttendanceForUser(
+      user.userId,
+      body.attendenceId,
+      body.attendance
+    );
+    return NextResponse.json({
+      success: true,
+      message: 'Attendance updated successfully'
+    });
   }
 };
