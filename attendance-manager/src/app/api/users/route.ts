@@ -33,10 +33,9 @@ export async function GET(req: Request) {
         { error: 'Missing parameters' },
         { status: 400 }
       );
-    console.log('The');
     return UsersController.checkUserExists({
       userEmail: email,
-      userPassword: password,
+      userPassword: password
     });
   }
   return NextResponse.json({ error: 'Too many parameters' }, { status: 400 });

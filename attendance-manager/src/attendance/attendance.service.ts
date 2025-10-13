@@ -1,4 +1,9 @@
+import { AttendanceStatus } from '@/generated/prisma';
 import { prisma } from '../lib/prisma';
+
+function isAttendanceStatus(status: string): status is AttendanceStatus {
+  return Object.values(AttendanceStatus).includes(status as AttendanceStatus);
+}
 
 export const AttendanceService = {
   // Get all attendance records for a user
@@ -7,8 +12,8 @@ export const AttendanceService = {
       where: { userId },
       include: {
         meeting: true,
-        request: true,
-      },
+        request: true
+      }
     });
   },
 
@@ -18,8 +23,8 @@ export const AttendanceService = {
       where: { meetingId },
       include: {
         user: true,
-        request: true,
-      },
+        request: true
+      }
     });
   },
 
@@ -37,15 +42,32 @@ export const AttendanceService = {
     return prisma.attendance.update({
       where: { attendanceId: attendanceId },
       data: {
-        ...data,
-      },
+        ...data
+      }
     });
   },
 
   // Delete an attendance record
   async deleteAttendance(attendanceId: string) {
     return prisma.attendance.delete({
-      where: { attendanceId },
+      where: { attendanceId }
     });
   },
+
+  async updateAttendanceForUser(
+    userId: string,
+    attendanceId: string,
+    status: string
+  ) {
+    if (!isAttendanceStatus(status)) {
+      throw new Error(`Invalid attendance status: ${status}`);
+    }
+    const attendanceRecord = await prisma.attendance.update({
+      where: { attendanceId, userId },
+      data: { status }
+    });
+    if (!attendanceRecord) {
+      throw new Error('Attendance record not found for this user');
+    }
+  }
 };
