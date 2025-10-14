@@ -4,19 +4,20 @@ import { UsersService } from '@/users/users.service';
 /**
  * @swagger
  * /api/users/validate-nuid:
- *   post:
+ *   get:
  *     summary: Validates NUID format and matches it with provided name.
- *     @param {Request} request - The incoming request object, expected to contain a JSON body with nuid, firstName, and lastName.
  *     responses:
  *       200:
  *         description: Validation result with user data if valid.
  *       400:
  *         description: Invalid request or validation failed.
  */
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   try {
-    const body = await request.json();
-    const { nuid, firstName, lastName } = body;
+    const { searchParams } = new URL(request.url);
+    const nuid = searchParams.get('nuid');
+    const firstName = searchParams.get('firstName');
+    const lastName = searchParams.get('lastName');
 
     if (!nuid || !firstName || !lastName) {
       return NextResponse.json(
