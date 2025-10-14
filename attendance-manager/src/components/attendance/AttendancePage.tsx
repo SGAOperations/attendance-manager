@@ -11,6 +11,7 @@ interface MeetingRecord {
   totalMembers: number,
   attendedMembers: number;
   percentage: number;
+  meetingType: 'FULL_BODY' | 'REGULAR';
 }
 
 interface Attendance {
@@ -98,13 +99,18 @@ const AttendancePage: React.FC = () => {
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showBulkAddModal, setShowBulkAddModal] = useState(false);
   const [meetings, setMeetings] = useState<MeetingRecord[]>([]);
-const [meetingsWithAttendance, setMeetingsWithAttendance] = useState<MeetingRecord[]>([]);
+  const [meetingsWithAttendance, setMeetingsWithAttendance] = useState<MeetingRecord[]>([]);
   const [users, setUsers] = useState<Member[]>([]);
+  const [typeFilter, setTypeFilter] = useState('ALL');
 useEffect(() => {
   const loadMeetings = async () => {
     try {
       const allMeetings = await meetingAPI.getAllMeetings();
-      setMeetings(allMeetings);
+      const normalized = allMeetings.map((m: any) => ({
+        ...m,
+        meetingType: m.meetingType ?? m.type ?? 'Unknown',
+      }));
+      setMeetings(normalized);
     } catch (err) {
       console.error('Error loading meetings:', err);
     }
@@ -149,13 +155,21 @@ useEffect(() => {
 
     setMeetingsWithAttendance(updatedMeetings);
   };
-
   updateMeetingsWithAttendance();
 }, [meetings]);
+
+const meetingTypeOptions = ['ALL', 'FULL_BODY', 'REGULAR'];
+
+
+const filteredMeetingsWithAttendance =
+  typeFilter === 'ALL'
+    ? meetingsWithAttendance
+    : meetingsWithAttendance.filter(
+        (m) => (m.meetingType ?? 'Unknown').trim() === typeFilter
+      );
   
   const eboardMembers = users.filter(m => m.role.roleType === 'EBOARD');
   const regularMembers = users.filter(m => m.role.roleType === 'MEMBER');
-
   return (
     <div className="flex-1 p-6 bg-gray-50">
       {/* Header Section */}
@@ -238,7 +252,26 @@ useEffect(() => {
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
           <div className="p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Attendance History</h2>
-            
+            <div className="mb-4 flex items-center gap-3">
+              <label className="text-sm text-gray-700">Filter by type:</label>
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                  >
+                    {meetingTypeOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt === 'ALL'
+                          ? 'All'
+                          : opt === 'FULL_BODY'
+                          ? 'Full Body'
+                          : opt === 'REGULAR'
+                          ? 'Regular'
+                          : opt}
+                      </option>
+                      ))}
+                  </select>
+            </div>
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -246,13 +279,14 @@ useEffect(() => {
                   <tr className="bg-[#C8102E] text-white">
                     <th className="text-left py-3 px-4 font-medium">Date/Time</th>
                     <th className="text-left py-3 px-4 font-medium">Meeting</th>
+                    <th className="text-left py-3 px-4 font-medium">Type</th>
                     <th className="text-left py-3 px-4 font-medium">Description</th>
                     <th className="text-center py-3 px-4 font-medium"># of Members</th>
                     <th className="text-center py-3 px-4 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {meetingsWithAttendance.map((record) => (
+                  {filteredMeetingsWithAttendance.map((record) => (
                     <tr key={record.meetingId} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="py-3 px-4">
                         <div className="text-sm text-gray-900">{record.date}</div>
@@ -260,6 +294,11 @@ useEffect(() => {
                       </td>
                       <td className="py-3 px-4">
                         <div className="text-sm font-medium text-gray-900">{record.name}</div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="inline-flex items-center rounded-full border border-gray-200 px-2 py-0.5 text-xs text-gray-600">
+                            {record.meetingType ?? 'Unknown'}
+                            </span>
                       </td>
                       <td className="py-3 px-4">
                         <div className="text-sm text-gray-600">{record.notes}</div>

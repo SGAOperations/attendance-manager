@@ -32,7 +32,7 @@ export const MeetingController = {
       !body.date ||
       !body.endTime ||
       !body.notes ||
-      !body.type
+      !body.meetingType
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -41,7 +41,7 @@ export const MeetingController = {
     }
 
     // Validate type enum
-    if (!Object.values(MeetingType).includes(body.type)) {
+    if (!Object.values(MeetingType).includes(body.meetingType)) {
       return NextResponse.json(
         { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
         { status: 400 }
@@ -56,7 +56,7 @@ export const MeetingController = {
     const updates = await request.json();
     
     // Validate type enum if provided
-    if (updates.type && !Object.values(MeetingType).includes(updates.type)) {
+    if (updates.meetingType && !Object.values(MeetingType).includes(updates.meetingType)) {
       return NextResponse.json(
         { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
         { status: 400 }

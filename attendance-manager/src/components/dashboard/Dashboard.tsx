@@ -8,6 +8,7 @@ interface Meeting {
   startTime: string;
   endTime: string;
   date: string;
+  meetingType: 'FULL_BODY' | 'REGULAR';
   notes: string;
 }
 
