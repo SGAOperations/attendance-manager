@@ -7,10 +7,19 @@ interface MeetingRecord {
   time: string;
   meetingName: string;
   description: string;
+  meetingType: 'FULL_BODY' | 'REGULAR';
   attendedMembers: number;
   totalMembers: number;
   status: 'attended' | 'missed' | 'upcoming';
 }
+
+type MeetingType = 'FULL_BODY' | 'REGULAR';
+
+const MEETING_TYPE_OPTIONS: { value: MeetingType; label: string }[] = [
+  { value: 'FULL_BODY', label: 'Full Body' },
+  { value: 'REGULAR', label: 'Regular' },
+];
+
 
 const MeetingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'past' | 'upcoming'>('past');
@@ -20,6 +29,7 @@ const MeetingsPage: React.FC = () => {
     date: '',
     startTime: '',
     endTime: '',
+    meetingType: 'FULL_BODY' as MeetingType,
     selectedAttendees: [] as string[]
   });
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
@@ -33,6 +43,7 @@ const MeetingsPage: React.FC = () => {
       })
       .catch(error => console.error(error));
   }, []);
+  
   // Mock data for SGA members (for attendee selection) - only Renee and Justin
   const mockMembers: Member[] = [
     {
@@ -63,6 +74,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'First General Meeting of the semester',
+      meetingType: 'REGULAR',
       attendedMembers: 35,
       totalMembers: 42,
       status: 'attended'
@@ -73,6 +85,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Second General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 38,
       totalMembers: 42,
       status: 'attended'
@@ -83,6 +96,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Third General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 32,
       totalMembers: 42,
       status: 'attended'
@@ -93,6 +107,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Fourth General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 0,
       totalMembers: 42,
       status: 'missed'
@@ -103,6 +118,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Fifth General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 40,
       totalMembers: 42,
       status: 'attended'
@@ -113,6 +129,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Sixth General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 37,
       totalMembers: 42,
       status: 'attended'
@@ -123,6 +140,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Twenty-first General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 0,
       totalMembers: 42,
       status: 'upcoming'
@@ -133,6 +151,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Twenty-second General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 0,
       totalMembers: 42,
       status: 'upcoming'
@@ -143,6 +162,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Twenty-third General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 0,
       totalMembers: 42,
       status: 'upcoming'
@@ -153,6 +173,7 @@ const MeetingsPage: React.FC = () => {
       time: '6:00-7:00 PM',
       meetingName: 'General Meeting',
       description: 'Twenty-fourth General Meeting of the semester',
+      meetingType: 'FULL_BODY',
       attendedMembers: 0,
       totalMembers: 42,
       status: 'upcoming'
@@ -314,6 +335,9 @@ const MeetingsPage: React.FC = () => {
                     <th className="text-left py-3 px-4 font-medium text-gray-900">
                       Description
                     </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">
+                      Type
+                    </th>
                     <th className="text-right py-3 px-4 font-medium text-gray-900">
                       # of Members
                     </th>
@@ -326,7 +350,7 @@ const MeetingsPage: React.FC = () => {
                       <div>Name: {meeting.name}</div>
                     </div>
                   ))}
-                  {/* {filteredMeetings.map(meeting => (
+                  {filteredMeetings.map(meeting => (
                     <tr
                       key={meeting.id}
                       className="border-b border-gray-100 hover:bg-gray-50"
@@ -349,6 +373,13 @@ const MeetingsPage: React.FC = () => {
                           {meeting.description}
                         </div>
                       </td>
+                      <td className="py-3 px-4">
+                      {meeting.meetingType && (
+                        <span className="mt-1 inline-flex items-center rounded-full border border-gray-200 px-2 py-0.5 text-xs text-gray-600">
+                          {meeting.meetingType === 'FULL_BODY' ? 'Full Body' : 'Regular'}
+                        </span>
+                        )}
+                      </td>
                       <td className="py-3 px-4 text-right">
                         <div className="text-sm font-medium text-gray-900">
                           {meeting.status === 'upcoming'
@@ -362,7 +393,7 @@ const MeetingsPage: React.FC = () => {
                         )}
                       </td>
                     </tr>
-                  ))} */}
+                  ))} 
                 </tbody>
               </table>
             </div>
@@ -423,7 +454,29 @@ const MeetingsPage: React.FC = () => {
                   required
                 />
               </div>
-
+              {/* Meeting Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meeting Type
+                </label>
+                <select
+                  value={newMeeting.meetingType}
+                  onChange={(e) =>
+                    setNewMeeting((prev) => ({
+                      ...prev,
+                      meetingType: e.target.value as MeetingType,
+                    }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  required
+                >
+                  {MEETING_TYPE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {/* Date and Time */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -551,6 +604,7 @@ const MeetingsPage: React.FC = () => {
                       date: '',
                       startTime: '',
                       endTime: '',
+                      meetingType: "FULL_BODY",
                       selectedAttendees: []
                     });
                   }}
@@ -572,7 +626,8 @@ const MeetingsPage: React.FC = () => {
                       date: '',
                       startTime: '',
                       endTime: '',
-                      selectedAttendees: []
+                      meetingType: "FULL_BODY",
+                      selectedAttendees: [],
                     });
                   }}
                 >
