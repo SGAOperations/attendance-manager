@@ -43,12 +43,7 @@ export interface AttendanceApiData {
   attendanceId: string;
   userId: string;
   meetingId: string;
-  status:
-    | 'PENDING'
-    | 'PRESENT'
-    | 'PENDING_ABSENCE'
-    | 'EXCUSED_ABSENCE'
-    | 'UNEXCUSED ABSENCE';
+  status: 'PRESENT' | 'EXCUSED_ABSENCE' | 'UNEXCUSED_ABSENCE';
   user: UserApiData;
 }
 
@@ -77,12 +72,7 @@ export interface Attendance {
   attendanceId: string;
   userId: string;
   meetingId: string;
-  status:
-    | 'PENDING'
-    | 'PRESENT'
-    | 'PENDING_ABSENCE'
-    | 'EXCUSED_ABSENCE'
-    | 'UNEXCUSED ABSENCE';
+  status: 'PRESENT' | 'EXCUSED_ABSENCE' | 'UNEXCUSED_ABSENCE';
   timestamp: Date;
 }
 

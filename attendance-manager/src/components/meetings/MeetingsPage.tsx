@@ -62,8 +62,24 @@ const MeetingsPage: React.FC = () => {
 
   // Calculate statistics from real meetings
   const today = new Date();
-  const attendedMeetings = 0; // TODO: Calculate from attendance records
-  const missedMeetings = 0; // TODO: Calculate from attendance records
+  // Calculate statistics from real data
+  const attendedMeetings = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
+    if (meetingDate > today) return false; // Skip upcoming meetings
+    // Check if current user attended this meeting
+    return m.attendance.some(a => a.userId === user?.id && a.status === 'PRESENT');
+  }).length;
+
+  const missedMeetings = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
+    if (meetingDate > today) return false; // Skip upcoming meetings
+    // Check if current user was absent
+    return m.attendance.some(a => 
+      a.userId === user?.id && 
+      (a.status === 'UNEXCUSED_ABSENCE' || a.status === 'EXCUSED_ABSENCE')
+    );
+  }).length;
+
   const upcomingMeetings = meetings.filter(m => new Date(m.date) > today).length;
 
   // Filter meetings based on active tab
@@ -110,8 +126,7 @@ const MeetingsPage: React.FC = () => {
                   Attended Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {/* {attendedMeetings} */}
-                  Coming Soon!
+                  {attendedMeetings}
                 </p>
               </div>
 
@@ -130,8 +145,7 @@ const MeetingsPage: React.FC = () => {
                   Missed Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {/* {missedMeetings} */}
-                  Coming Soon!
+                  {missedMeetings}
                 </p>
               </div>
 
@@ -150,8 +164,7 @@ const MeetingsPage: React.FC = () => {
                   Upcoming Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {/* {upcomingMeetings} */}
-                  Coming Soon!
+                  {upcomingMeetings}
                 </p>
               </div>
             </div>
