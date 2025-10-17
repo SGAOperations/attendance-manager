@@ -29,6 +29,7 @@ export interface Meeting {
 }
 
 export interface MeetingApiData {
+  type: string;
   meetingId: string;
   name: string;
   date: string;

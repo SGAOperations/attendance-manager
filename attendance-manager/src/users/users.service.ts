@@ -1,6 +1,5 @@
 import { RoleType } from '@/generated/prisma';
 import { prisma } from '../lib/prisma';
-import { Prisma } from '@prisma/client';
 
 export const UsersService = {
   async getAllUsers() {
@@ -71,6 +70,11 @@ export const UsersService = {
   },
 
   async deleteUser(userId: string) {
+    // Delete attendance records first to avoid foreign key constraint
+    await prisma.attendance.deleteMany({
+      where: { userId },
+    });
+    
     return prisma.user.delete({
       where: { userId }
     });
