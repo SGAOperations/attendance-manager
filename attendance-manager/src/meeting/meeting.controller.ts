@@ -39,16 +39,24 @@ export const MeetingController = {
         { status: 400 }
       );
     }
-
+  
     // Validate type enum
-    if (!Object.values(MeetingType).includes(body.type)) {
+    if (body.type !== 'FULL_BODY' && body.type !== 'REGULAR') {
       return NextResponse.json(
         { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
         { status: 400 }
       );
     }
-
-    const newMeeting = await MeetingService.createMeeting(body);
+  
+    // Validate attendeeIds if provided
+    if (body.attendeeIds && !Array.isArray(body.attendeeIds)) {
+      return NextResponse.json(
+        { error: 'attendeeIds must be an array' },
+        { status: 400 }
+      );
+    }
+  
+    const newMeeting = await MeetingService.createMeeting(body, body.attendeeIds || []);
     return NextResponse.json(newMeeting, { status: 201 });
   },
 

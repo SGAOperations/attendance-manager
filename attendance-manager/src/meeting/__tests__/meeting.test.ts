@@ -10,14 +10,17 @@ describe('MeetingServices', () => {
   });
 
   it('should create a new meeting', async () => {
-    const newMeeting = await MeetingService.createMeeting({
-      name: 'test2',
-      startTime: '8:12:56 PM',
-      date: '7/30/2025',
-      endTime: '8:13:15 PM',
-      notes: 'notes',
-      type: MeetingType.REGULAR,
-    });
+    const newMeeting = await MeetingService.createMeeting(
+      {
+        name: 'test2',
+        startTime: '8:12:56 PM',
+        date: '7/30/2025',
+        endTime: '8:13:15 PM',
+        notes: 'notes',
+        type: MeetingType.REGULAR,
+      },
+      [] // Empty attendeeIds array
+    );
 
     expect(newMeeting).toBeDefined();
     expect(newMeeting.name).toBe('test2');
@@ -48,17 +51,16 @@ describe('MeetingServices', () => {
       newMeeting.meetingId,
       {
         name: 'test',
-        meetingId: '123',
         startTime: '8:07:56 PM',
         date: '7/29/2025',
         endTime: '8:08:15 PM',
         notes: 'notes',
-        type: MeetingType.FULL_BODY, // Added type field
+        type: MeetingType.FULL_BODY,
       },
     );
 
     expect(updatedMeeting.name).toBe('test');
-    expect(updatedMeeting.meetingId).toBe('123');
+    expect(updatedMeeting.meetingId).toBe(newMeeting.meetingId);
     expect(updatedMeeting.startTime).toBe('8:07:56 PM');
     expect(updatedMeeting.date).toBe('7/29/2025');
     expect(updatedMeeting.endTime).toBe('8:08:15 PM');
