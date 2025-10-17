@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Member } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { RoleType } from '@/generated/prisma';
+import Attendance from '@/app/attendance/page';
 
 interface MeetingRecord {
   meetingId: string;
@@ -123,6 +125,7 @@ const AttendancePage: React.FC = () => {
   const [nuidInput, setNuidInput] = useState('');
   const [attendanceUsers, setAttendanceUsers] = useState<AttendanceUser[]>([]);
   const [isLoadingAttendance, setIsLoadingAttendance] = useState(false);
+  const [attendanceRecord, setAttendanceRecord] = useState<Record<string, Attendance[]>>({});
   
   // New state for Attendance Check flow
   const [showAttendanceCheck, setShowAttendanceCheck] = useState(false);
@@ -132,93 +135,93 @@ const AttendancePage: React.FC = () => {
   
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
+  useEffect(() => {
+    const loadMeetings = async () => {
+      try {
+        const allMeetings = await meetingAPI.getAllMeetings();
+        setMeetings(allMeetings);
+      } catch (err) {
+        console.error('Error loading meetings:', err);
+      }
+    };
+
+    loadMeetings();
+  }, []);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const allUsers = await meetingAPI.getUsers();
+        setUsers(allUsers);
+      } catch (err) {
+        console.error('Error loading meetings:', err);
+      }
+    };
+
+    loadUsers();
+  }, []);
+    useEffect(() => {
+    console.log('new attendance record', attendanceRecord);
+  }, [attendanceRecord]);
+
 useEffect(() => {
-  const loadMeetings = async () => {
+  const fetchAttendanceUsers = async () => {
+    if (!selectedMeetingForCheck?.meetingId) return;
+
     try {
-      const allMeetings = await meetingAPI.getAllMeetings();
-      setMeetings(allMeetings);
-    } catch (err) {
-      console.error('Error loading meetings:', err);
+      const response = await fetch(`/api/attendance/meeting/${selectedMeetingForCheck.meetingId}`);
+      const allAttendance = await response.json();
+      setAttendanceRecord((prev: Record<string, Attendance[]>) => ({
+        ...prev,
+        [selectedMeetingForCheck.meetingId]: allAttendance
+      }));
+      
+    } catch (error) {
+      console.error('Error fetching attendance users:', error);
     }
   };
 
-  loadMeetings();
-}, []);
+  fetchAttendanceUsers();
+}, [selectedMeetingForCheck, attendanceUsers]);
 
-useEffect(() => {
-  const loadUsers = async () => {
-    try {
-      const allUsers = await meetingAPI.getUsers();
-      setUsers(allUsers);
-    } catch (err) {
-      console.error('Error loading meetings:', err);
-    }
-  };
+  useEffect(() => {
+    if (meetings.length === 0) return;
 
-  loadUsers();
-}, []);
+    const updateMeetingsWithAttendance = async () => {
+      const updatedMeetings: MeetingRecord[] = [];
 
-useEffect(() => {
-  if (meetings.length === 0) return;
+      for (const meeting of meetings) {
+        const attendances = await meetingAPI.getAttendances(meeting.meetingId);
 
-  const updateMeetingsWithAttendance = async () => {
-    const updatedMeetings: MeetingRecord[] = [];
+        const totalMembers = attendances.length;
+        const attendedMembers = attendances.filter(a => a.status === 'Present').length;
+        const percentage = totalMembers === 0 ? 0 : Math.round((attendedMembers / totalMembers) * 100);
 
-    for (const meeting of meetings) {
-      const attendances = await meetingAPI.getAttendances(meeting.meetingId);
+        updatedMeetings.push({
+          ...meeting,
+          totalMembers,
+          attendedMembers,
+          percentage,
+        });
+        setAttendanceRecord((prev: Record<string, Attendance[]>) => ({
+        ...prev,
+        [meeting.meetingId]: attendances
+      }));
 
-      const totalMembers = attendances.length;
-      const attendedMembers = attendances.filter(a => a.status === 'Present').length;
-      const percentage = totalMembers === 0 ? 0 : Math.round((attendedMembers / totalMembers) * 100);
+      }
+      setMeetingsWithAttendance(updatedMeetings);
+    };
 
-      updatedMeetings.push({
-        ...meeting,
-        totalMembers,
-        attendedMembers,
-        percentage,
-      });
-    }
-
-    setMeetingsWithAttendance(updatedMeetings);
-  };
-
-  updateMeetingsWithAttendance();
-}, [meetings]);
+    updateMeetingsWithAttendance();
+  }, [meetings]);
 
   // Function to load attendance users for a meeting
   const loadAttendanceUsers = async (meetingId: string) => {
     setIsLoadingAttendance(true);
     try {
-      // Get all users
-      const allUsers = await fetch('/api/users/only-name').then(res => res.json());
-      
-      // Get attendance records for this meeting
-      const attendances = await meetingAPI.getAttendances(meetingId);
-      
-      // Create a map of userId to attendance status
-      const attendanceMap = new Map(
-        attendances.map(a => [a.userId, { status: a.status, attendanceId: a.attendanceId }])
-      );
-      
-      // Fetch complete user details including NUID
-      const usersWithAttendance: AttendanceUser[] = await Promise.all(
-        allUsers.map(async (user: Member) => {
-          const userDetails = await fetch(`/api/users/${user.id}`).then(res => res.json());
-          const attendance = attendanceMap.get(user.id);
-          
-          return {
-            userId: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            nuid: userDetails.nuid || '',
-            status: attendance?.status || 'PENDING',
-            attendanceId: attendance?.attendanceId || ''
-          };
-        })
-      );
-      
-      setAttendanceUsers(usersWithAttendance);
+      const allUsers:AttendanceUser[] = await fetch('/api/users').then(res => res.json());
+      setAttendanceUsers(allUsers);
+
     } catch (error) {
       console.error('Error loading attendance users:', error);
       alert('Failed to load attendance data');
@@ -229,16 +232,27 @@ useEffect(() => {
 
   // Function to handle admin verification in Attendance Check
   const handleAdminVerification = async () => {
+    let thisUser;
     if (!adminNuidInput.trim()) {
       alert('Please enter your admin NUID');
       return;
     }
 
-    // TODO: Backend will verify admin NUID here
-    // For now, just proceed to next step
-    console.log('Admin NUID entered:', adminNuidInput);
-    
-    setAttendanceCheckStep('select-meeting');
+    try {
+      const response = await fetch(`/api/users/get-user-by-nuid/${adminNuidInput}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert( `Failed to fetch user (${response.status}): ${errorText}`);
+      }
+      thisUser = await response.json();
+    } catch (error) {
+      throw error;
+    }
+    if (thisUser && thisUser.role?.roleType === RoleType.EBOARD) {
+      setAttendanceCheckStep('select-meeting');
+    } else {
+      alert('User does not have proper permission to access this modal');
+    }
   };
 
   // Function to handle meeting selection in Attendance Check
@@ -246,6 +260,8 @@ useEffect(() => {
     setSelectedMeetingForCheck(meeting);
     await loadAttendanceUsers(meeting.meetingId);
     setAttendanceCheckStep('user-list');
+    const allUsers:AttendanceUser[] = await fetch('/api/users').then(res => res.json());
+    setAttendanceUsers(allUsers);
   };
 
   // Function to start check-in process
@@ -262,8 +278,9 @@ useEffect(() => {
 
     try {
       // Find user by NUID
+      console.log('attendance users', attendanceUsers);
       const userToMark = attendanceUsers.find(u => u.nuid === nuidInput.trim());
-      
+      console.log('user to mark', userToMark);
       if (!userToMark) {
         alert('NUID not found. Please check and try again.');
         return;
@@ -276,12 +293,21 @@ useEffect(() => {
         return;
       }
 
-      // Update attendance status
-      const response = await fetch(`/api/attendance/${userToMark.attendanceId}`, {
+      const response = await fetch('/api/users/attendance_update', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'PRESENT' })
+        body: JSON.stringify({ userId: userToMark.userId,
+          meetingId: selectedMeetingForCheck.meetingId, 
+          status: 'PRESENT' })
       });
+      const updatedUsers = attendanceUsers.map(u => {
+        if (u.nuid === nuidInput.trim()) {
+          return { ...u, status: 'PRESENT' }; // update just this user
+        }
+        return u; // keep others unchanged
+      });
+
+      setAttendanceUsers(updatedUsers);
 
       if (!response.ok) {
         throw new Error('Failed to update attendance');
@@ -291,7 +317,7 @@ useEffect(() => {
       setNuidInput('');
       
       // Reload attendance data
-      await loadAttendanceUsers(selectedMeetingForCheck.meetingId);
+      // await loadAttendanceUsers(selectedMeetingForCheck.meetingId);
       
       // Reload meetings to update statistics
       const allMeetings = await meetingAPI.getAllMeetings();
@@ -471,9 +497,9 @@ useEffect(() => {
                         <div className="text-sm text-gray-600">{record.notes}</div>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <div className="text-sm font-medium text-gray-900">{record.attendedMembers}</div>
-                        <div className="text-xs text-gray-500">of {record.totalMembers}</div>
-                        <div className="text-xs text-[#C8102E] font-medium">{record.percentage}%</div>
+                        <div className="text-sm font-medium text-gray-900">{attendanceRecord[record.meetingId]?.filter((record) => record.status === 'PRESENT').length}</div>
+                        <div className="text-xs text-gray-500">of {attendanceRecord[record.meetingId]?.length}</div>
+                        <div className="text-xs text-[#C8102E] font-medium">{(attendanceRecord[record.meetingId]?.filter((record) => record.status === 'PRESENT').length)/(attendanceRecord[record.meetingId]?.length)*100}%</div>
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex justify-center space-x-2">
@@ -691,10 +717,12 @@ useEffect(() => {
                             </div>
                             <div className="text-right ml-4">
                               <div className="text-sm font-medium text-gray-900">
-                                {meeting.attendedMembers}/{meeting.totalMembers}
+                                {attendanceRecord[meeting.meetingId]?.filter(
+                                    (record) => record.status === 'PRESENT'
+                                  ).length ?? 0} / {attendanceRecord[meeting.meetingId]?.length ?? 0} present
                               </div>
                               <div className="text-xs text-[#C8102E] font-medium">
-                                {meeting.percentage}%
+                                {(attendanceRecord[meeting.meetingId]?.filter((record) => record.status === 'PRESENT').length / attendanceRecord[meeting.meetingId]?.length) * 100}%
                               </div>
                             </div>
                           </div>
@@ -740,7 +768,7 @@ useEffect(() => {
                           Members Expected
                         </p>
                         <p className="text-sm text-gray-600">
-                          {attendanceUsers.filter(u => u.status === 'PRESENT' || u.status === 'Present').length} / {attendanceUsers.length} present
+                          {/* {attendanceUsers.filter(u => u.status === 'PRESENT' || u.status === 'Present').length} / {attendanceUsers.length} present */}
                         </p>
                       </div>
                     </div>
@@ -752,7 +780,10 @@ useEffect(() => {
                       ) : (
                         <div className="divide-y divide-gray-200">
                           {attendanceUsers.map((user) => {
-                            const isPresent = user.status === 'PRESENT' || user.status === 'Present';
+                            // const isPresent = attendanceRecord[selectedMeetingForCheck.meetingId].
+                            const isPresent = attendanceRecord[selectedMeetingForCheck.meetingId]?.some(
+                              (record) => record.userId === user.userId && record.status === 'PRESENT'
+                            );
                             return (
                               <div
                                 key={user.userId}
@@ -845,14 +876,14 @@ useEffect(() => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-700">Attendance Progress</span>
                     <span className="text-sm font-semibold text-gray-900">
-                      {attendanceUsers.filter(u => u.status === 'PRESENT' || u.status === 'Present').length} / {attendanceUsers.length} present
+                      {attendanceRecord[selectedMeetingForCheck.meetingId]?.filter((record) => record.status === 'PRESENT').length} / {attendanceRecord[selectedMeetingForCheck.meetingId].length} present
                     </span>
                   </div>
                   <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-[#C8102E] h-2 rounded-full transition-all duration-300"
                       style={{
-                        width: `${(attendanceUsers.filter(u => u.status === 'PRESENT' || u.status === 'Present').length / attendanceUsers.length) * 100}%`
+                        width: `${(attendanceRecord[selectedMeetingForCheck.meetingId]?.filter((record) => record.status === 'PRESENT').length / attendanceRecord[selectedMeetingForCheck.meetingId].length) * 100}%`
                       }}
                     ></div>
                   </div>

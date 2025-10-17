@@ -63,6 +63,26 @@ export const AttendanceService = {
     });
   },
 
+  async upsertAttendance(
+  userId: string,
+  meetingId: string,
+  status: AttendanceStatus
+) {
+  return prisma.attendance.upsert({
+    where: {
+      userId_meetingId: { userId, meetingId }
+    },
+    update: {
+      status
+    },
+    create: {
+      userId,
+      meetingId,
+      status
+    }
+  });
+},
+
   // Delete an attendance record
   async deleteAttendance(attendanceId: string) {
     return prisma.attendance.delete({
