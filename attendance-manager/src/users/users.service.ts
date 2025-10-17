@@ -14,6 +14,13 @@ export const UsersService = {
     });
   },
 
+  async getUserByNUID(nuid: string) {
+    return prisma.user.findUnique({
+      where: { nuid },
+      include: { role: true }
+    });
+  },
+
   async getUserById(userId: string) {
     return prisma.user.findUnique({
       where: { userId },

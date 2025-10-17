@@ -14,6 +14,11 @@ export const UsersController = {
     return NextResponse.json(roles);
   },
 
+  async getUserByNUID(params: { nuid: string }) {
+    const roles = await UsersService.getUserByNUID(params.nuid);
+    return NextResponse.json(roles);
+  },
+
   async listUsersSantizied() {
     const users = await UsersService.getAllUsers();
     const sanitizedUsers = users.map(user => {
@@ -116,7 +121,8 @@ export const UsersController = {
 
   async updateAttendence(request: Request) {
     const body = await request.json();
-    if (!body.email || !body.attendenceId || body.attendance === undefined) {
+    console.log('body', body);
+    if (!body.userId || !body.meetingId || body.status === undefined) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -129,20 +135,17 @@ export const UsersController = {
       'EXCUSED_ABSENCE',
       'UNEXCUSED_ABSENCE'
     ];
-    if (!validStatuses.includes(body.attendance)) {
+    if (!validStatuses.includes(body.status)) {
       return NextResponse.json(
         { error: 'Invalid attendance value' },
         { status: 400 }
       );
     }
-    const user = await UsersService.getUserByEmail(body.email);
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-    await AttendanceService.updateAttendanceForUser(
-      user.userId,
-      body.attendenceId,
-      body.attendance
+
+    await AttendanceService.upsertAttendance(
+      body.userId,
+      body.meetingId,
+      body.status
     );
     return NextResponse.json({
       success: true,
