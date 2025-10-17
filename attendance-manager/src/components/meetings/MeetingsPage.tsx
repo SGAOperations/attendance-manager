@@ -22,6 +22,8 @@ const MeetingsPage: React.FC = () => {
     date: '',
     startTime: '',
     endTime: '',
+    notes: '',
+    type: 'REGULAR' as 'FULL_BODY' | 'REGULAR',
     selectedAttendees: [] as string[]
   });
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
@@ -38,145 +40,55 @@ const MeetingsPage: React.FC = () => {
       })
       .catch(error => console.error(error));
   }, []);
-  // Mock data for SGA members (for attendee selection) - only Renee and Justin
-  const mockMembers: Member[] = [
-    {
-      id: '1',
-      firstName: 'Renee',
-      lastName: 'Cai',
-      email: 'cai.renee@northeastern.edu',
-      role: { roleType: 'EBOARD' }, // Object with roleType property
-      joinDate: new Date('2024-01-15'),
-      status: 'active'
-    },
-    {
-      id: '2',
-      firstName: 'Justin',
-      lastName: 'Kim',
-      email: 'kim.justin@northeastern.edu',
-      role: { roleType: 'EBOARD' }, // Object with roleType property
-      joinDate: new Date('2024-01-20'),
-      status: 'active'
-    }
-  ];
 
-  // Mock data for meetings and attendance - reduced to 6 rows for mockup
-  const mockMeetings: MeetingRecord[] = [
-    {
-      id: '1',
-      date: '01/07/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'First General Meeting of the semester',
-      attendedMembers: 35,
-      totalMembers: 42,
-      status: 'attended'
-    },
-    {
-      id: '2',
-      date: '01/14/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Second General Meeting of the semester',
-      attendedMembers: 38,
-      totalMembers: 42,
-      status: 'attended'
-    },
-    {
-      id: '3',
-      date: '01/21/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Third General Meeting of the semester',
-      attendedMembers: 32,
-      totalMembers: 42,
-      status: 'attended'
-    },
-    {
-      id: '4',
-      date: '01/28/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Fourth General Meeting of the semester',
-      attendedMembers: 0,
-      totalMembers: 42,
-      status: 'missed'
-    },
-    {
-      id: '5',
-      date: '02/04/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Fifth General Meeting of the semester',
-      attendedMembers: 40,
-      totalMembers: 42,
-      status: 'attended'
-    },
-    {
-      id: '6',
-      date: '02/11/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Sixth General Meeting of the semester',
-      attendedMembers: 37,
-      totalMembers: 42,
-      status: 'attended'
-    },
-    {
-      id: '7',
-      date: '05/27/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Twenty-first General Meeting of the semester',
-      attendedMembers: 0,
-      totalMembers: 42,
-      status: 'upcoming'
-    },
-    {
-      id: '8',
-      date: '06/03/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Twenty-second General Meeting of the semester',
-      attendedMembers: 0,
-      totalMembers: 42,
-      status: 'upcoming'
-    },
-    {
-      id: '9',
-      date: '06/10/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Twenty-third General Meeting of the semester',
-      attendedMembers: 0,
-      totalMembers: 42,
-      status: 'upcoming'
-    },
-    {
-      id: '10',
-      date: '06/17/2025',
-      time: '6:00-7:00 PM',
-      meetingName: 'General Meeting',
-      description: 'Twenty-fourth General Meeting of the semester',
-      attendedMembers: 0,
-      totalMembers: 42,
-      status: 'upcoming'
-    }
-  ];
+  const [members, setMembers] = useState<Member[]>([]);
 
-  // Calculate statistics
-  const attendedMeetings = mockMeetings.filter(m => m.status === 'attended')
-    .length;
-  const missedMeetings = mockMeetings.filter(m => m.status === 'missed').length;
-  const upcomingMeetings = mockMeetings.filter(m => m.status === 'upcoming')
-    .length;
+  useEffect(() => {
+    fetch('/api/users')
+      .then(response => response.json())
+      .then(json => {
+        setMembers(json.map((u: any) => ({
+          id: u.userId,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          email: u.email,
+          role: u.role,
+          joinDate: new Date(),
+          status: 'active'
+        })));
+      })
+      .catch(error => console.error(error));
+  }, []);
+
+  // Calculate statistics from real meetings
+  const today = new Date();
+  // Calculate statistics from real data
+  const attendedMeetings = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
+    if (meetingDate > today) return false; // Skip upcoming meetings
+    // Check if current user attended this meeting
+    return m.attendance.some(a => a.userId === user?.id && a.status === 'PRESENT');
+  }).length;
+
+  const missedMeetings = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
+    if (meetingDate > today) return false; // Skip upcoming meetings
+    // Check if current user was absent
+    return m.attendance.some(a => 
+      a.userId === user?.id && 
+      (a.status === 'UNEXCUSED_ABSENCE' || a.status === 'EXCUSED_ABSENCE')
+    );
+  }).length;
+
+  const upcomingMeetings = meetings.filter(m => new Date(m.date) > today).length;
 
   // Filter meetings based on active tab
-  const filteredMeetings = mockMeetings.filter(m => {
+  const filteredMeetings = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
     if (activeTab === 'past') {
-      return m.status === 'attended' || m.status === 'missed';
+      return meetingDate <= today;
     } else {
-      return m.status === 'upcoming';
+      return meetingDate > today;
     }
   });
 
@@ -214,8 +126,7 @@ const MeetingsPage: React.FC = () => {
                   Attended Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {/* {attendedMeetings} */}
-                  Coming Soon!
+                  {attendedMeetings}
                 </p>
               </div>
 
@@ -234,8 +145,7 @@ const MeetingsPage: React.FC = () => {
                   Missed Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {/* {missedMeetings} */}
-                  Coming Soon!
+                  {missedMeetings}
                 </p>
               </div>
 
@@ -254,8 +164,7 @@ const MeetingsPage: React.FC = () => {
                   Upcoming Meetings
                 </h3>
                 <p className="text-2xl font-bold text-[#C8102E]">
-                  {/* {upcomingMeetings} */}
-                  Coming Soon!
+                  {upcomingMeetings}
                 </p>
               </div>
             </div>
@@ -327,50 +236,47 @@ const MeetingsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Just some testing around */}
-                  {meetings.map(meeting => (
-                    <div>
-                      <div>Name: {meeting.name}</div>
-                    </div>
-                  ))}
-                  {/* {filteredMeetings.map(meeting => (
-                    <tr
-                      key={meeting.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
-                    >
-                      <td className="py-3 px-4">
-                        <div className="text-sm text-gray-900">
-                          {meeting.date}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {meeting.time}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {meeting.meetingName}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="text-sm text-gray-600">
-                          {meeting.description}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="text-sm font-medium text-gray-900">
-                          {meeting.status === 'upcoming'
-                            ? '-'
-                            : meeting.attendedMembers}
-                        </div>
-                        {meeting.status !== 'upcoming' && (
-                          <div className="text-xs text-gray-500">
-                            of {meeting.totalMembers}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))} */}
-                </tbody>
+                {filteredMeetings.map(meeting => (
+                  <tr
+                    key={meeting.meetingId}
+                    className="border-b border-gray-100 hover:bg-gray-50"
+                  >
+                    <td className="py-3 px-4">
+                      <div className="text-sm text-gray-900">
+                        {new Date(meeting.date).toLocaleDateString()}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {meeting.startTime} - {meeting.endTime}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        {meeting.name}
+                      </div>
+                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                        meeting.type === 'FULL_BODY'
+                          ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E]'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {meeting.type === 'FULL_BODY' ? 'Full Body' : 'Regular'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="text-sm text-gray-600">
+                        {meeting.notes}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="text-sm font-medium text-gray-900">
+                        {meeting.attendance.length}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        attendees
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
               </table>
             </div>
 
@@ -483,13 +389,46 @@ const MeetingsPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes
+                </label>
+                <textarea
+                  value={newMeeting.notes || ''}
+                  onChange={e =>
+                    setNewMeeting(prev => ({ ...prev, notes: e.target.value }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  placeholder="Enter meeting notes or agenda"
+                  rows={3}
+                />
+              </div>
+
+              {/* Meeting Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meeting Type
+                </label>
+                <select
+                  value={newMeeting.type || 'REGULAR'}
+                  onChange={e =>
+                    setNewMeeting(prev => ({ ...prev, type: e.target.value as 'FULL_BODY' | 'REGULAR' }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                >
+                  <option value="REGULAR">Regular Meeting</option>
+                  <option value="FULL_BODY">Full Body Meeting</option>
+                </select>
+              </div>
+
               {/* Attendees Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Select Attendees
                 </label>
                 <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-3">
-                  {mockMembers.map(member => (
+                  {members.map(member => (
                     <label
                       key={member.id}
                       className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
@@ -558,6 +497,8 @@ const MeetingsPage: React.FC = () => {
                       date: '',
                       startTime: '',
                       endTime: '',
+                      notes: '',
+                      type: 'REGULAR',
                       selectedAttendees: []
                     });
                   }}
@@ -568,19 +509,55 @@ const MeetingsPage: React.FC = () => {
                 <button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium"
-                  onClick={e => {
+                  onClick={async (e) => {
                     e.preventDefault();
-                    // Here you would typically save the meeting to your backend
-                    console.log('Creating meeting:', newMeeting);
-                    alert('Meeting created successfully! (This is a demo)');
-                    setShowCreateMeetingModal(false);
-                    setNewMeeting({
-                      name: '',
-                      date: '',
-                      startTime: '',
-                      endTime: '',
-                      selectedAttendees: []
-                    });
+                    
+                    try {
+                      const response = await fetch('/api/meeting', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          name: newMeeting.name,
+                          date: newMeeting.date,
+                          startTime: newMeeting.startTime,
+                          endTime: newMeeting.endTime,
+                          notes: newMeeting.notes,
+                          type: newMeeting.type,
+                          attendeeIds: newMeeting.selectedAttendees, // Send attendee IDs to backend
+                        }),
+                      });
+                      
+                      if (!response.ok) {
+                        throw new Error('Failed to create meeting');
+                      }
+                      
+                      const createdMeeting = await response.json();
+                      console.log('Meeting created:', createdMeeting);
+                      
+                      // Refresh meetings list
+                      const meetingsResponse = await fetch('/api/meeting');
+                      const updatedMeetings = await meetingsResponse.json();
+                      setMeetings(updatedMeetings);
+                      
+                      // Close modal and reset form
+                      setShowCreateMeetingModal(false);
+                      setNewMeeting({
+                        name: '',
+                        date: '',
+                        startTime: '',
+                        endTime: '',
+                        notes: '',
+                        type: 'REGULAR',
+                        selectedAttendees: []
+                      });
+                      
+                      alert('Meeting created successfully!');
+                    } catch (error) {
+                      console.error('Error creating meeting:', error);
+                      alert('Failed to create meeting. Please try again.');
+                    }
                   }}
                 >
                   Create Meeting
