@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { UsersService } from './users.service';
-import { RoleType } from '@/generated/prisma';
+import { RoleType } from '../generated/prisma';
 
 export const UsersController = {
   async listUsers() {
@@ -111,5 +111,82 @@ export const UsersController = {
       { message: 'User deleted successfully' },
       { status: 204 }
     );
+  },
+
+  async validateNuid(params: { nuid: string; firstName: string; lastName: string }) {
+    try {
+      // Validate required fields
+      if (!params.nuid || !params.firstName || !params.lastName) {
+        return NextResponse.json(
+          { 
+            valid: false, 
+            error: 'Missing required fields: nuid, firstName, lastName' 
+          },
+          { status: 400 }
+        );
+      }
+
+      // Validate NUID format (exactly 9 digits)
+      const nuidRegex = /^\d{9}$/;
+      if (!nuidRegex.test(params.nuid)) {
+        return NextResponse.json(
+          { 
+            valid: false, 
+            error: 'Invalid NUID format. Must be exactly 9 digits.' 
+          },
+          { status: 400 }
+        );
+      }
+
+      // Check if user exists with this NUID
+      const user = await UsersService.getUserByNuid(params.nuid);
+      
+      if (!user) {
+        return NextResponse.json(
+          { 
+            valid: false, 
+            error: 'No user found with this NUID' 
+          },
+          { status: 400 }
+        );
+      }
+
+      // Validate that names match
+      const namesMatch = 
+        user.firstName.toLowerCase() === params.firstName.toLowerCase() &&
+        user.lastName.toLowerCase() === params.lastName.toLowerCase();
+
+      if (!namesMatch) {
+        return NextResponse.json(
+          { 
+            valid: false, 
+            error: 'NUID does not match the provided name' 
+          },
+          { status: 400 }
+        );
+      }
+
+      // Return success response
+      return NextResponse.json({
+        valid: true,
+        message: 'NUID format is valid and matches the provided name',
+        user: {
+          userId: user.userId,
+          nuid: user.nuid,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email
+        }
+      });
+    } catch (error) {
+      console.error('NUID validation error:', error);
+      return NextResponse.json(
+        { 
+          valid: false, 
+          error: 'Internal server error' 
+        },
+        { status: 500 }
+      );
+    }
   }
 };
