@@ -1,6 +1,6 @@
 'use client';
 
-import { LoginCredentials, User, UserDetails } from '@/types';
+import { LoginCredentials, User, UserData } from '@/types';
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction } from 'react';
 
@@ -13,11 +13,9 @@ export const login = async (
   setIsLoading(true);
   console.log(decodeURIComponent(credentials.email));
   try {
-    let url = `/api/users?email=${decodeURIComponent(
-      credentials.email
-    )}&password=${credentials.password}`;
-    console.log(url);
-    const res = await fetch(url);
+    const res = await fetch(
+      `/api/users/get-user-by-email/${credentials.email}`
+    );
     if (!res.ok) {
       console.error(
         `Response status: ${res.status}\n. Response Msg: ${await res.text}`
@@ -27,35 +25,35 @@ export const login = async (
       );
     }
 
-    let user_details: UserDetails = await res.json();
+    let user_details: UserData = await res.json();
     console.log(user_details);
-    if (!user_details.exists) {
-      console.error('User does not exist');
-      return;
-    }
     if (
       !(
-        user_details.user.role.roleType === 'EBOARD' ||
-        user_details.user.role.roleType === 'MEMBER'
+        user_details.role.roleType === 'EBOARD' ||
+        user_details.role.roleType === 'MEMBER'
       )
     ) {
-      console.error('Incorrect Roles');
+      alert('Incorrect Roles');
+      return;
+    }
+    if (credentials.password !== user_details.password) {
+      alert('Invalid email or password');
       return;
     }
 
     // Mock user data based on email
     const user: User = {
-      id: user_details.user.userId,
+      id: user_details.userId,
       email: credentials.email,
-      name: user_details.user.firstName + user_details.user.lastName,
-      role: user_details.user.role.roleType,
+      name: user_details.firstName + ' ' + user_details.lastName,
+      role: user_details.role.roleType,
       avatar: undefined
     };
 
     setUser(user);
     router.push('/homepage');
   } catch (error) {
-    console.error('Login failed:', error);
+    alert(`Login failed: ${error}`);
     throw error;
   } finally {
     setIsLoading(false);

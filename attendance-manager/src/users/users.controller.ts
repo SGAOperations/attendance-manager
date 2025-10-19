@@ -19,6 +19,11 @@ export const UsersController = {
     return NextResponse.json(roles);
   },
 
+  async getUserByEmail(params: { email: string }) {
+    const user = await UsersService.getUserByEmail(params.email);
+    return NextResponse.json(user);
+  },
+
   async listUsersSantizied() {
     const users = await UsersService.getAllUsers();
     const sanitizedUsers = users.map(user => {
