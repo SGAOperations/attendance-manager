@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { UsersService } from './users.service';
-import { RoleType } from '@/generated/prisma';
-import { AttendanceService } from '@/attendance/attendance.service';
+import { RoleType } from '../generated/prisma';
+import { AttendanceService } from '../attendance/attendance.service';
 
 export const UsersController = {
   async listUsers() {
@@ -199,6 +199,8 @@ export const UsersController = {
         { status: 500 }
       );
     }
+  },
+
   async updateAttendence(request: Request) {
     const body = await request.json();
     console.log('body', body);
