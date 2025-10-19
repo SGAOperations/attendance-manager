@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const Layout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'meetings' | 'attendance' | 'profile'>('dashboard');
   const { user } = useAuth();
-
+  const isAdmin = user?.role === 'EBOARD';
   const handleProfileClick = () => {
     setActiveTab('profile');
   };
@@ -23,7 +23,7 @@ const Layout: React.FC = () => {
         return <MeetingsPage />;
       case 'attendance':
         // Check if user is admin
-        if (user?.email?.includes('admin')) {
+        if (isAdmin) {
           return <AttendancePage />;
         } else {
           return (

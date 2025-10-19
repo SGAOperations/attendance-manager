@@ -504,9 +504,7 @@ console.log('User created:', result);
 
               <div className="text-center">
                 <p className="text-sm text-gray-400">
-                  {isLoginMode
-                    ? 'Use any email with \'admin\' for admin access'
-                    : 'Password must be at least 6 characters long'}
+                  Password must be at least 6 characters long
                 </p>
               </div>
             </form>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { UsersService } from './users.service';
-import { RoleType } from '../generated/prisma';
+import { RoleType } from '@/generated/prisma';
+import { AttendanceService } from '@/attendance/attendance.service';
 
 export const UsersController = {
   async listUsers() {
@@ -11,6 +12,16 @@ export const UsersController = {
   async listRoles() {
     const roles = await UsersService.getAllRoles();
     return NextResponse.json(roles);
+  },
+
+  async getUserByNUID(params: { nuid: string }) {
+    const roles = await UsersService.getUserByNUID(params.nuid);
+    return NextResponse.json(roles);
+  },
+
+  async getUserByEmail(params: { email: string }) {
+    const user = await UsersService.getUserByEmail(params.email);
+    return NextResponse.json(user);
   },
 
   async listUsersSantizied() {
@@ -188,5 +199,37 @@ export const UsersController = {
         { status: 500 }
       );
     }
+  async updateAttendence(request: Request) {
+    const body = await request.json();
+    console.log('body', body);
+    if (!body.userId || !body.meetingId || body.status === undefined) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+    const validStatuses = [
+      'PENDING',
+      'PRESENT',
+      'PENDING_ABSENCE',
+      'EXCUSED_ABSENCE',
+      'UNEXCUSED_ABSENCE'
+    ];
+    if (!validStatuses.includes(body.status)) {
+      return NextResponse.json(
+        { error: 'Invalid attendance value' },
+        { status: 400 }
+      );
+    }
+
+    await AttendanceService.upsertAttendance(
+      body.userId,
+      body.meetingId,
+      body.status
+    );
+    return NextResponse.json({
+      success: true,
+      message: 'Attendance updated successfully'
+    });
   }
 };

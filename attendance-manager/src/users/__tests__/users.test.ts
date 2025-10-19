@@ -25,6 +25,9 @@ describe('UsersService', () => {
   });
 
   afterAll(async () => {
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
+    await prisma.meeting.deleteMany();
     await prisma.user.deleteMany();
     await prisma.role.deleteMany();
     await prisma.$disconnect();

@@ -29,6 +29,7 @@ export interface Meeting {
 }
 
 export interface MeetingApiData {
+  type: string;
   meetingId: string;
   name: string;
   date: string;
@@ -42,12 +43,7 @@ export interface AttendanceApiData {
   attendanceId: string;
   userId: string;
   meetingId: string;
-  status:
-    | 'PENDING'
-    | 'PRESENT'
-    | 'PENDING_ABSENCE'
-    | 'EXCUSED_ABSENCE'
-    | 'UNEXCUSED ABSENCE';
+  status: 'PRESENT' | 'EXCUSED_ABSENCE' | 'UNEXCUSED_ABSENCE';
   user: UserApiData;
 }
 
@@ -76,12 +72,7 @@ export interface Attendance {
   attendanceId: string;
   userId: string;
   meetingId: string;
-  status:
-    | 'PENDING'
-    | 'PRESENT'
-    | 'PENDING_ABSENCE'
-    | 'EXCUSED_ABSENCE'
-    | 'UNEXCUSED ABSENCE';
+  status: 'PRESENT' | 'EXCUSED_ABSENCE' | 'UNEXCUSED_ABSENCE';
   timestamp: Date;
 }
 
@@ -109,11 +100,7 @@ export interface UserData {
   firstName: string;
   lastName: string;
   role: RoleData;
-}
-
-export interface UserDetails {
-  exists: true;
-  user: UserData;
+  password: string;
 }
 
 export type MeetingType = 'FULL_BODY' | 'REGULAR';
