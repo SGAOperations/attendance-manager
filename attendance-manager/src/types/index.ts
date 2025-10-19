@@ -100,11 +100,7 @@ export interface UserData {
   firstName: string;
   lastName: string;
   role: RoleData;
-}
-
-export interface UserDetails {
-  exists: true;
-  user: UserData;
+  password: string;
 }
 
 export type MeetingType = 'FULL_BODY' | 'REGULAR';
