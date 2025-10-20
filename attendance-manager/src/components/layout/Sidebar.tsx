@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { MeetingApiData, UserApiData, AttendanceApiData } from '@/types';
 
 interface SidebarProps {
   activeTab: 'dashboard' | 'meetings' | 'attendance' | 'profile';
@@ -8,9 +9,64 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   const { user } = useAuth();
-  const isAdmin = user?.email?.includes('admin');
-  // check based on role, not based on email having admin
-  // check if role is admin
+  const isAdmin = user?.role === 'EBOARD';
+
+  const [meetings, setMeetings] = React.useState<MeetingApiData[]>([]);
+  const [users, setUsers] = React.useState<UserApiData[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch meetings
+        const meetingsResponse = await fetch('/api/meeting');
+        if (!meetingsResponse.ok) throw new Error('Failed to fetch meetings');
+        const meetingsData = await meetingsResponse.json();
+        setMeetings(meetingsData);
+
+        // Fetch users (for total members count)
+        if (isAdmin) {
+          const usersResponse = await fetch('/api/users');
+          if (!usersResponse.ok) throw new Error('Failed to fetch users');
+          const usersData = await usersResponse.json();
+          setUsers(usersData);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+        console.error('Error loading sidebar data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isAdmin]);
+
+  // Calculate stats
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todaysMeetings = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
+    meetingDate.setHours(0, 0, 0, 0);
+    return meetingDate.getTime() === today.getTime();
+  }).length;
+
+  const pendingAttendance = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
+    if (meetingDate > today) {
+      return false; // Only past meetings
+    } 
+    return m.attendance.some((a: AttendanceApiData) => 
+      a.userId === user?.id && a.status === 'UNEXCUSED_ABSENCE'
+    );
+  }).length;
+
+  const totalMembers = users.length;
 
   const navItems = [
     {
@@ -124,26 +180,34 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         {/* Quick Stats - Fixed at bottom */}
         <div className="p-6 border-t border-gray-200 flex-shrink-0">
           <h3 className="text-sm font-medium text-gray-900 mb-3">Quick Stats</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">Today's Meetings</span>
-              <span className="text-sm font-semibold text-[#C8102E]">3</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">Pending Attendance</span>
-              <span className="text-sm font-semibold text-[#A4804A]">5</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">Total Members</span>
-              <span className="text-sm font-semibold text-[#C8102E]">24</span>
-            </div>
-            {isAdmin && (
+          {error ? (
+            <p className="text-xs text-red-500">Failed to load stats</p>
+          ) : loading ? (
+            <p className="text-xs text-gray-400">Loading...</p>
+          ) : (
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Admin Access</span>
-                <span className="text-sm font-semibold text-[#A4804A]">✓</span>
+                <span className="text-xs text-gray-500">Today's Meetings</span>
+                <span className="text-sm font-semibold text-[#C8102E]">{todaysMeetings}</span>
               </div>
-            )}
-          </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">Pending Attendance</span>
+                <span className="text-sm font-semibold text-[#A4804A]">{pendingAttendance}</span>
+              </div>
+              {isAdmin && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">Total Members</span>
+                    <span className="text-sm font-semibold text-[#C8102E]">{totalMembers}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">Admin Access</span>
+                    <span className="text-sm font-semibold text-[#A4804A]">✓</span>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
