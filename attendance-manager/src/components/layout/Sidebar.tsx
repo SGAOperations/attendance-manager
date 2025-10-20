@@ -8,9 +8,48 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   const { user } = useAuth();
-  const isAdmin = user?.email?.includes('admin');
-  // check based on role, not based on email having admin
-  // check if role is admin
+  const isAdmin = user?.role === 'EBOARD';
+
+  const [meetings, setMeetings] = React.useState<any[]>([]);
+  const [users, setUsers] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    // Fetch meetings
+    fetch('/api/meeting')
+      .then(response => response.json())
+      .then(json => setMeetings(json))
+      .catch(error => console.error(error));
+    
+    // Fetch users (for total members count)
+    if (isAdmin) {
+      fetch('/api/users')
+        .then(response => response.json())
+        .then(json => setUsers(json))
+        .catch(error => console.error(error));
+    }
+  }, [isAdmin]);
+
+  // Calculate stats
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todaysMeetings = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
+    meetingDate.setHours(0, 0, 0, 0);
+    return meetingDate.getTime() === today.getTime();
+  }).length;
+
+  const pendingAttendance = meetings.filter(m => {
+    const meetingDate = new Date(m.date);
+    if (meetingDate > today) {
+      return false; // Only past meetings
+    } 
+    return m.attendance.some((a: any) => 
+      a.userId === user?.id && a.status === 'UNEXCUSED_ABSENCE'
+    );
+  }).length;
+
+  const totalMembers = users.length;
 
   const navItems = [
     {
@@ -127,21 +166,23 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-500">Today's Meetings</span>
-              <span className="text-sm font-semibold text-[#C8102E]">3</span>
+              <span className="text-sm font-semibold text-[#C8102E]">{todaysMeetings}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-500">Pending Attendance</span>
-              <span className="text-sm font-semibold text-[#A4804A]">5</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">Total Members</span>
-              <span className="text-sm font-semibold text-[#C8102E]">24</span>
+              <span className="text-sm font-semibold text-[#A4804A]">{pendingAttendance}</span>
             </div>
             {isAdmin && (
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Admin Access</span>
-                <span className="text-sm font-semibold text-[#A4804A]">✓</span>
-              </div>
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">Total Members</span>
+                  <span className="text-sm font-semibold text-[#C8102E]">{totalMembers}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">Admin Access</span>
+                  <span className="text-sm font-semibold text-[#A4804A]">✓</span>
+                </div>
+              </>
             )}
           </div>
         </div>

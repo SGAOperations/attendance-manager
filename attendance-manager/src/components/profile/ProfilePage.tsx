@@ -116,20 +116,7 @@ const ProfilePage: React.FC = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">Member Since:</span>
-              <span className="ml-2 text-gray-900">January 2025</span>
-            </div>
-            <div>
-              <span className="text-gray-500">Last Login:</span>
-              <span className="ml-2 text-gray-900">Today</span>
-            </div>
-            <div>
-              <span className="text-gray-500">Total Meetings:</span>
-              <span className="ml-2 text-gray-900">24</span>
-            </div>
-            <div>
-              <span className="text-gray-500">Attendance Rate:</span>
-              <span className="ml-2 text-gray-900">85%</span>
+              <span className="text-gray-500">Coming Soon</span>
             </div>
           </div>
         </div>
