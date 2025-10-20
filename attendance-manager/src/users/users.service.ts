@@ -36,6 +36,13 @@ export const UsersService = {
     });
   },
 
+  async getUserByNuid(nuid: string) {
+    return prisma.user.findUnique({
+      where: { nuid },
+      include: { role: true }
+    });
+  },
+
   async createUser(data: {
     nuid: string;
     password: string;
