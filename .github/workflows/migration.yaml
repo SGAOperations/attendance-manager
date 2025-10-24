@@ -10,8 +10,8 @@ jobs:
   run-migrations:
     runs-on: ubuntu-latest
     environment: ${{
-                  github.ref_name == 'main' && 'production'
-                  ||                           'development'
+                  github.ref_name == 'main' && 'Production'
+                  ||                           'Preview'
                   }}
     steps:
       - name: Checkout repository
