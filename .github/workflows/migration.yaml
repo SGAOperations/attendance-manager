@@ -24,7 +24,7 @@ jobs:
       
       - name: Install dependencies
         working-directory: attendance-manager
-        run: npm i
+        run: npm ci
       
       - name: Run Prisma Migrations
         working-directory: attendance-manager
