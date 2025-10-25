@@ -1,0 +1,31 @@
+name: Migrations
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  run-migrations:
+    runs-on: ubuntu-latest
+    environment: ${{
+                  github.ref_name == 'main' && 'Production'
+                  ||                           'Preview'
+                  }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      
+      - name: Install dependencies
+        working-directory: attendance-manager
+        run: npm ci
+      
+      - name: Run Prisma Migrations
+        working-directory: attendance-manager
+        run: npx prisma migrate deploy
