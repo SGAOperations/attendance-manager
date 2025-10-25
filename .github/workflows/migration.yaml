@@ -28,4 +28,7 @@ jobs:
       
       - name: Run Prisma Migrations
         working-directory: attendance-manager
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: npx prisma migrate deploy
