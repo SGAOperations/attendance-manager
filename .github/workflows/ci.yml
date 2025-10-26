@@ -2,11 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
 
 jobs:
   build-and-test:
@@ -54,3 +50,4 @@ jobs:
       - name: Test Requests
         working-directory: attendance-manager
         run: npm run test -- src/request/__tests__/request.test.ts
+
