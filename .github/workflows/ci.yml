@@ -27,10 +27,6 @@ jobs:
         working-directory: attendance-manager
         run: npx prisma generate
       
-      - name: Run Prisma Migrations (Test DB)
-        working-directory: attendance-manager
-        run: npx prisma migrate deploy
-      
       - name: Lint
         working-directory: attendance-manager
         run: npm run lint
@@ -50,4 +46,5 @@ jobs:
       - name: Test Requests
         working-directory: attendance-manager
         run: npm run test -- src/request/__tests__/request.test.ts
+
 
