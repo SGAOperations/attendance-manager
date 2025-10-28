@@ -123,5 +123,9 @@ export const UsersService = {
     const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(password, salt);
     return hashedPassword;
+  },
+
+  async comparePasswords(password: string, hash: string) {
+    return bcrypt.compare(password, hash);
   }
 };
