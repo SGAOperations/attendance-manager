@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { MeetingApiData, Member } from '../../types';
 
 interface MeetingRecord {
@@ -7,7 +7,7 @@ interface MeetingRecord {
   time: string;
   meetingName: string;
   description: string;
-  meetingType: 'FULL_BODY' | 'REGULAR';
+  meetingType: MeetingType;
   attendedMembers: number;
   totalMembers: number;
   status: 'attended' | 'missed' | 'upcoming';
@@ -32,7 +32,14 @@ const MeetingsPage: React.FC = () => {
     meetingType: 'FULL_BODY' as MeetingType,
     selectedAttendees: [] as string[]
   });
-  const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
+
+const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
+const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
+const normalizeType = (x: unknown) =>
+  String(x ?? "").trim().replace(/\s+/g, "_").toUpperCase(); // "Full Body" -> "FULL_BODY"
+const visibleMeetings = typeFilter
+  ? meetings.filter((meeting) => normalizeType(meeting.meetingType) === typeFilter) // typeFilter is "FULL_BODY" | "REGULAR"
+  : meetings;
 
   useEffect(() => {
     fetch('/api/meeting')
@@ -336,7 +343,43 @@ const MeetingsPage: React.FC = () => {
                       Description
                     </th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">
-                      Type
+                      <details className="inline-block">
+                        <summary className="list-none cursor-pointer hover:underline select-none">
+                          Type{typeFilter ? ` (${typeFilter})` : ""}
+                        </summary>
+                            <div className="absolute z-10 mt-2 w-40 rounded-md border bg-white shadow">
+                              <button
+                                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${typeFilter === null ? "font-semibold" : ""}`}
+                                onClick={() => {
+                                setTypeFilter(null);
+                                (document.activeElement as HTMLElement | null)?.blur(); // close <details> quickly
+                                                }}
+                                >
+                                All
+                              </button>
+                            <div className="border-t my-1" />
+                              {["FULL_BODY", "REGULAR"].map((t) => {
+                                const label =
+                                  t === "FULL_BODY"
+                                  ? "Full Body"
+                                  : t.charAt(0) + t.slice(1).toLowerCase(); // REGULAR → Regular
+                                return (
+                                  <button
+                                      key={t}
+                                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                      typeFilter === t ? "font-semibold" : ""
+                                      }`}
+                                    onClick={() => {
+                                      setTypeFilter(t as "FULL_BODY" | "REGULAR");
+                                      (document.activeElement as HTMLElement | null)?.blur();
+                                    }}
+                                  >
+                                {label}
+                                  </button>
+                                );
+                             })}
+                              </div>
+                      </details>
                     </th>
                     <th className="text-right py-3 px-4 font-medium text-gray-900">
                       # of Members
@@ -345,7 +388,7 @@ const MeetingsPage: React.FC = () => {
                 </thead>
                 <tbody>
                   {/* Just some testing around */}
-                  {meetings.map(meeting => (
+                  {visibleMeetings.map(meeting => (
                     <div>
                       <div>Name: {meeting.name}</div>
                     </div>
