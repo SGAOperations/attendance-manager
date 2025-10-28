@@ -58,7 +58,7 @@ export const UsersController = {
         user: null
       });
     }
-    if (user.password === params.userPassword) {
+    if (await UsersService.comparePasswords(params.userPassword, user.password)) {
       const { password: _password, roleId: _roleId, ...userData } = user;
       const res = NextResponse.json({
         exists: true,
@@ -98,6 +98,10 @@ export const UsersController = {
         { status: 400 }
       );
     }
+
+    const hashedPassword = await UsersService.hashPassword(body.password);
+    body.password = hashedPassword;
+
     const roleId = await UsersService.getRoleIdByRoleType(RoleType.MEMBER);
     body.roleId = roleId;
     const newUser = await UsersService.createUser(body);
@@ -112,6 +116,10 @@ export const UsersController = {
 
   async updateUser(request: Request, params: { userId: string }) {
     const updates = await request.json();
+
+    const hashedPassword = await UsersService.hashPassword(updates.password);
+    updates.password = hashedPassword;
+
     const updatedUser = await UsersService.updateUser(params.userId, updates);
     return NextResponse.json(updatedUser);
   },
