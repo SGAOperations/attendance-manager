@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import { RoleType } from '@/generated/prisma';
 import { prisma } from '../lib/prisma';
 
@@ -115,5 +116,12 @@ export const UsersService = {
         role: true
       }
     });
+  },
+
+  async hashPassword(password: string) {
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    return hashedPassword;
   }
 };
