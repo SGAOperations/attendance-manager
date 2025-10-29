@@ -1,9 +1,8 @@
 import { UsersController } from '@/users/users.controller';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ email: string, password: string }> }
+export async function POST(
+  request: Request
 ) {
-  const { email, password } = await params;
+  const { email, password } = await request.json();
   return UsersController.loginUser({ email, password });
 }
