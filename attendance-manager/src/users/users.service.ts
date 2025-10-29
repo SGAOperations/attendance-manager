@@ -87,9 +87,9 @@ export const UsersService = {
   async deleteUser(userId: string) {
     // Delete attendance records first to avoid foreign key constraint
     await prisma.attendance.deleteMany({
-      where: { userId },
+      where: { userId }
     });
-    
+
     return prisma.user.delete({
       where: { userId }
     });
@@ -126,6 +126,8 @@ export const UsersService = {
   },
 
   async comparePasswords(password: string, hash: string) {
-    return bcrypt.compare(password, hash);
+    const val = await bcrypt.compare(password, hash);
+    console.log('pass:', val);
+    return val;
   }
 };
