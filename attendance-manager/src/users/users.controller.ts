@@ -27,7 +27,7 @@ export const UsersController = {
   async loginUser(params: { email: string; password: string }) {
     const user = await UsersService.getUserByEmail(params.email);
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 401 });
     }
     const passwordMatch = await UsersService.comparePasswords(
       params.password,
