@@ -37,6 +37,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
       });
       if (!res.ok) {
+        // Check for incorrect username or password
+        if (res.status === 401) {
+          alert('Incorrect email or password');
+          return;
+        }
+
         console.error(
           `Response status: ${res.status}\n. Response Msg: ${await res.text}`
         );
