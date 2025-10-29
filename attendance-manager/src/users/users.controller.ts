@@ -24,6 +24,21 @@ export const UsersController = {
     return NextResponse.json(user);
   },
 
+  async loginUser(params: { email: string; password: string }) {
+    const user = await UsersService.getUserByEmail(params.email);
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    const passwordMatch = await UsersService.comparePasswords(
+      params.password,
+      user.password
+    );
+    if (!passwordMatch) {
+      return NextResponse.json({ error: 'Incorrect password' }, { status: 401 });
+    }
+    return NextResponse.json(user);
+  },
+
   async listUsersSantizied() {
     const users = await UsersService.getAllUsers();
     const sanitizedUsers = users.map(user => {
@@ -51,14 +66,15 @@ export const UsersController = {
 
   async checkUserExists(params: { userEmail: string; userPassword: string }) {
     const user = await UsersService.getUserByEmail(params.userEmail);
-    console.log(user);
     if (!user) {
       return NextResponse.json({
         exists: false,
         user: null
       });
     }
-    if (await UsersService.comparePasswords(params.userPassword, user.password)) {
+    if (
+      await UsersService.comparePasswords(params.userPassword, user.password)
+    ) {
       const { password: _password, roleId: _roleId, ...userData } = user;
       const res = NextResponse.json({
         exists: true,
@@ -132,14 +148,18 @@ export const UsersController = {
     );
   },
 
-  async validateNuid(params: { nuid: string; firstName: string; lastName: string }) {
+  async validateNuid(params: {
+    nuid: string;
+    firstName: string;
+    lastName: string;
+  }) {
     try {
       // Validate required fields
       if (!params.nuid || !params.firstName || !params.lastName) {
         return NextResponse.json(
-          { 
-            valid: false, 
-            error: 'Missing required fields: nuid, firstName, lastName' 
+          {
+            valid: false,
+            error: 'Missing required fields: nuid, firstName, lastName'
           },
           { status: 400 }
         );
@@ -149,9 +169,9 @@ export const UsersController = {
       const nuidRegex = /^\d{9}$/;
       if (!nuidRegex.test(params.nuid)) {
         return NextResponse.json(
-          { 
-            valid: false, 
-            error: 'Invalid NUID format. Must be exactly 9 digits.' 
+          {
+            valid: false,
+            error: 'Invalid NUID format. Must be exactly 9 digits.'
           },
           { status: 400 }
         );
@@ -159,27 +179,27 @@ export const UsersController = {
 
       // Check if user exists with this NUID
       const user = await UsersService.getUserByNuid(params.nuid);
-      
+
       if (!user) {
         return NextResponse.json(
-          { 
-            valid: false, 
-            error: 'No user found with this NUID' 
+          {
+            valid: false,
+            error: 'No user found with this NUID'
           },
           { status: 400 }
         );
       }
 
       // Validate that names match
-      const namesMatch = 
+      const namesMatch =
         user.firstName.toLowerCase() === params.firstName.toLowerCase() &&
         user.lastName.toLowerCase() === params.lastName.toLowerCase();
 
       if (!namesMatch) {
         return NextResponse.json(
-          { 
-            valid: false, 
-            error: 'NUID does not match the provided name' 
+          {
+            valid: false,
+            error: 'NUID does not match the provided name'
           },
           { status: 400 }
         );
@@ -200,9 +220,9 @@ export const UsersController = {
     } catch (error) {
       console.error('NUID validation error:', error);
       return NextResponse.json(
-        { 
-          valid: false, 
-          error: 'Internal server error' 
+        {
+          valid: false,
+          error: 'Internal server error'
         },
         { status: 500 }
       );
