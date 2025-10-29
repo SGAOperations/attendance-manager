@@ -7,17 +7,25 @@ export async function POST(req: Request) {
     const { attendanceId, reason } = await req.json();
 
     if (!attendanceId || !reason) {
-      return NextResponse.json({ error: 'attendanceId and reason are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'attendanceId and reason are required' },
+        { status: 400 }
+      );
     }
 
     const newRequest = await RequestController.createRequest({
       attendanceId,
-      reason,
+      reason
     });
 
     return NextResponse.json(newRequest, { status: 201 });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to create request';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to create request';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return RequestController.listRequest();
 }
