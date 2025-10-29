@@ -27,14 +27,14 @@ export const UsersController = {
   async loginUser(params: { email: string; password: string }) {
     const user = await UsersService.getUserByEmail(params.email);
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 401 });
+      return NextResponse.json({ error: 'Email or password is incorrect' }, { status: 401 });
     }
     const passwordMatch = await UsersService.comparePasswords(
       params.password,
       user.password
     );
     if (!passwordMatch) {
-      return NextResponse.json({ error: 'Incorrect password' }, { status: 401 });
+      return NextResponse.json({ error: 'Email or password is incorrect' }, { status: 401 });
     }
     return NextResponse.json(user);
   },
