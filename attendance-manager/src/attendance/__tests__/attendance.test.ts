@@ -1,6 +1,7 @@
 import { AttendanceController } from '../attendance.controller';
 import { prisma } from '../../lib/prisma';
-
+import dotenv from 'dotenv';
+dotenv.config();
 jest.setTimeout(20000);
 
 describe('AttendanceController', () => {
@@ -22,8 +23,8 @@ describe('AttendanceController', () => {
         email: 'testuser@example.com',
         firstName: 'Test',
         lastName: 'User',
-        roleId: role.roleId,
-      },
+        roleId: role.roleId
+      }
     });
     testUserId = user.userId;
 
@@ -34,8 +35,8 @@ describe('AttendanceController', () => {
         email: 'testuser2@example.com',
         firstName: 'Test2',
         lastName: 'User2',
-        roleId: role.roleId,
-      },
+        roleId: role.roleId
+      }
     });
     testUser2Id = user2.userId;
 
@@ -47,8 +48,8 @@ describe('AttendanceController', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR',
-      },
+        type: 'REGULAR'
+      }
     });
     testMeetingId = meeting.meetingId;
 
@@ -59,8 +60,8 @@ describe('AttendanceController', () => {
         startTime: '9:00',
         endTime: '10:00',
         notes: 'Test notes 2',
-        type: 'FULL_BODY',
-      },
+        type: 'FULL_BODY'
+      }
     });
     testMeeting2Id = meeting2.meetingId;
 
@@ -69,8 +70,8 @@ describe('AttendanceController', () => {
       data: {
         userId: testUserId,
         meetingId: testMeetingId,
-        status: 'EXCUSED_ABSENCE',
-      },
+        status: 'EXCUSED_ABSENCE'
+      }
     });
     testAttendanceId = attendance.attendanceId;
 
@@ -79,8 +80,8 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser2Id,
         meetingId: testMeeting2Id,
-        status: 'PRESENT',
-      },
+        status: 'PRESENT'
+      }
     });
   });
 
@@ -126,7 +127,7 @@ describe('AttendanceController', () => {
     const data = {
       userId: testUserId,
       meetingId: testMeeting2Id,
-      status: 'PRESENT',
+      status: 'PRESENT'
     };
     const newAttendance = await AttendanceController.createAttendance(data);
     expect(newAttendance).toBeDefined();
@@ -152,7 +153,7 @@ describe('AttendanceController', () => {
   it('should throw error for invalid status update', async () => {
     await expect(
       AttendanceController.updateAttendance(testAttendanceId, {
-        status: 'INVALID_STATUS',
+        status: 'INVALID_STATUS'
       })
     ).rejects.toThrow('Invalid attendance status');
   });
@@ -163,15 +164,76 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser2Id,
         meetingId: testMeetingId,
-        status: 'PRESENT',
-      },
+        status: 'PRESENT'
+      }
     });
 
     await AttendanceController.deleteAttendance(attendance.attendanceId);
 
     const deleted = await prisma.attendance.findUnique({
-      where: { attendanceId: attendance.attendanceId },
+      where: { attendanceId: attendance.attendanceId }
     });
     expect(deleted).toBeNull();
+  });
+
+  it('should throw error if requestId does not exist', async () => {
+    await expect(
+      AttendanceController.updateAttendanceStatus('nonexistent-id', 'PRESENT')
+    ).rejects.toThrow('Request or related attendance record not found');
+  });
+
+  it('should throw error for invalid attendance status', async () => {
+    // Create a new attendance + request pair
+    const attendance = await prisma.attendance.create({
+      data: {
+        userId: testUserId,
+        meetingId: testMeetingId,
+        status: 'PRESENT'
+      }
+    });
+
+    const request = await prisma.request.create({
+      data: {
+        attendanceId: attendance.attendanceId,
+        reason: 'Test invalid status',
+        attendanceMode: 'IN_PERSON'
+      }
+    });
+
+    await expect(
+      AttendanceController.updateAttendanceStatus(request.requestId, 'INVALID')
+    ).rejects.toThrow('Invalid attendance status');
+  });
+
+  it('should update attendance status given a valid requestId', async () => {
+    // Create a new attendance + request pair
+    const attendance = await prisma.attendance.create({
+      data: {
+        userId: testUserId,
+        meetingId: testMeetingId,
+        status: 'PRESENT'
+      }
+    });
+
+    const request = await prisma.request.create({
+      data: {
+        attendanceId: attendance.attendanceId,
+        reason: 'Test update status',
+        attendanceMode: 'ONLINE'
+      }
+    });
+
+    const updatedAttendance = await AttendanceController.updateAttendanceStatus(
+      request.requestId,
+      'EXCUSED_ABSENCE'
+    );
+
+    expect(updatedAttendance).toBeDefined();
+    expect(updatedAttendance.status).toBe('EXCUSED_ABSENCE');
+
+    const updated = await prisma.attendance.findUnique({
+      where: { attendanceId: attendance.attendanceId }
+    });
+    expect(updated.status).toBe('EXCUSED_ABSENCE');
   });
 });
