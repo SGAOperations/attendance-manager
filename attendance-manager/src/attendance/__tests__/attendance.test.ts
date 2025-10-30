@@ -10,6 +10,8 @@ describe('AttendanceController', () => {
   let testMeetingId: string;
   let testMeeting2Id: string;
   let testAttendanceId: string;
+  let testMeeting3Id: string;
+  let testUser3Id: string;
 
   beforeAll(async () => {
     // Test role
@@ -65,6 +67,30 @@ describe('AttendanceController', () => {
     });
     testMeeting2Id = meeting2.meetingId;
 
+    const meeting3 = await prisma.meeting.create({
+      data: {
+        name: 'Test Meeting 3',
+        date: '2025-10-05',
+        startTime: '11:00',
+        endTime: '12:00',
+        notes: 'Test notes 3',
+        type: 'FULL_BODY'
+      }
+    });
+    testMeeting3Id = meeting3.meetingId;
+
+    const user3 = await prisma.user.create({
+      data: {
+        nuid: '001234571',
+        password: 'testpassword3',
+        email: 'testuser3@example.com',
+        firstName: 'Test3',
+        lastName: 'User3',
+        roleId: role.roleId
+      }
+    });
+    testUser3Id = user3.userId;
+
     // Create initial attendance record
     const attendance = await prisma.attendance.create({
       data: {
@@ -86,6 +112,7 @@ describe('AttendanceController', () => {
   });
 
   afterAll(async () => {
+    await prisma.request.deleteMany();
     await prisma.attendance.deleteMany();
     await prisma.meeting.deleteMany();
     await prisma.user.deleteMany();
@@ -187,7 +214,7 @@ describe('AttendanceController', () => {
     const attendance = await prisma.attendance.create({
       data: {
         userId: testUserId,
-        meetingId: testMeetingId,
+        meetingId: testMeeting3Id,
         status: 'PRESENT'
       }
     });
@@ -209,7 +236,7 @@ describe('AttendanceController', () => {
     // Create a new attendance + request pair
     const attendance = await prisma.attendance.create({
       data: {
-        userId: testUserId,
+        userId: testUser3Id,
         meetingId: testMeetingId,
         status: 'PRESENT'
       }
