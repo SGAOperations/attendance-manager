@@ -29,17 +29,12 @@ const MeetingsPage: React.FC = () => {
     date: '',
     startTime: '',
     endTime: '',
-    meetingType: 'FULL_BODY' as MeetingType,
+    meetingType: 'REGULAR' as MeetingType,
     selectedAttendees: [] as string[]
   });
 
 const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
 const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
-const normalizeType = (x: unknown) =>
-  String(x ?? "").trim().replace(/\s+/g, "_").toUpperCase(); // "Full Body" -> "FULL_BODY"
-const visibleMeetings = typeFilter
-  ? meetings.filter((meeting) => normalizeType(meeting.meetingType) === typeFilter) // typeFilter is "FULL_BODY" | "REGULAR"
-  : meetings;
 
   useEffect(() => {
     fetch('/api/meeting')
@@ -189,19 +184,26 @@ const visibleMeetings = typeFilter
 
   // Calculate statistics
   const attendedMeetings = mockMeetings.filter(m => m.status === 'attended')
-    .length;
-  const missedMeetings = mockMeetings.filter(m => m.status === 'missed').length;
-  const upcomingMeetings = mockMeetings.filter(m => m.status === 'upcoming')
+    .length; // change mockMeetings to meetings
+  const missedMeetings = mockMeetings.filter(m => m.status === 'missed').length; // change mockMeetings to meetings
+  const upcomingMeetings = mockMeetings.filter(m => m.status === 'upcoming') // change mockMeetings to meetings
     .length;
 
   // Filter meetings based on active tab
-  const filteredMeetings = mockMeetings.filter(m => {
+  const filteredMeetings = mockMeetings.filter(m => { // change mockMeetings to meetings
     if (activeTab === 'past') {
       return m.status === 'attended' || m.status === 'missed';
     } else {
       return m.status === 'upcoming';
     }
   });
+
+const normalizeType = (x: unknown) =>
+  String(x ?? "").trim().replace(/\s+/g, "_").toUpperCase();
+const visibleMeetings = typeFilter
+  ? mockMeetings.filter((m) => normalizeType(m.meetingType) === typeFilter) // change mockMeetings to meetings
+  : mockMeetings; // change mockMeetings to meetings
+
 
   return (
     <div className="flex-1 p-6 bg-gray-50">
@@ -389,11 +391,6 @@ const visibleMeetings = typeFilter
                 <tbody>
                   {/* Just some testing around */}
                   {visibleMeetings.map(meeting => (
-                    <div>
-                      <div>Name: {meeting.name}</div>
-                    </div>
-                  ))}
-                  {filteredMeetings.map(meeting => (
                     <tr
                       key={meeting.id}
                       className="border-b border-gray-100 hover:bg-gray-50"
