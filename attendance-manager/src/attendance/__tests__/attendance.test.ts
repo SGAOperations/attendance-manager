@@ -261,6 +261,7 @@ describe('AttendanceController', () => {
     const updated = await prisma.attendance.findUnique({
       where: { attendanceId: attendance.attendanceId }
     });
-    expect(updated.status).toBe('EXCUSED_ABSENCE');
+
+    expect(updated?.status).toBe('EXCUSED_ABSENCE');
   });
 });
