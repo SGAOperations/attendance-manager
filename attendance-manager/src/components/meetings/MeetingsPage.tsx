@@ -252,6 +252,7 @@ const MeetingsPage: React.FC = () => {
 
   return (
     <div className='flex-1 p-6 bg-gray-50'>
+    <div className='flex-1 p-6 bg-gray-50'>
       {/* Header Section */}
       <div className='mb-6 flex justify-between items-start'>
         <div>
@@ -294,7 +295,11 @@ const MeetingsPage: React.FC = () => {
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Left Panel - Statistics */}
+        <div className='lg:col-span-1'>
+          <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
+            <h2 className='text-lg font-semibold text-gray-900 mb-6'>
         <div className='lg:col-span-1'>
           <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
             <h2 className='text-lg font-semibold text-gray-900 mb-6'>
@@ -421,14 +426,14 @@ const MeetingsPage: React.FC = () => {
                     <th className='text-left py-3 px-4 font-medium text-gray-900'>
                       Description
                     </th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">
-                      <details className="inline-block">
-                        <summary className="list-none cursor-pointer hover:underline select-none">
-                          Type&#9662;{typeFilter ? ` (${typeFilter})` : ""}
+                    <th className='text-left py-3 px-4 font-medium text-gray-900'>
+                      <details className='inline-block'>
+                        <summary className='list-none cursor-pointer hover:underline select-none'>
+                          Type&#9662;{typeFilter ? ` (${typeFilter})` : ''}
                         </summary>
-                            <div className="absolute z-10 mt-2 w-40 rounded-md border bg-white shadow">
+                            <div className='absolute z-10 mt-2 w-40 rounded-md border bg-white shadow'>
                               <button
-                                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${typeFilter === null ? "font-semibold" : ""}`}
+                                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${typeFilter === null ? 'font-semibold' : ''}`}
                                 onClick={() => {
                                 setTypeFilter(null);
                                 (document.activeElement as HTMLElement | null)?.blur(); // close <details> quickly
@@ -436,20 +441,20 @@ const MeetingsPage: React.FC = () => {
                                 >
                                 All
                               </button>
-                            <div className="border-t my-1" />
-                              {["FULL_BODY", "REGULAR"].map((t) => {
+                            <div className='border-t my-1' />
+                              {['FULL_BODY', 'REGULAR'].map((t) => {
                                 const label =
-                                  t === "FULL_BODY"
-                                  ? "Full Body"
+                                  t === 'FULL_BODY'
+                                  ? 'Full Body'
                                   : t.charAt(0) + t.slice(1).toLowerCase(); // REGULAR → Regular
                                 return (
                                   <button
                                       key={t}
                                       className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                                      typeFilter === t ? "font-semibold" : ""
+                                      typeFilter === t ? 'font-semibold' : ''
                                       }`}
                                     onClick={() => {
-                                      setTypeFilter(t as "FULL_BODY" | "REGULAR");
+                                      setTypeFilter(t as 'FULL_BODY' | 'REGULAR');
                                       (document.activeElement as HTMLElement | null)?.blur();
                                     }}
                                   >
