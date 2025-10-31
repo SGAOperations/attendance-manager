@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Member } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { RoleType } from '@/generated/prisma';
 import Attendance from '@/app/attendance/page';
 
 interface MeetingRecord {
@@ -21,10 +20,6 @@ interface Attendance {
   userId: string,
   meetingId: string,
   status: string,
-}
-
-interface UserWithNUID extends Member {
-  nuid: string;
 }
 
 interface AttendanceUser {
@@ -129,7 +124,7 @@ const AttendancePage: React.FC = () => {
   
   // New state for Attendance Check flow
   const [showAttendanceCheck, setShowAttendanceCheck] = useState(false);
-  const [attendanceCheckStep, setAttendanceCheckStep] = useState<'admin-verify' | 'select-meeting' | 'user-list' | 'check-in'>('admin-verify');
+  const [attendanceCheckStep, setAttendanceCheckStep] = useState<'select-meeting' | 'user-list' | 'check-in'>('select-meeting');
   const [adminNuidInput, setAdminNuidInput] = useState('');
   const [selectedMeetingForCheck, setSelectedMeetingForCheck] = useState<MeetingRecord | null>(null);
   
@@ -230,31 +225,6 @@ useEffect(() => {
     }
   };
 
-  // Function to handle admin verification in Attendance Check
-  const handleAdminVerification = async () => {
-    let thisUser;
-    if (!adminNuidInput.trim()) {
-      alert('Please enter your admin NUID');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/users/get-user-by-nuid/${adminNuidInput}`);
-      if (!response.ok) {
-        const errorText = await response.text();
-        alert( `Failed to fetch user (${response.status}): ${errorText}`);
-      }
-      thisUser = await response.json();
-    } catch (error) {
-      throw error;
-    }
-    if (thisUser && thisUser.role?.roleType === RoleType.EBOARD) {
-      setAttendanceCheckStep('select-meeting');
-    } else {
-      alert('User does not have proper permission to access this modal');
-    }
-  };
-
   // Function to handle meeting selection in Attendance Check
   const handleMeetingSelection = async (meeting: MeetingRecord) => {
     setSelectedMeetingForCheck(meeting);
@@ -332,7 +302,7 @@ useEffect(() => {
   // Function to close Attendance Check and reset
   const closeAttendanceCheck = () => {
     setShowAttendanceCheck(false);
-    setAttendanceCheckStep('admin-verify');
+    setAttendanceCheckStep('select-meeting');
     setAdminNuidInput('');
     setSelectedMeetingForCheck(null);
     setNuidInput('');
@@ -641,51 +611,8 @@ useEffect(() => {
       {showAttendanceCheck && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
-            {/* Step 1: Admin NUID Verification */}
-            {attendanceCheckStep === 'admin-verify' && (
-              <>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Attendance Check</h3>
-                <p className="text-sm text-gray-600 mb-6">Please verify your admin credentials to continue</p>
-                
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Admin NUID
-                  </label>
-                  <input
-                    type="text"
-                    value={adminNuidInput}
-                    onChange={(e) => setAdminNuidInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleAdminVerification();
-                      }
-                    }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
-                    placeholder="Enter your admin NUID"
-                    autoFocus
-                  />
-                </div>
 
-                <div className="flex space-x-3">
-                  <button
-                    type="button"
-                    onClick={closeAttendanceCheck}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleAdminVerification}
-                    className="flex-1 px-4 py-2 bg-[#C8102E] text-white rounded-lg hover:bg-[#A8102E]"
-                  >
-                    Continue
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Step 2: Select Meeting */}
+            {/* Step 1: Select Meeting */}
             {attendanceCheckStep === 'select-meeting' && (
               <>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Select Meeting</h3>
@@ -744,7 +671,7 @@ useEffect(() => {
               </>
             )}
 
-            {/* Step 3: User List */}
+            {/* Step 2: User List */}
             {attendanceCheckStep === 'user-list' && selectedMeetingForCheck && (
               <>
                 <div className="mb-6">
@@ -837,7 +764,7 @@ useEffect(() => {
               </>
             )}
 
-            {/* Step 4: Check-In (NUID Entry) */}
+            {/* Step 3: Check-In (NUID Entry) */}
             {attendanceCheckStep === 'check-in' && selectedMeetingForCheck && (
               <>
                 <div className="mb-6">
