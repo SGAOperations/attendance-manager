@@ -2,16 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { MeetingApiData, Member } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 
-interface MeetingRecord {
+/* interface MeetingRecord {
   id: string;
   date: string;
   time: string;
   meetingName: string;
   description: string;
+  meetingType: MeetingType;
   attendedMembers: number;
   totalMembers: number;
   status: 'attended' | 'missed' | 'upcoming';
-}
+} */
+
+type MeetingType = 'FULL_BODY' | 'REGULAR';
 
 const MeetingsPage: React.FC = () => {
   const { user } = useAuth();
@@ -23,10 +26,11 @@ const MeetingsPage: React.FC = () => {
     startTime: '',
     endTime: '',
     notes: '',
-    type: 'REGULAR' as 'FULL_BODY' | 'REGULAR',
+    type: 'REGULAR' as MeetingType, // defaults to REGULAR
     selectedAttendees: [] as string[]
   });
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
+  const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
   
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
@@ -60,6 +64,20 @@ const MeetingsPage: React.FC = () => {
       .catch(error => console.error(error));
   }, []);
 
+// Mock Meeting
+/* const mockMeetings: MeetingApiData[] = [
+    {
+      type: 'FULL_BODY',
+      meetingId: '1',
+      date: '01/07/2025',
+      startTime: '6:00PM',
+      endTime: '7:00PM',
+      name: 'General Meeting',
+      notes: 'First General Meeting of the semester',
+      attendance: []
+    },
+] */
+
   // Calculate statistics from real meetings
   const today = new Date();
   // Calculate statistics from real data
@@ -80,10 +98,10 @@ const MeetingsPage: React.FC = () => {
     );
   }).length;
 
-  const upcomingMeetings = meetings.filter(m => new Date(m.date) > today).length;
+  const upcomingMeetings = meetings.filter(m => new Date(m.date) > today).length; 
 
   // Filter meetings based on active tab
-  const filteredMeetings = meetings.filter(m => {
+  const filteredMeetings = meetings.filter(m => { // change to 'meetings' for implementation
     const meetingDate = new Date(m.date);
     if (activeTab === 'past') {
       return meetingDate <= today;
@@ -91,6 +109,11 @@ const MeetingsPage: React.FC = () => {
       return meetingDate > today;
     }
   });
+
+  // visibleMeetings are meetings post-type-filter
+  const visibleMeetings = typeFilter
+  ? filteredMeetings.filter((m) => m.type === typeFilter)
+  : filteredMeetings; 
 
   return (
     <div className="flex-1 p-6 bg-gray-50">
@@ -230,13 +253,52 @@ const MeetingsPage: React.FC = () => {
                     <th className="text-left py-3 px-4 font-medium text-gray-900">
                       Description
                     </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">
+                      <details className="inline-block">
+                        <summary className="list-none cursor-pointer hover:underline select-none">
+                          Type&#9662;{typeFilter ? ` (${typeFilter})` : ""}
+                        </summary>
+                            <div className="absolute z-10 mt-2 w-40 rounded-md border bg-white shadow">
+                              <button
+                                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${typeFilter === null ? "font-semibold" : ""}`}
+                                onClick={() => {
+                                setTypeFilter(null);
+                                (document.activeElement as HTMLElement | null)?.blur(); // close <details> quickly
+                                                }}
+                                >
+                                All
+                              </button>
+                            <div className="border-t my-1" />
+                              {["FULL_BODY", "REGULAR"].map((t) => {
+                                const label =
+                                  t === "FULL_BODY"
+                                  ? "Full Body"
+                                  : t.charAt(0) + t.slice(1).toLowerCase(); // REGULAR → Regular
+                                return (
+                                  <button
+                                      key={t}
+                                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                      typeFilter === t ? "font-semibold" : ""
+                                      }`}
+                                    onClick={() => {
+                                      setTypeFilter(t as "FULL_BODY" | "REGULAR");
+                                      (document.activeElement as HTMLElement | null)?.blur();
+                                    }}
+                                  >
+                                {label}
+                                  </button>
+                                );
+                             })}
+                              </div>
+                      </details>
+                    </th>
                     <th className="text-right py-3 px-4 font-medium text-gray-900">
                       # of Members
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                {filteredMeetings.map(meeting => (
+                {visibleMeetings.map(meeting => (
                   <tr
                     key={meeting.meetingId}
                     className="border-b border-gray-100 hover:bg-gray-50"
@@ -253,19 +315,19 @@ const MeetingsPage: React.FC = () => {
                       <div className="text-sm font-medium text-gray-900">
                         {meeting.name}
                       </div>
-                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                        meeting.type === 'FULL_BODY'
-                          ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E]'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {meeting.type === 'FULL_BODY' ? 'Full Body' : 'Regular'}
-                      </span>
                     </td>
                     <td className="py-3 px-4">
                       <div className="text-sm text-gray-600">
                         {meeting.notes}
                       </div>
                     </td>
+                    <td className={`mt-6 inline-block px-2 py-1 text-xs rounded-full ${
+                        meeting.type === 'FULL_BODY'
+                          ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E]'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {meeting.type === 'FULL_BODY' ? 'Full Body' : 'Regular'}
+                      </td>
                     <td className="py-3 px-4 text-right">
                       <div className="text-sm font-medium text-gray-900">
                         {meeting.attendance.length}
@@ -281,7 +343,7 @@ const MeetingsPage: React.FC = () => {
             </div>
 
             {/* Empty State */}
-            {filteredMeetings.length === 0 && (
+            {visibleMeetings.length === 0 && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
