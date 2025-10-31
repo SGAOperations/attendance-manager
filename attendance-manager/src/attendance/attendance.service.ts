@@ -64,24 +64,24 @@ export const AttendanceService = {
   },
 
   async upsertAttendance(
-  userId: string,
-  meetingId: string,
-  status: AttendanceStatus
-) {
-  return prisma.attendance.upsert({
-    where: {
-      userId_meetingId: { userId, meetingId }
-    },
-    update: {
-      status
-    },
-    create: {
-      userId,
-      meetingId,
-      status
-    }
-  });
-},
+    userId: string,
+    meetingId: string,
+    status: AttendanceStatus
+  ) {
+    return prisma.attendance.upsert({
+      where: {
+        userId_meetingId: { userId, meetingId }
+      },
+      update: {
+        status
+      },
+      create: {
+        userId,
+        meetingId,
+        status
+      }
+    });
+  },
 
   // Delete an attendance record
   async deleteAttendance(attendanceId: string) {
@@ -105,5 +105,28 @@ export const AttendanceService = {
     if (!attendanceRecord) {
       throw new Error('Attendance record not found for this user');
     }
+  },
+
+  // Update attendance status based on request
+  async updateAttendanceStatus(requestId: string, status: string) {
+    if (!isAttendanceStatus(status)) {
+      throw new Error('Invalid attendance status: ' + status);
+    }
+
+    const request = await prisma.request.findUnique({
+      where: { requestId },
+      include: { attendance: true }
+    });
+
+    if (!request || !request.attendance) {
+      throw new Error('Request or related attendance record not found');
+    }
+
+    const attendanceRecord = await prisma.attendance.update({
+      where: { attendanceId: request.attendance.attendanceId },
+      data: { status: convertToAttendanceStatus(status) }
+    });
+
+    return attendanceRecord;
   }
 };
