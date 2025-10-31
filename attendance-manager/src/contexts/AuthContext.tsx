@@ -25,10 +25,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
-    console.log(decodeURIComponent(credentials.email));
     try {
-      const res = await fetch(`/api/users/get-user-by-email/${credentials.email}`);
+      const res = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password
+        })
+      });
       if (!res.ok) {
+        // Check for incorrect username or password
+        if (res.status === 401) {
+          alert('Incorrect email or password');
+          return;
+        }
+
         console.error(
           `Response status: ${res.status}\n. Response Msg: ${await res.text}`
         );
@@ -50,14 +64,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         )
       ) {
         alert('Incorrect Roles');
-        return;
-      }
-      if (
-        (
-          credentials.password !== user_details.password
-        )
-      ) {
-        alert('Invalid email or password');
         return;
       }
 
