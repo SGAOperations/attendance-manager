@@ -18,17 +18,32 @@ export const RequestService = {
   async getRequest(requestId: string) {
     return prisma.request.findUnique({
       where: { requestId },
-      include: { attendance: true }
+      include: { 
+        attendance: {
+          include: {
+            meeting: true,
+            user: true,
+          }
+        }
+      }, 
     });
   },
 
-  // Get all requests
-  async getAllRequest() {
-    return await prisma.request.findMany({
+  // Get all requests with meeting and user info
+  async getAllRequests() {
+    return prisma.request.findMany({
       include: {
         attendance: {
           include: {
-            user: true
+            meeting: true,
+            user: true,
+          }
+        }
+      },
+      orderBy: {
+        attendance: {
+          meeting: {
+            date: 'desc'
           }
         }
       }
