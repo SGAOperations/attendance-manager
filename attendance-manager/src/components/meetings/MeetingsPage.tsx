@@ -243,7 +243,16 @@ const MeetingsPage: React.FC = () => {
                   >
                     <td className="py-3 px-4">
                       <div className="text-sm text-gray-900">
-                        {new Date(meeting.date).toLocaleDateString()}
+                        {(() => { // possible fix for issue ATM-64
+                          const d = meeting.date;
+                            if (!d) return "";
+                              const parts = d.split("-");
+                            if (parts.length === 3) {
+                              const [y, m, day] = parts.map(Number);
+                              return new Date(y, m - 1, day).toLocaleDateString();
+                            }
+                          return new Date(d).toLocaleDateString();
+                        })()}
                       </div>
                       <div className="text-xs text-gray-500">
                         {meeting.startTime} - {meeting.endTime}

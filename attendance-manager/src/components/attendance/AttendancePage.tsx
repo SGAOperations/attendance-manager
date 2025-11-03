@@ -484,7 +484,12 @@ useEffect(() => {
                   </tr>
                 </thead>
                 <tbody>
-                  {meetingsWithAttendance.map((record) => (
+                  {meetingsWithAttendance
+                  .filter(r => { // possible fix for issue ATM-65
+                    const end = r.endTime || r.startTime || "23:59";
+                    return new Date(`${r.date}T${end}:00`) <= new Date();
+                    })
+                  .map(record => (
                     <tr key={record.meetingId} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="py-3 px-4">
                         <div className="text-sm text-gray-900">{record.date}</div>
