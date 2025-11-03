@@ -133,6 +133,10 @@ const AttendancePage: React.FC = () => {
   const [adminNuidInput, setAdminNuidInput] = useState('');
   const [selectedMeetingForCheck, setSelectedMeetingForCheck] = useState<MeetingRecord | null>(null);
   
+  // New state for Requests viewing
+  const [showRequestsModal, setShowRequestsModal] = useState(false);
+  const [requests, setRequests] = useState<any[]>([]);
+  
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
   useEffect(() => {
@@ -387,12 +391,34 @@ useEffect(() => {
           <p className="text-gray-600">Manage SGA members and track attendance history</p>
         </div>
         {isAdmin && (
-          <button
-            onClick={() => setShowAttendanceCheck(true)}
-            className="px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl"
-          >
-            📋 Attendance Check
-          </button>
+          <div className="flex flex-col space-y-3">
+            <button
+              onClick={() => setShowAttendanceCheck(true)}
+              className="px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl"
+            >
+              📋 Attendance Check
+            </button>
+            <button
+              onClick={async () => {
+                setShowRequestsModal(true);
+                try {
+                  const response = await fetch('/api/requests');
+                  if (!response.ok) {
+                    throw new Error('Failed to fetch requests');
+                  }
+                  const fetchedRequests = await response.json();
+                  setRequests(fetchedRequests || []);
+                } catch (error: any) {
+                  console.error('Error fetching requests:', error);
+                  alert(`Failed to load requests: ${error.message}`);
+                  setRequests([]);
+                }
+              }}
+              className="px-6 py-3 bg-[#A4804A] text-white rounded-xl hover:bg-[#8A6D3F] transition-colors font-medium shadow-lg hover:shadow-xl"
+            >
+              📝 View Requests
+            </button>
+          </div>
         )}
       </div>
 
@@ -707,12 +733,38 @@ useEffect(() => {
                               <h4 className="text-sm font-semibold text-gray-900">{meeting.name}</h4>
                               <p className="text-xs text-gray-600 mt-1">{meeting.notes}</p>
                               <div className="flex items-center space-x-4 mt-2">
-                                <span className="text-xs text-gray-500">
-                                  📅 {meeting.date}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  🕒 {meeting.startTime} - {meeting.endTime}
-                                </span>
+                                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
+                                    />
+                                  </svg>
+                                  <span>{meeting.date}</span>
+                                </div>
+                                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                  <span>{meeting.startTime} - {meeting.endTime}</span>
+                                </div>
                               </div>
                             </div>
                             <div className="text-right ml-4">
@@ -1005,6 +1057,220 @@ useEffect(() => {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* View Requests Modal - For Admins */}
+      {showRequestsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              Attendance Requests
+            </h3>
+            
+            {requests.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-8 h-8 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <p className="text-gray-500 text-lg font-medium">No requests found</p>
+                <p className="text-gray-400 text-sm">There are no pending attendance requests at this time.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {requests.map((request) => (
+                  <div
+                    key={request.requestId}
+                    className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        {/* Meeting Info */}
+                        <div className="mb-3">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                            {request.attendance.meeting.name}
+                          </h4>
+                          <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                            <div className="flex items-center space-x-1">
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
+                                />
+                              </svg>
+                              <span>{new Date(request.attendance.meeting.date).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              <span>{request.attendance.meeting.startTime} - {request.attendance.meeting.endTime}</span>
+                            </div>
+                          </div>
+                          {request.attendance.meeting.notes && (
+                            <p className="text-xs text-gray-500 mt-1">{request.attendance.meeting.notes}</p>
+                          )}
+                        </div>
+
+                        {/* Member Info */}
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-10 h-10 bg-[#C8102E] rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-sm font-semibold">
+                              {request.attendance.user.firstName.charAt(0)}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {request.attendance.user.firstName} {request.attendance.user.lastName}
+                            </p>
+                            <p className="text-xs text-gray-500">{request.attendance.user.email}</p>
+                            <p className="text-xs text-gray-400">NUID: {request.attendance.user.nuid}</p>
+                          </div>
+                        </div>
+
+                        {/* Request Details */}
+                        <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {request.attendanceMode === 'ONLINE' && (
+                              <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                                🌐 Attending Online
+                              </span>
+                            )}
+                            {request.attendanceMode === 'IN_PERSON' && (
+                              <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                👤 Attending In Person
+                              </span>
+                            )}
+                            {request.timeAdjustment === 'ARRIVING_LATE' && (
+                              <span className="inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                                ⏰ Arriving Late
+                              </span>
+                            )}
+                            {request.timeAdjustment === 'LEAVING_EARLY' && (
+                              <span className="inline-block px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
+                                🚪 Leaving Early
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">Explanation: </span>
+                            {request.reason}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3 pt-3 border-t border-gray-200">
+                      <button
+                        onClick={async () => {
+                          try {
+                            // Update attendance status to EXCUSED_ABSENCE
+                            const updateResponse = await fetch(`/api/attendance/${request.attendance.attendanceId}`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                status: 'EXCUSED_ABSENCE'
+                              })
+                            });
+
+                            if (!updateResponse.ok) {
+                              throw new Error('Failed to update attendance');
+                            }
+
+                            // Optionally delete the request (since it's been processed)
+                            // Or you might want to keep it for history
+                            await fetch(`/api/requests/${request.requestId}`, {
+                              method: 'DELETE'
+                            });
+
+                            alert(`Request accepted! Attendance updated for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`);
+                            
+                            // Remove from list
+                            setRequests(prev => prev.filter(r => r.requestId !== request.requestId));
+                          } catch (error: any) {
+                            console.error('Error accepting request:', error);
+                            alert(`Failed to accept request: ${error.message}`);
+                          }
+                        }}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                      >
+                        ✓ Accept
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            // Update attendance status to UNEXCUSED_ABSENCE (or leave as is)
+                            // For rejection, we might just delete the request without changing attendance
+                            
+                            // Delete the request
+                            const deleteResponse = await fetch(`/api/requests/${request.requestId}`, {
+                              method: 'DELETE'
+                            });
+
+                            if (!deleteResponse.ok) {
+                              throw new Error('Failed to reject request');
+                            }
+
+                            alert(`Request rejected for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`);
+                            
+                            // Remove from list
+                            setRequests(prev => prev.filter(r => r.requestId !== request.requestId));
+                          } catch (error: any) {
+                            console.error('Error rejecting request:', error);
+                            alert(`Failed to reject request: ${error.message}`);
+                          }
+                        }}
+                        className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                      >
+                        ✗ Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Close Button */}
+            <div className="flex justify-end mt-6 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => setShowRequestsModal(false)}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
