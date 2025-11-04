@@ -1,5 +1,6 @@
 import { RequestController } from '../request.controller';
 import { prisma } from '../../lib/prisma';
+import { POST } from '../../app/api/attendance/[attendanceId]/requests/route';
 
 jest.setTimeout(20000);
 
@@ -254,5 +255,242 @@ describe('RequestController', () => {
       where: { requestId: requestToDelete.requestId }
     });
     expect(deleted).toBeNull();
+  });
+});
+
+describe('POST /api/attendance/[attendanceId]/requests', () => {
+  let routeTestRoleId: string;
+  let routeTestUserId: string;
+  let routeTestMeetingId: string;
+  let routeTestAttendanceId: string;
+
+  beforeAll(async () => {
+    // Create test data for route endpoint tests
+    const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
+    routeTestRoleId = role.roleId;
+
+    const user = await prisma.user.create({
+      data: {
+        nuid: '001234570',
+        password: 'testpassword',
+        email: 'requestrouteuser@example.com',
+        firstName: 'Request',
+        lastName: 'Route',
+        roleId: routeTestRoleId,
+      },
+    });
+    routeTestUserId = user.userId;
+
+    const newMeeting = await prisma.meeting.create({
+      data: {
+        name: 'Route Test Meeting',
+        date: '2025-09-10',
+        startTime: '14:00',
+        endTime: '15:00',
+        notes: 'Meeting for route endpoint tests',
+        type: 'REGULAR',
+      },
+    });
+    routeTestMeetingId = newMeeting.meetingId;
+
+    const attendance = await prisma.attendance.create({
+      data: {
+        userId: routeTestUserId,
+        meetingId: routeTestMeetingId,
+        status: 'EXCUSED_ABSENCE',
+      },
+    });
+    routeTestAttendanceId = attendance.attendanceId;
+  });
+
+  afterAll(async () => {
+    // Delete all requests, attendances, meetings, users, and roles created during tests
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
+    await prisma.meeting.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.role.deleteMany();
+  });
+
+  it('should create a request successfully via POST endpoint', async () => {
+    const requestBody = {
+      reason: 'Test reason from route',
+      attendanceMode: 'ONLINE',
+      timeAdjustment: 'ARRIVING_LATE',
+    };
+
+    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
+    const response = await POST(req, { params });
+
+    expect(response.status).toBe(201);
+    const data = await response.json();
+    expect(data).toBeDefined();
+    expect(data.reason).toBe('Test reason from route');
+    expect(data.attendanceId).toBe(routeTestAttendanceId);
+    expect(data.attendanceMode).toBe('ONLINE');
+    expect(data.timeAdjustment).toBe('ARRIVING_LATE');
+  });
+
+  it('should create a request without timeAdjustment via POST endpoint', async () => {
+    // Create a new meeting and attendance for this test since one attendance can only have one request
+    const meeting2 = await prisma.meeting.create({
+      data: {
+        name: 'Route Test Meeting 2',
+        date: '2025-09-11',
+        startTime: '15:00',
+        endTime: '16:00',
+        notes: 'Second meeting for route tests',
+        type: 'REGULAR',
+      },
+    });
+
+    const attendance2 = await prisma.attendance.create({
+      data: {
+        userId: routeTestUserId,
+        meetingId: meeting2.meetingId,
+        status: 'EXCUSED_ABSENCE',
+      },
+    });
+
+    const requestBody = {
+      reason: 'Test reason without time adjustment',
+      attendanceMode: 'IN_PERSON',
+    };
+
+    const req = new Request(`http://localhost/api/attendance/${attendance2.attendanceId}/requests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const params = Promise.resolve({ attendanceId: attendance2.attendanceId });
+    const response = await POST(req, { params });
+
+    expect(response.status).toBe(201);
+    const data = await response.json();
+    expect(data).toBeDefined();
+    expect(data.reason).toBe('Test reason without time adjustment');
+    expect(data.attendanceMode).toBe('IN_PERSON');
+  });
+
+  it('should return 400 when reason is missing', async () => {
+    const requestBody = {
+      attendanceMode: 'ONLINE',
+    };
+
+    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
+    const response = await POST(req, { params });
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data.error).toBe('reason and attendanceMode are required');
+  });
+
+  it('should return 400 when attendanceMode is missing', async () => {
+    const requestBody = {
+      reason: 'Test reason',
+    };
+
+    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
+    const response = await POST(req, { params });
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data.error).toBe('reason and attendanceMode are required');
+  });
+
+  it('should return 400 when both reason and attendanceMode are missing', async () => {
+    const requestBody = {};
+
+    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
+    const response = await POST(req, { params });
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data.error).toBe('reason and attendanceMode are required');
+  });
+
+  it('should use attendanceId from URL params', async () => {
+    // Create a new meeting and attendance for this test since one attendance can only have one request
+    const meeting3 = await prisma.meeting.create({
+      data: {
+        name: 'Route Test Meeting 3',
+        date: '2025-09-12',
+        startTime: '16:00',
+        endTime: '17:00',
+        notes: 'Third meeting for route tests',
+        type: 'REGULAR',
+      },
+    });
+
+    const attendance3 = await prisma.attendance.create({
+      data: {
+        userId: routeTestUserId,
+        meetingId: meeting3.meetingId,
+        status: 'EXCUSED_ABSENCE',
+      },
+    });
+
+    const requestBody = {
+      reason: 'Test with attendanceId from URL',
+      attendanceMode: 'ONLINE',
+    };
+
+    const req = new Request(`http://localhost/api/attendance/${attendance3.attendanceId}/requests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const params = Promise.resolve({ attendanceId: attendance3.attendanceId });
+    const response = await POST(req, { params });
+
+    expect(response.status).toBe(201);
+    const data = await response.json();
+    expect(data.attendanceId).toBe(attendance3.attendanceId);
+  });
+
+  it('should return 500 when controller throws an error', async () => {
+    const requestBody = {
+      reason: 'Test reason',
+      attendanceMode: 'INVALID_MODE', 
+    };
+
+    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
+    const response = await POST(req, { params });
+
+    expect(response.status).toBe(500);
+    const data = await response.json();
+    expect(data.error).toBe('Invalid input data for creating request');
   });
 });
