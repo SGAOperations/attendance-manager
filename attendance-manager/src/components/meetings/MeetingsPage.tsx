@@ -170,7 +170,7 @@ const MeetingsPage: React.FC = () => {
         // Fetch the user's attendance to find the one we just created/updated
         const userAttendanceResponse = await fetch(`/api/attendance/user/${user.id}`);
         if (!userAttendanceResponse.ok) {
-          throw new Error(`Failed to fetch attendance record`);
+          throw new Error('Failed to fetch attendance record'); // single quotes
         }
         
         const userAttendance = await userAttendanceResponse.json();
