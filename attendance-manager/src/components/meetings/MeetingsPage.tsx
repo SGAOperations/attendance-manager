@@ -252,7 +252,6 @@ const MeetingsPage: React.FC = () => {
 
   return (
     <div className='flex-1 p-6 bg-gray-50'>
-    <div className='flex-1 p-6 bg-gray-50'>
       {/* Header Section */}
       <div className='mb-6 flex justify-between items-start'>
         <div>
@@ -295,11 +294,7 @@ const MeetingsPage: React.FC = () => {
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Left Panel - Statistics */}
-        <div className='lg:col-span-1'>
-          <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
-            <h2 className='text-lg font-semibold text-gray-900 mb-6'>
         <div className='lg:col-span-1'>
           <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
             <h2 className='text-lg font-semibold text-gray-900 mb-6'>
