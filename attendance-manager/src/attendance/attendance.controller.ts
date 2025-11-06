@@ -26,7 +26,12 @@ export const AttendanceController = {
       .filter(a => a.request)
       .map(a => ({
         ...a.request,
-        AttendanceStatus: a.status
+        AttendanceStatus: a.status,
+        attendance: {
+          attendanceId: a.attendanceId,
+          meeting: a.meeting,
+          status: a.status
+        }
       }));
     return filtered_attendances;
   },

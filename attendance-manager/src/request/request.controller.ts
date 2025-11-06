@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export const RequestController = {
   async listRequest() {
-    const meeting = await RequestService.getAllRequest();
+    const meeting = await RequestService.getAllRequests();
     return NextResponse.json(meeting);
   },
 
