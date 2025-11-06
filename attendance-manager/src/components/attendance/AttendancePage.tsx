@@ -377,7 +377,12 @@ useEffect(() => {
                     throw new Error('Failed to fetch requests');
                   }
                   const fetchedRequests = await response.json();
-                  setRequests(fetchedRequests || []);
+                  // Filter to show only pending requests (where attendance.status !== 'EXCUSED_ABSENCE')
+                  // This means requests that haven't been approved yet
+                  const pendingRequests = fetchedRequests.filter((r: any) => 
+                    r.attendance?.status !== 'EXCUSED_ABSENCE'
+                  );
+                  setRequests(pendingRequests || []);
                 } catch (error: any) {
                   console.error('Error fetching requests:', error);
                   alert(`Failed to load requests: ${error.message}`);
@@ -1135,16 +1140,19 @@ useEffect(() => {
                               throw new Error('Failed to update attendance');
                             }
 
-                            // Optionally delete the request (since it's been processed)
-                            // Or you might want to keep it for history
-                            await fetch(`/api/requests/${request.requestId}`, {
-                              method: 'DELETE'
-                            });
-
+                            // Keep the request for history - don't delete it
                             alert(`Request accepted! Attendance updated for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`);
                             
-                            // Remove from list
-                            setRequests(prev => prev.filter(r => r.requestId !== request.requestId));
+                            // Refresh the requests list to show updated status
+                            const response = await fetch('/api/requests');
+                            if (response.ok) {
+                              const fetchedRequests = await response.json();
+                              // Filter to show only pending requests (where attendance.status !== 'EXCUSED_ABSENCE')
+                              const pendingRequests = fetchedRequests.filter((r: any) => 
+                                r.attendance?.status !== 'EXCUSED_ABSENCE'
+                              );
+                              setRequests(pendingRequests || []);
+                            }
                           } catch (error: any) {
                             console.error('Error accepting request:', error);
                             alert(`Failed to accept request: ${error.message}`);
@@ -1157,21 +1165,10 @@ useEffect(() => {
                       <button
                         onClick={async () => {
                           try {
-                            // Update attendance status to UNEXCUSED_ABSENCE (or leave as is)
-                            // For rejection, we might just delete the request without changing attendance
-                            
-                            // Delete the request
-                            const deleteResponse = await fetch(`/api/requests/${request.requestId}`, {
-                              method: 'DELETE'
-                            });
-
-                            if (!deleteResponse.ok) {
-                              throw new Error('Failed to reject request');
-                            }
-
+                            // Keep the request for history - don't delete it
                             alert(`Request rejected for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`);
                             
-                            // Remove from list
+                            // Remove from list (but don't delete from database)
                             setRequests(prev => prev.filter(r => r.requestId !== request.requestId));
                           } catch (error: any) {
                             console.error('Error rejecting request:', error);

@@ -1038,15 +1038,11 @@ const MeetingsPage: React.FC = () => {
                           <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
                             request.attendance?.status === 'EXCUSED_ABSENCE' 
                               ? 'bg-green-100 text-green-800'
-                              : request.attendance?.status === 'UNEXCUSED_ABSENCE'
-                              ? 'bg-gray-100 text-gray-800'
                               : 'bg-blue-100 text-blue-800'
                           }`}>
                             {request.attendance?.status === 'EXCUSED_ABSENCE' 
                               ? '✓ Approved'
-                              : request.attendance?.status === 'UNEXCUSED_ABSENCE'
-                              ? '⏳ Pending'
-                              : 'Pending Review'}
+                              : '⏳ Pending'}
                           </span>
                         </div>
                       </div>
