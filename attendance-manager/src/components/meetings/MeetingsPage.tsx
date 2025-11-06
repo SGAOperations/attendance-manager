@@ -249,16 +249,12 @@ const MeetingsPage: React.FC = () => {
               onClick={async () => {
                 setShowMyRequestsModal(true);
                 try {
-                  // Fetch all requests
-                  const response = await fetch('/api/requests');
+                  // Fetch user's requests using the new endpoint
+                  const response = await fetch(`/api/attendance/user/requests/${user?.id}`);
                   if (!response.ok) {
                     throw new Error('Failed to fetch requests');
                   }
-                  const allRequests = await response.json();
-                  // Filter requests for current user
-                  const userRequests = allRequests.filter((req: any) => 
-                    req.attendance?.user?.userId === user?.id
-                  );
+                  const userRequests = await response.json();
                   setMyRequests(userRequests || []);
                 } catch (error: any) {
                   console.error('Error fetching my requests:', error);
@@ -1036,11 +1032,11 @@ const MeetingsPage: React.FC = () => {
                         {/* Request Status */}
                         <div className='mt-3'>
                           <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
-                            request.attendance?.status === 'EXCUSED_ABSENCE' 
+                            request.AttendanceStatus === 'EXCUSED_ABSENCE' 
                               ? 'bg-green-100 text-green-800'
                               : 'bg-blue-100 text-blue-800'
                           }`}>
-                            {request.attendance?.status === 'EXCUSED_ABSENCE' 
+                            {request.AttendanceStatus === 'EXCUSED_ABSENCE' 
                               ? '✓ Approved'
                               : '⏳ Pending'}
                           </span>

@@ -16,6 +16,26 @@ function isValidStatus(status: any): status is AttendanceStatus {
 }
 
 export const AttendanceController = {
+  async getRequestsByUser(userId: string) {
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('Invalid or missing userId');
+    }
+
+    const attendances = await AttendanceService.getUserAttendance(userId);
+    const filtered_attendances = attendances
+      .filter(a => a.request)
+      .map(a => ({
+        ...a.request,
+        AttendanceStatus: a.status,
+        attendance: {
+          attendanceId: a.attendanceId,
+          meeting: a.meeting,
+          status: a.status
+        }
+      }));
+    return filtered_attendances;
+  },
+
   async getUserAttendance(userId: string) {
     if (!userId || typeof userId !== 'string') {
       throw new Error('Invalid or missing userId');
