@@ -1,6 +1,12 @@
 import { RequestService } from './request.service';
+import { NextResponse } from 'next/server';
 
 export const RequestController = {
+  async listRequest() {
+    const meeting = await RequestService.getAllRequests();
+    return NextResponse.json(meeting);
+  },
+
   async getRequest(requestId: string) {
     if (!requestId || typeof requestId !== 'string') {
       throw new Error('Invalid or missing requestId');
@@ -21,9 +27,11 @@ export const RequestController = {
     }
 
     // Validate timeAdjustment if provided
-    if (data.timeAdjustment && 
-        data.timeAdjustment !== 'ARRIVING_LATE' && 
-        data.timeAdjustment !== 'LEAVING_EARLY') {
+    if (
+      data.timeAdjustment &&
+      data.timeAdjustment !== 'ARRIVING_LATE' &&
+      data.timeAdjustment !== 'LEAVING_EARLY'
+    ) {
       throw new Error('Invalid timeAdjustment value');
     }
 
@@ -31,7 +39,7 @@ export const RequestController = {
       attendanceId: data.attendanceId,
       reason: data.reason.trim(),
       attendanceMode: data.attendanceMode,
-      timeAdjustment: data.timeAdjustment || undefined,
+      timeAdjustment: data.timeAdjustment || undefined
     });
   },
 
@@ -48,17 +56,21 @@ export const RequestController = {
     }
 
     // Validate attendanceMode if provided
-    if (data.attendanceMode && 
-        data.attendanceMode !== 'ONLINE' && 
-        data.attendanceMode !== 'IN_PERSON') {
+    if (
+      data.attendanceMode &&
+      data.attendanceMode !== 'ONLINE' &&
+      data.attendanceMode !== 'IN_PERSON'
+    ) {
       throw new Error('Invalid attendanceMode value');
     }
 
     // Validate timeAdjustment if provided
-    if (data.timeAdjustment && 
-        data.timeAdjustment !== 'ARRIVING_LATE' && 
-        data.timeAdjustment !== 'LEAVING_EARLY' &&
-        data.timeAdjustment !== null) {
+    if (
+      data.timeAdjustment &&
+      data.timeAdjustment !== 'ARRIVING_LATE' &&
+      data.timeAdjustment !== 'LEAVING_EARLY' &&
+      data.timeAdjustment !== null
+    ) {
       throw new Error('Invalid timeAdjustment value');
     }
 
@@ -81,5 +93,5 @@ export const RequestController = {
       throw new Error('Invalid or missing requestId');
     }
     return RequestService.deleteRequest(requestId);
-  },
+  }
 };
