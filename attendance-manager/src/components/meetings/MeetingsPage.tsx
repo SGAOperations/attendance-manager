@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MeetingApiData, Member } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -59,6 +59,10 @@ const MeetingsPage: React.FC = () => {
   }, []);
 
   const [members, setMembers] = useState<Member[]>([]);
+  const [bulkSelectionActive, setBulkSelectionActive] = useState({
+    nonEboard: false,
+    allMembers: false
+  });
 
   useEffect(() => {
     fetch('/api/users')
@@ -76,6 +80,77 @@ const MeetingsPage: React.FC = () => {
       })
       .catch(error => console.error(error));
   }, []);
+
+  const nonEboardMembers = useMemo(
+    () => members.filter(member => member.role.roleType !== 'EBOARD'),
+    [members]
+  );
+  const nonEboardMemberIds = useMemo(
+    () => nonEboardMembers.map(member => member.id),
+    [nonEboardMembers]
+  );
+  const allMemberIds = useMemo(() => members.map(member => member.id), [members]);
+  const selectedAttendeeSet = useMemo(() => new Set(newMeeting.selectedAttendees), [
+    newMeeting.selectedAttendees
+  ]);
+
+  const bulkSelectButtonClasses = (active: boolean) =>
+    `px-3 py-1 text-xs font-medium border rounded-full transition-colors ${
+      active
+        ? 'bg-[#C8102E] text-white border-[#C8102E]'
+        : 'text-gray-700 border-gray-300 hover:bg-gray-100'
+    }`;
+
+  const toggleNonEboardSelection = () => {
+    if (bulkSelectionActive.nonEboard) {
+      setNewMeeting(prev => ({
+        ...prev,
+        selectedAttendees: prev.selectedAttendees.filter(
+          id => !nonEboardMemberIds.includes(id)
+        )
+      }));
+      setBulkSelectionActive(prev => ({ ...prev, nonEboard: false }));
+    } else {
+      setNewMeeting(prev => ({
+        ...prev,
+        selectedAttendees: nonEboardMemberIds
+      }));
+      setBulkSelectionActive({ nonEboard: true, allMembers: false });
+    }
+  };
+
+  const toggleAllMembersSelection = () => {
+    if (bulkSelectionActive.allMembers) {
+      setNewMeeting(prev => ({ ...prev, selectedAttendees: [] }));
+      setBulkSelectionActive(prev => ({ ...prev, allMembers: false }));
+    } else {
+      setNewMeeting(prev => ({ ...prev, selectedAttendees: allMemberIds }));
+      setBulkSelectionActive({ nonEboard: false, allMembers: true });
+    }
+  };
+
+  useEffect(() => {
+    if (!bulkSelectionActive.nonEboard) return;
+    const allSelected =
+      nonEboardMemberIds.length > 0 &&
+      nonEboardMemberIds.every(id => selectedAttendeeSet.has(id));
+    if (!allSelected) {
+      setBulkSelectionActive(prev => ({ ...prev, nonEboard: false }));
+    }
+  }, [
+    bulkSelectionActive.nonEboard,
+    nonEboardMemberIds,
+    selectedAttendeeSet
+  ]);
+
+  useEffect(() => {
+    if (!bulkSelectionActive.allMembers) return;
+    const allSelected =
+      allMemberIds.length > 0 && allMemberIds.every(id => selectedAttendeeSet.has(id));
+    if (!allSelected) {
+      setBulkSelectionActive(prev => ({ ...prev, allMembers: false }));
+    }
+  }, [bulkSelectionActive.allMembers, allMemberIds, selectedAttendeeSet]);
 
 // Mock Meeting
 /* const mockMeetings: MeetingApiData[] = [
@@ -657,6 +732,22 @@ const MeetingsPage: React.FC = () => {
                 <label className='block text-sm font-medium text-gray-700 mb-3'>
                   Select Attendees
                 </label>
+                <div className='flex flex-wrap gap-2 mb-4'>
+                  <button
+                    type='button'
+                    onClick={toggleNonEboardSelection}
+                    className={bulkSelectButtonClasses(bulkSelectionActive.nonEboard)}
+                  >
+                    Select All Members (Non-Eboard)
+                  </button>
+                  <button
+                    type='button'
+                    onClick={toggleAllMembersSelection}
+                    className={bulkSelectButtonClasses(bulkSelectionActive.allMembers)}
+                  >
+                    Select Everyone (Eboard + Members)
+                  </button>
+                </div>
                 <div className='max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-3'>
                   {members.map(member => (
                     <label
