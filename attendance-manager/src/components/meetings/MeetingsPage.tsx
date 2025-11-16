@@ -16,6 +16,19 @@ import { useAuth } from '../../contexts/AuthContext';
 
 type MeetingType = 'FULL_BODY' | 'REGULAR';
 
+interface RemainingAbsences {
+  regular: {
+    used: number;
+    allowed: number;
+    remaining: number;
+  };
+  fullBody: {
+    used: number;
+    allowed: number;
+    remaining: number;
+  };
+}
+
 const MeetingsPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'past' | 'upcoming'>('past');
@@ -47,6 +60,7 @@ const MeetingsPage: React.FC = () => {
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
   const isMember = user?.role === 'MEMBER';
+  const [remainingAbsences, setRemainingAbsences] = useState<RemainingAbsences | null>(null);
 
   useEffect(() => {
     fetch('/api/meeting')
@@ -57,6 +71,20 @@ const MeetingsPage: React.FC = () => {
       })
       .catch(error => console.error(error));
   }, []);
+
+  // Fetch remaining unexcused absences
+  useEffect(() => {
+    if (user?.id) {
+      fetch(`/api/attendance/user/${user.id}/remaining-absences`)
+        .then(response => response.json())
+        .then((data: RemainingAbsences) => {
+          setRemainingAbsences(data);
+        })
+        .catch(error => {
+          console.error('Failed to fetch remaining absences:', error);
+        });
+    }
+  }, [user]);
 
   const [members, setMembers] = useState<Member[]>([]);
   const [bulkSelectionActive, setBulkSelectionActive] = useState({
@@ -325,6 +353,25 @@ const MeetingsPage: React.FC = () => {
   ? filteredMeetings.filter((m) => m.type === typeFilter)
   : filteredMeetings; 
 
+  // Determine banner color based on remaining absences
+  const getBannerColor = () => {
+    if (!remainingAbsences) return 'bg-blue-50 border-blue-200';
+    
+    const regularRemaining = remainingAbsences.regular.remaining;
+    const fullBodyRemaining = remainingAbsences.fullBody.remaining;
+    
+    // Red if no absences left for either type
+    if (regularRemaining === 0 || fullBodyRemaining === 0) {
+      return 'bg-red-50 border-red-200';
+    }
+    // Yellow if 1 remaining for regular
+    if (regularRemaining <= 1) {
+      return 'bg-yellow-50 border-yellow-200';
+    }
+    // Green if okay
+    return 'bg-green-50 border-green-200';
+  };
+
   return (
     <div className='flex-1 p-6 bg-gray-50'>
       {/* Header Section */}
@@ -367,6 +414,126 @@ const MeetingsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Remaining Unexcused Absences Banner */}
+      {remainingAbsences && (
+        <div className={`mb-6 rounded-lg border-2 p-4 ${getBannerColor()}`}>
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg
+                className="w-6 h-6 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                Remaining Unexcused Absences
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-medium">Regular Meetings:</span>{' '}
+                    <span className={`font-bold ${
+                      remainingAbsences.regular.remaining === 0
+                        ? 'text-red-600'
+                        : remainingAbsences.regular.remaining <= 1
+                        ? 'text-yellow-600'
+                        : 'text-green-600'
+                    }`}>
+                      {remainingAbsences.regular.remaining}
+                    </span>
+                    {' '}remaining out of {remainingAbsences.regular.allowed} allowed
+                    {' '}({remainingAbsences.regular.used} used)
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-medium">Full-Body Meetings:</span>{' '}
+                    <span className={`font-bold ${
+                      remainingAbsences.fullBody.remaining === 0
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                    }`}>
+                      {remainingAbsences.fullBody.remaining}
+                    </span>
+                    {' '}remaining out of {remainingAbsences.fullBody.allowed} allowed
+                    {' '}({remainingAbsences.fullBody.used} used)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remaining Unexcused Absences Banner */}
+      {remainingAbsences && (
+        <div className={`mb-6 rounded-lg border-2 p-4 ${getBannerColor()}`}>
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg
+                className="w-6 h-6 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+                Remaining Unexcused Absences
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-medium">Regular Meetings:</span>{' '}
+                    <span className={`font-bold ${
+                      remainingAbsences.regular.remaining === 0
+                        ? 'text-red-600'
+                        : remainingAbsences.regular.remaining <= 1
+                        ? 'text-yellow-600'
+                        : 'text-green-600'
+                    }`}>
+                      {remainingAbsences.regular.remaining}
+                    </span>
+                    {' '}remaining out of {remainingAbsences.regular.allowed} allowed
+                    {' '}({remainingAbsences.regular.used} used)
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-medium">Full-Body Meetings:</span>{' '}
+                    <span className={`font-bold ${
+                      remainingAbsences.fullBody.remaining === 0
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                    }`}>
+                      {remainingAbsences.fullBody.remaining}
+                    </span>
+                    {' '}remaining out of {remainingAbsences.fullBody.allowed} allowed
+                    {' '}({remainingAbsences.fullBody.used} used)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Left Panel - Statistics */}

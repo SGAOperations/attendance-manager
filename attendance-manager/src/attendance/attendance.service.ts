@@ -1,5 +1,5 @@
 import { prisma } from '../lib/prisma';
-import { AttendanceStatus } from '../generated/prisma';
+import { AttendanceStatus, MeetingType } from '../generated/prisma';
 
 function convertToAttendanceStatus(status: string): AttendanceStatus {
   switch (status) {
@@ -88,6 +88,44 @@ export const AttendanceService = {
     return prisma.attendance.delete({
       where: { attendanceId }
     });
+  },
+
+  // Get remaining unexcused absences for a user
+  async getRemainingUnexcusedAbsences(userId: string) {
+    const unexcusedAbsences = await prisma.attendance.findMany({
+      where: {
+        userId,
+        status: AttendanceStatus.UNEXCUSED_ABSENCE,
+      },
+      include: {
+        meeting: true,
+      },
+    });
+
+    // Count unexcused absences by meeting type
+    const regularCount = unexcusedAbsences.filter(
+      (attendance) => attendance.meeting.type === MeetingType.REGULAR
+    ).length;
+    const fullBodyCount = unexcusedAbsences.filter(
+      (attendance) => attendance.meeting.type === MeetingType.FULL_BODY
+    ).length;
+
+    // Allowed absences: 3 for regular, 1 for full-body
+    const allowedRegular = 3;
+    const allowedFullBody = 1;
+
+    return {
+      regular: {
+        used: regularCount,
+        allowed: allowedRegular,
+        remaining: Math.max(0, allowedRegular - regularCount),
+      },
+      fullBody: {
+        used: fullBodyCount,
+        allowed: allowedFullBody,
+        remaining: Math.max(0, allowedFullBody - fullBodyCount),
+      },
+    };
   },
 
   async updateAttendanceForUser(

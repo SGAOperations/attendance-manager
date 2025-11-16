@@ -90,6 +90,13 @@ export const AttendanceController = {
     return AttendanceService.deleteAttendance(attendanceId);
   },
 
+  async getRemainingUnexcusedAbsences(userId: string) {
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('Invalid or missing userId');
+    }
+    return AttendanceService.getRemainingUnexcusedAbsences(userId);
+  },
+
   async updateAttendanceStatus(requestId: string, status: string) {
     if (!requestId || typeof requestId !== 'string') {
       throw new Error('Invalid or missing requestId');

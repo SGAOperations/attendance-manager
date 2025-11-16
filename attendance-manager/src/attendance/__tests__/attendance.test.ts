@@ -222,6 +222,280 @@ describe('AttendanceController', () => {
     expect(deleted).toBeNull();
   });
 
+  describe('getRemainingUnexcusedAbsences', () => {
+    let testUser3Id: string;
+    let testUser4Id: string;
+    let regularMeeting1Id: string;
+    let regularMeeting2Id: string;
+    let regularMeeting3Id: string;
+    let regularMeeting4Id: string;
+    let fullBodyMeeting1Id: string;
+    let fullBodyMeeting2Id: string;
+
+    beforeAll(async () => {
+      // Create a new user for these tests
+      const role = await prisma.role.findFirst({ where: { roleType: 'MEMBER' } });
+      if (!role) {
+        throw new Error('Role not found');
+      }
+      
+      const user3 = await prisma.user.create({
+        data: {
+          nuid: '001234571',
+          password: 'testpassword3',
+          email: 'testuser3@example.com',
+          firstName: 'Test3',
+          lastName: 'User3',
+          roleId: role.roleId,
+        },
+      });
+      testUser3Id = user3.userId;
+
+      const user4 = await prisma.user.create({
+        data: {
+          nuid: '001234572',
+          password: 'testpassword4',
+          email: 'testuser4@example.com',
+          firstName: 'Test4',
+          lastName: 'User4',
+          roleId: role.roleId,
+        },
+      });
+      testUser4Id = user4.userId;
+
+      // Create regular meetings
+      const regular1 = await prisma.meeting.create({
+        data: {
+          name: 'Regular Meeting 1',
+          date: '2025-01-01',
+          startTime: '10:00',
+          endTime: '11:00',
+          notes: 'Test notes',
+          type: 'REGULAR',
+        },
+      });
+      regularMeeting1Id = regular1.meetingId;
+
+      const regular2 = await prisma.meeting.create({
+        data: {
+          name: 'Regular Meeting 2',
+          date: '2025-01-08',
+          startTime: '10:00',
+          endTime: '11:00',
+          notes: 'Test notes',
+          type: 'REGULAR',
+        },
+      });
+      regularMeeting2Id = regular2.meetingId;
+
+      const regular3 = await prisma.meeting.create({
+        data: {
+          name: 'Regular Meeting 3',
+          date: '2025-01-15',
+          startTime: '10:00',
+          endTime: '11:00',
+          notes: 'Test notes',
+          type: 'REGULAR',
+        },
+      });
+      regularMeeting3Id = regular3.meetingId;
+
+      const regular4 = await prisma.meeting.create({
+        data: {
+          name: 'Regular Meeting 4',
+          date: '2025-01-22',
+          startTime: '10:00',
+          endTime: '11:00',
+          notes: 'Test notes',
+          type: 'REGULAR',
+        },
+      });
+      regularMeeting4Id = regular4.meetingId;
+
+      // Create full-body meetings
+      const fullBody1 = await prisma.meeting.create({
+        data: {
+          name: 'Full Body Meeting 1',
+          date: '2025-02-01',
+          startTime: '10:00',
+          endTime: '11:00',
+          notes: 'Test notes',
+          type: 'FULL_BODY',
+        },
+      });
+      fullBodyMeeting1Id = fullBody1.meetingId;
+
+      const fullBody2 = await prisma.meeting.create({
+        data: {
+          name: 'Full Body Meeting 2',
+          date: '2025-02-08',
+          startTime: '10:00',
+          endTime: '11:00',
+          notes: 'Test notes',
+          type: 'FULL_BODY',
+        },
+      });
+      fullBodyMeeting2Id = fullBody2.meetingId;
+    });
+
+    it('should return full allowance when user has no unexcused absences', async () => {
+      const result = await AttendanceController.getRemainingUnexcusedAbsences(testUser3Id);
+
+      expect(result).toBeDefined();
+      expect(result.regular.used).toBe(0);
+      expect(result.regular.allowed).toBe(3);
+      expect(result.regular.remaining).toBe(3);
+      expect(result.fullBody.used).toBe(0);
+      expect(result.fullBody.allowed).toBe(1);
+      expect(result.fullBody.remaining).toBe(1);
+    });
+
+    it('should correctly count remaining regular meeting unexcused absences', async () => {
+      // Create 2 unexcused absences for regular meetings
+      await prisma.attendance.create({
+        data: {
+          userId: testUser3Id,
+          meetingId: regularMeeting1Id,
+          status: 'UNEXCUSED_ABSENCE',
+        },
+      });
+
+      await prisma.attendance.create({
+        data: {
+          userId: testUser3Id,
+          meetingId: regularMeeting2Id,
+          status: 'UNEXCUSED_ABSENCE',
+        },
+      });
+
+      const result = await AttendanceController.getRemainingUnexcusedAbsences(testUser3Id);
+
+      expect(result.regular.used).toBe(2);
+      expect(result.regular.allowed).toBe(3);
+      expect(result.regular.remaining).toBe(1);
+      expect(result.fullBody.used).toBe(0);
+      expect(result.fullBody.remaining).toBe(1);
+    });
+
+    it('should correctly count remaining full-body meeting unexcused absences', async () => {
+      // Create 1 unexcused absence for full-body meeting
+      await prisma.attendance.create({
+        data: {
+          userId: testUser3Id,
+          meetingId: fullBodyMeeting1Id,
+          status: 'UNEXCUSED_ABSENCE',
+        },
+      });
+
+      const result = await AttendanceController.getRemainingUnexcusedAbsences(testUser3Id);
+
+      expect(result.fullBody.used).toBe(1);
+      expect(result.fullBody.allowed).toBe(1);
+      expect(result.fullBody.remaining).toBe(0);
+      // Regular should still be 2 used (from previous test)
+      expect(result.regular.used).toBe(2);
+      expect(result.regular.remaining).toBe(1);
+    });
+
+    it('should show 0 remaining when user reaches max unexcused absences', async () => {
+      // Add one more regular unexcused absence to reach max (3)
+      await prisma.attendance.create({
+        data: {
+          userId: testUser3Id,
+          meetingId: regularMeeting3Id,
+          status: 'UNEXCUSED_ABSENCE',
+        },
+      });
+
+      const result = await AttendanceController.getRemainingUnexcusedAbsences(testUser3Id);
+
+      expect(result.regular.used).toBe(3);
+      expect(result.regular.allowed).toBe(3);
+      expect(result.regular.remaining).toBe(0);
+      expect(result.fullBody.used).toBe(1);
+      expect(result.fullBody.remaining).toBe(0);
+    });
+
+    it('should not return negative remaining when exceeding limits', async () => {
+      // Add one more regular unexcused absence to exceed limit
+      await prisma.attendance.create({
+        data: {
+          userId: testUser3Id,
+          meetingId: regularMeeting4Id,
+          status: 'UNEXCUSED_ABSENCE',
+        },
+      });
+
+      // Add one more full-body unexcused absence to exceed limit
+      await prisma.attendance.create({
+        data: {
+          userId: testUser3Id,
+          meetingId: fullBodyMeeting2Id,
+          status: 'UNEXCUSED_ABSENCE',
+        },
+      });
+
+      const result = await AttendanceController.getRemainingUnexcusedAbsences(testUser3Id);
+
+      expect(result.regular.used).toBe(4);
+      expect(result.regular.allowed).toBe(3);
+      expect(result.regular.remaining).toBe(0); 
+      expect(result.fullBody.used).toBe(2);
+      expect(result.fullBody.allowed).toBe(1);
+      expect(result.fullBody.remaining).toBe(0); 
+    });
+
+    it('should only count UNEXCUSED_ABSENCE status, not EXCUSED_ABSENCE or PRESENT', async () => {
+      // Create excused absences and present records (should not count)
+      await prisma.attendance.create({
+        data: {
+          userId: testUser4Id,
+          meetingId: regularMeeting1Id,
+          status: 'EXCUSED_ABSENCE',
+        },
+      });
+
+      await prisma.attendance.create({
+        data: {
+          userId: testUser4Id,
+          meetingId: regularMeeting2Id,
+          status: 'PRESENT',
+        },
+      });
+
+      // Create one unexcused absence (should count)
+      await prisma.attendance.create({
+        data: {
+          userId: testUser4Id,
+          meetingId: regularMeeting3Id,
+          status: 'UNEXCUSED_ABSENCE',
+        },
+      });
+
+      const result = await AttendanceController.getRemainingUnexcusedAbsences(testUser4Id);
+
+      expect(result.regular.used).toBe(1); 
+      expect(result.regular.allowed).toBe(3);
+      expect(result.regular.remaining).toBe(2);
+      expect(result.fullBody.used).toBe(0);
+      expect(result.fullBody.remaining).toBe(1);
+    });
+
+    it('should throw error for invalid userId', async () => {
+      await expect(
+        AttendanceController.getRemainingUnexcusedAbsences('')
+      ).rejects.toThrow('Invalid or missing userId');
+
+      await expect(
+        AttendanceController.getRemainingUnexcusedAbsences(null as any)
+      ).rejects.toThrow('Invalid or missing userId');
+
+      await expect(
+        AttendanceController.getRemainingUnexcusedAbsences(123 as any)
+      ).rejects.toThrow('Invalid or missing userId');
+    });
+  });
+
   it('should throw error if requestId does not exist', async () => {
     await expect(
       AttendanceController.updateAttendanceStatus('nonexistent-id', 'PRESENT')
