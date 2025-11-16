@@ -128,9 +128,11 @@ const AttendancePage: React.FC = () => {
   const [adminNuidInput, setAdminNuidInput] = useState('');
   const [selectedMeetingForCheck, setSelectedMeetingForCheck] = useState<MeetingRecord | null>(null);
   
-  // New state for Requests viewing
+  // New state for Requests viewing (admin archive)
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [requests, setRequests] = useState<any[]>([]);
+  const [requestsView, setRequestsView] = useState<'active' | 'history'>('active');
+  const [declinedRequestIds, setDeclinedRequestIds] = useState<string[]>([]);
   
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
@@ -371,18 +373,15 @@ useEffect(() => {
             <button
               onClick={async () => {
                 setShowRequestsModal(true);
+                setRequestsView('active');
                 try {
                   const response = await fetch('/api/requests');
                   if (!response.ok) {
                     throw new Error('Failed to fetch requests');
                   }
                   const fetchedRequests = await response.json();
-                  // Filter to show only pending requests (where attendance.status !== 'EXCUSED_ABSENCE')
-                  // This means requests that haven't been approved yet
-                  const pendingRequests = fetchedRequests.filter((r: any) => 
-                    r.attendance?.status !== 'EXCUSED_ABSENCE'
-                  );
-                  setRequests(pendingRequests || []);
+                  // Archive view: show all requests as read-only
+                  setRequests(fetchedRequests || []);
                 } catch (error: any) {
                   console.error('Error fetching requests:', error);
                   alert(`Failed to load requests: ${error.message}`);
@@ -993,15 +992,47 @@ useEffect(() => {
         </div>
       )}
 
-      {/* View Requests Modal - For Admins */}
+      {/* View Requests Modal - For Admins (Read-only archive with filters) */}
       {showRequestsModal && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto'>
-            <h3 className='text-xl font-semibold text-gray-900 mb-6'>
-              Attendance Requests
-            </h3>
-            
-            {requests.length === 0 ? (
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-xl font-semibold text-gray-900'>
+                Attendance Requests
+              </h3>
+              <div className='inline-flex rounded-full border border-gray-200 bg-gray-50 p-1'>
+                <button
+                  type='button'
+                  onClick={() => setRequestsView('active')}
+                  className={`px-3 py-1 text-xs font-medium rounded-full ${
+                    requestsView === 'active'
+                      ? 'bg-white text-[#C8102E] shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  type='button'
+                  onClick={() => setRequestsView('history')}
+                  className={`px-3 py-1 text-xs font-medium rounded-full ${
+                    requestsView === 'history'
+                      ? 'bg-white text-[#C8102E] shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  History
+                </button>
+              </div>
+            </div>
+
+            {requests.filter((r: any) =>
+              requestsView === 'active'
+                ? r.attendance?.status !== 'EXCUSED_ABSENCE' &&
+                  !declinedRequestIds.includes(r.requestId)
+                : r.attendance?.status === 'EXCUSED_ABSENCE' ||
+                  declinedRequestIds.includes(r.requestId)
+            ).length === 0 ? (
               <div className='text-center py-12'>
                 <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
                   <svg
@@ -1018,12 +1049,28 @@ useEffect(() => {
                     />
                   </svg>
                 </div>
-                <p className='text-gray-500 text-lg font-medium'>No requests found</p>
-                <p className='text-gray-400 text-sm'>There are no pending attendance requests at this time.</p>
+                <p className='text-gray-500 text-lg font-medium'>
+                  {requestsView === 'active'
+                    ? 'No active requests'
+                    : 'No historical requests'}
+                </p>
+                <p className='text-gray-400 text-sm'>
+                  {requestsView === 'active'
+                    ? 'There are no active attendance requests at this time.'
+                    : 'Approved requests will appear here.'}
+                </p>
               </div>
             ) : (
               <div className='space-y-4'>
-                {requests.map((request) => (
+                {requests
+                  .filter((r: any) =>
+                    requestsView === 'active'
+                      ? r.attendance?.status !== 'EXCUSED_ABSENCE' &&
+                        !declinedRequestIds.includes(r.requestId)
+                      : r.attendance?.status === 'EXCUSED_ABSENCE' ||
+                        declinedRequestIds.includes(r.requestId)
+                  )
+                  .map((request) => (
                   <div
                     key={request.requestId}
                     className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
@@ -1119,67 +1166,75 @@ useEffect(() => {
                             {request.reason}
                           </p>
                         </div>
+
+                        {/* Action Buttons for Active tab only */}
+                        {requestsView === 'active' && (
+                          <div className='flex space-x-3 pt-3 border-t border-gray-200'>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  // Update attendance status to EXCUSED_ABSENCE
+                                  const updateResponse = await fetch(
+                                    `/api/attendance/${request.attendance.attendanceId}`,
+                                    {
+                                      method: 'PATCH',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        status: 'EXCUSED_ABSENCE'
+                                      })
+                                    }
+                                  );
+
+                                  if (!updateResponse.ok) {
+                                    throw new Error('Failed to update attendance');
+                                  }
+
+                                  alert(
+                                    `Request accepted! Attendance updated for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`
+                                  );
+
+                                  // Refresh requests to move this into History
+                                  const response = await fetch('/api/requests');
+                                  if (response.ok) {
+                                    const fetchedRequests = await response.json();
+                                    setRequests(fetchedRequests || []);
+                                    setDeclinedRequestIds([]);
+                                  }
+                                } catch (error: any) {
+                                  console.error('Error accepting request:', error);
+                                  alert(`Failed to accept request: ${error.message}`);
+                                }
+                              }}
+                              className='flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium'
+                            >
+                              ✓ Accept
+                            </button>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  // For now, declined is tracked only in UI state
+                                  alert(
+                                    `Request rejected for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`
+                                  );
+
+                                  setDeclinedRequestIds(prev => [
+                                    ...prev,
+                                    request.requestId
+                                  ]);
+                                } catch (error: any) {
+                                  console.error('Error rejecting request:', error);
+                                  alert(`Failed to reject request: ${error.message}`);
+                                }
+                              }}
+                              className='flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium'
+                            >
+                              ✗ Reject
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className='flex space-x-3 pt-3 border-t border-gray-200'>
-                      <button
-                        onClick={async () => {
-                          try {
-                            // Update attendance status to EXCUSED_ABSENCE
-                            const updateResponse = await fetch(`/api/attendance/${request.attendance.attendanceId}`, {
-                              method: 'PATCH',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({
-                                status: 'EXCUSED_ABSENCE'
-                              })
-                            });
-
-                            if (!updateResponse.ok) {
-                              throw new Error('Failed to update attendance');
-                            }
-
-                            // Keep the request for history - don't delete it
-                            alert(`Request accepted! Attendance updated for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`);
-                            
-                            // Refresh the requests list to show updated status
-                            const response = await fetch('/api/requests');
-                            if (response.ok) {
-                              const fetchedRequests = await response.json();
-                              // Filter to show only pending requests (where attendance.status !== 'EXCUSED_ABSENCE')
-                              const pendingRequests = fetchedRequests.filter((r: any) => 
-                                r.attendance?.status !== 'EXCUSED_ABSENCE'
-                              );
-                              setRequests(pendingRequests || []);
-                            }
-                          } catch (error: any) {
-                            console.error('Error accepting request:', error);
-                            alert(`Failed to accept request: ${error.message}`);
-                          }
-                        }}
-                        className='flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium'
-                      >
-                        ✓ Accept
-                      </button>
-                      <button
-                        onClick={async () => {
-                          try {
-                            // Keep the request for history - don't delete it
-                            alert(`Request rejected for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`);
-                            
-                            // Remove from list (but don't delete from database)
-                            setRequests(prev => prev.filter(r => r.requestId !== request.requestId));
-                          } catch (error: any) {
-                            console.error('Error rejecting request:', error);
-                            alert(`Failed to reject request: ${error.message}`);
-                          }
-                        }}
-                        className='flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium'
-                      >
-                        ✗ Reject
-                      </button>
-                    </div>
                   </div>
                 ))}
               </div>
