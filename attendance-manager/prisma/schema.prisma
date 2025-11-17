@@ -59,10 +59,6 @@ model Request {
   attendance     Attendance      @relation(fields: [attendanceId], references: [attendanceId])
 }
 
-model Vote {
-  voteId String @id @default(uuid())
-}
-
 enum RoleType {
   EBOARD
   MEMBER
@@ -72,7 +68,6 @@ enum AttendanceStatus {
   PRESENT
   UNEXCUSED_ABSENCE
   EXCUSED_ABSENCE
-  PENDING_REVIEW
 }
 
 enum MeetingType {
