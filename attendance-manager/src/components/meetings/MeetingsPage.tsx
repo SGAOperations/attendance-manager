@@ -1071,7 +1071,7 @@ const MeetingsPage: React.FC = () => {
         </div>
       )}
 
-      {/* View My Requests Modal - For Members */}
+      {/* View My Requests Modal - For Members (Pending only) */}
       {showMyRequestsModal && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto'>
@@ -1079,7 +1079,7 @@ const MeetingsPage: React.FC = () => {
               My Submitted Requests
             </h3>
             
-            {myRequests.length === 0 ? (
+            {myRequests.filter((r: any) => r.AttendanceStatus !== 'EXCUSED_ABSENCE').length === 0 ? (
               <div className='text-center py-12'>
                 <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
                   <svg
@@ -1096,12 +1096,18 @@ const MeetingsPage: React.FC = () => {
                     />
                   </svg>
                 </div>
-                <p className='text-gray-500 text-lg font-medium'>No requests found</p>
-                <p className='text-gray-400 text-sm'>You haven't submitted any attendance requests yet.</p>
+                <p className='text-gray-500 text-lg font-medium'>
+                  No requests found
+                </p>
+                <p className='text-gray-400 text-sm'>
+                  You haven't submitted any pending attendance requests.
+                </p>
               </div>
             ) : (
               <div className='space-y-4'>
-                {myRequests.map((request) => (
+                {myRequests
+                  .filter((r: any) => r.AttendanceStatus !== 'EXCUSED_ABSENCE')
+                  .map((request) => (
                   <div
                     key={request.requestId}
                     className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
@@ -1182,16 +1188,10 @@ const MeetingsPage: React.FC = () => {
                           </p>
                         </div>
 
-                        {/* Request Status */}
+                        {/* Request Status (pending only in this view) */}
                         <div className='mt-3'>
-                          <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
-                            request.AttendanceStatus === 'EXCUSED_ABSENCE' 
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {request.AttendanceStatus === 'EXCUSED_ABSENCE' 
-                              ? '✓ Approved'
-                              : '⏳ Pending'}
+                          <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                            ⏳ Pending
                           </span>
                         </div>
                       </div>
