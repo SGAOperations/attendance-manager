@@ -68,6 +68,7 @@ enum AttendanceStatus {
   PRESENT
   UNEXCUSED_ABSENCE
   EXCUSED_ABSENCE
+  PENDING
 }
 
 enum MeetingType {
