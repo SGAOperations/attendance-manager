@@ -6,7 +6,20 @@ jest.setTimeout(20000);
 
 describe('MeetingServices', () => {
   afterAll(async () => {
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
+    await prisma.meeting.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.role.deleteMany();
     await prisma.$disconnect();
+  });
+
+  beforeAll(async () => {
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
+    await prisma.meeting.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.role.deleteMany();
   });
 
   it('should create a new meeting', async () => {
@@ -17,7 +30,7 @@ describe('MeetingServices', () => {
         date: '7/30/2025',
         endTime: '8:13:15 PM',
         notes: 'notes',
-        type: MeetingType.REGULAR,
+        type: MeetingType.REGULAR
       },
       [] // Empty attendeeIds array
     );
@@ -40,7 +53,7 @@ describe('MeetingServices', () => {
   it('should fetch a meetings by id', async () => {
     const [newMeeting] = await MeetingService.getAllMeeting();
     const fetchedMeeting = await MeetingService.getMeetingById(
-      newMeeting.meetingId,
+      newMeeting.meetingId
     );
     expect(fetchedMeeting?.meetingId).toBe(newMeeting.meetingId);
   });
@@ -55,8 +68,8 @@ describe('MeetingServices', () => {
         date: '7/29/2025',
         endTime: '8:08:15 PM',
         notes: 'notes',
-        type: MeetingType.FULL_BODY,
-      },
+        type: MeetingType.FULL_BODY
+      }
     );
 
     expect(updatedMeeting.name).toBe('test');
@@ -72,7 +85,7 @@ describe('MeetingServices', () => {
     const [newMeeting] = await MeetingService.getAllMeeting();
     await MeetingService.deleteMeeting(newMeeting.meetingId);
     const deletedMeeting = await MeetingService.getMeetingById(
-      newMeeting.meetingId,
+      newMeeting.meetingId
     );
     expect(deletedMeeting).toBeNull();
   });
