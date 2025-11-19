@@ -1212,6 +1212,20 @@ useEffect(() => {
                             <button
                               onClick={async () => {
                                 try {
+                                  const updateResponse = await fetch(
+                                    `/api/attendance/${request.attendance.attendanceId}`,
+                                    {
+                                      method: 'PATCH',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        status: 'UNEXCUSED_ABSENCE'
+                                      })
+                                    }
+                                  );
+
+                                  if (!updateResponse.ok) {
+                                    throw new Error('Failed to update attendance');
+                                  }
                                   // For now, declined is tracked only in UI state
                                   alert(
                                     `Request rejected for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`
