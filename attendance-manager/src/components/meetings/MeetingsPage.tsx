@@ -33,6 +33,8 @@ const MeetingsPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'past' | 'upcoming'>('past');
   const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
+  const [showEditMeetingModal, setShowEditMeetingModal] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<MeetingApiData | null>(null);
   const [newMeeting, setNewMeeting] = useState({
     name: '',
     date: '',
@@ -41,6 +43,14 @@ const MeetingsPage: React.FC = () => {
     notes: '',
     type: 'REGULAR' as MeetingType, // defaults to REGULAR
     selectedAttendees: [] as string[]
+  });
+  const [editMeeting, setEditMeeting] = useState({
+    name: '',
+    date: '',
+    startTime: '',
+    endTime: '',
+    notes: '',
+    type: 'REGULAR' as 'FULL_BODY' | 'REGULAR'
   });
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
   const [showCreateRequestModal, setShowCreateRequestModal] = useState(false);
@@ -62,7 +72,7 @@ const MeetingsPage: React.FC = () => {
   const isMember = user?.role === 'MEMBER';
   const [remainingAbsences, setRemainingAbsences] = useState<RemainingAbsences | null>(null);
 
-  useEffect(() => {
+  const fetchMeetings = () => {
     fetch('/api/meeting')
       .then(response => response.json())
       .then(json => {
@@ -70,7 +80,67 @@ const MeetingsPage: React.FC = () => {
         setMeetings(json);
       })
       .catch(error => console.error(error));
+  };
+
+  useEffect(() => {
+    fetchMeetings();
   }, []);
+
+  const handleEditMeeting = (meeting: MeetingApiData) => {
+    setEditingMeeting(meeting);
+    setEditMeeting({
+      name: meeting.name,
+      date: meeting.date,
+      startTime: meeting.startTime,
+      endTime: meeting.endTime,
+      notes: meeting.notes,
+      type: meeting.type as 'FULL_BODY' | 'REGULAR'
+    });
+    setShowEditMeetingModal(true);
+  };
+
+  const handleUpdateMeeting = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMeeting) return;
+
+    try {
+      const response = await fetch(`/api/meeting/${editingMeeting.meetingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editMeeting),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Failed to update meeting: ${errorData.error || 'Unknown error'}`);
+        return;
+      }
+
+      const updatedMeeting = await response.json();
+      console.log('Meeting updated:', updatedMeeting);
+      
+      // Refresh meetings list
+      fetchMeetings();
+      
+      // Close modal and reset
+      setShowEditMeetingModal(false);
+      setEditingMeeting(null);
+      setEditMeeting({
+        name: '',
+        date: '',
+        startTime: '',
+        endTime: '',
+        notes: '',
+        type: 'REGULAR'
+      });
+      alert('Meeting updated successfully!');
+    } catch (error) {
+      console.error('Error updating meeting:', error);
+      alert('Failed to update meeting. Please try again.');
+    }
+  };
 
   // Fetch remaining unexcused absences
   useEffect(() => {
@@ -648,50 +718,99 @@ const MeetingsPage: React.FC = () => {
                     <th className='text-right py-3 px-4 font-medium text-gray-900'>
                       # of Members
                     </th>
+                    <th className="text-center py-3 px-4 font-medium text-gray-900">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                {visibleMeetings.map(meeting => (
-                  <tr
-                    key={meeting.meetingId}
-                    className='border-b border-gray-100 hover:bg-gray-50'
-                  >
-                    <td className='py-3 px-4'>
-                      <div className='text-sm text-gray-900'>
-                        {new Date(meeting.date).toLocaleDateString()}
-                      </div>
-                      <div className='text-xs text-gray-500'>
-                        {meeting.startTime} - {meeting.endTime}
-                      </div>
-                    </td>
-                    <td className='py-3 px-4'>
-                      <div className='text-sm font-medium text-gray-900'>
-                        {meeting.name}
-                      </div>
-                    </td>
-                    <td className='py-3 px-4'>
-                      <div className='text-sm text-gray-600'>
-                        {meeting.notes}
-                      </div>
-                    </td>
-                    <td className={`mt-6 inline-block px-2 py-1 text-xs rounded-full ${
-                        meeting.type === 'FULL_BODY'
-                          ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E]'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {meeting.type === 'FULL_BODY' ? 'Full Body' : 'Regular'}
+                  {meetings.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-8 text-gray-500">
+                        No meetings found
                       </td>
-                    <td className='py-3 px-4 text-right'>
-                      <div className='text-sm font-medium text-gray-900'>
-                        {meeting.attendance.length}
-                      </div>
-                      <div className='text-xs text-gray-500'>
-                        attendees
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                    </tr>
+                  ) : (
+                    meetings.map(meeting => (
+                      <tr
+                        key={meeting.meetingId}
+                        className="border-b border-gray-100 hover:bg-gray-50"
+                      >
+                        <td className="py-3 px-4">
+                          <div className="text-sm text-gray-900">
+                            {meeting.date}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {meeting.startTime} - {meeting.endTime}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {meeting.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {meeting.type}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="text-sm text-gray-600">
+                            {meeting.notes}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="text-sm font-medium text-gray-900">
+                            {meeting.attendance?.length || 0}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <button
+                            onClick={() => handleEditMeeting(meeting)}
+                            className="px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors"
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                  {/* {filteredMeetings.map(meeting => (
+                    <tr
+                      key={meeting.id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
+                      <td className="py-3 px-4">
+                        <div className="text-sm text-gray-900">
+                          {meeting.date}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {meeting.time}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {meeting.meetingName}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="text-sm text-gray-600">
+                          {meeting.description}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="text-sm font-medium text-gray-900">
+                          {meeting.status === 'upcoming'
+                            ? '-'
+                            : meeting.attendedMembers}
+                        </div>
+                        {meeting.status !== 'upcoming' && (
+                          <div className="text-xs text-gray-500">
+                            of {meeting.totalMembers}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))} */}
+                </tbody>
               </table>
             </div>
 
@@ -835,6 +954,44 @@ const MeetingsPage: React.FC = () => {
                   <option value='REGULAR'>Regular Meeting</option>
                   <option value='FULL_BODY'>Full Body Meeting</option>
                 </select>
+              </div>
+
+              {/* Meeting Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meeting Type
+                </label>
+                <select
+                  value={newMeeting.type}
+                  onChange={e =>
+                    setNewMeeting(prev => ({
+                      ...prev,
+                      type: e.target.value as 'FULL_BODY' | 'REGULAR'
+                    }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  required
+                >
+                  <option value="REGULAR">Regular</option>
+                  <option value="FULL_BODY">Full Body</option>
+                </select>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes
+                </label>
+                <textarea
+                  value={newMeeting.notes}
+                  onChange={e =>
+                    setNewMeeting(prev => ({ ...prev, notes: e.target.value }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  placeholder="Enter meeting notes"
+                  rows={4}
+                  required
+                />
               </div>
 
               {/* Attendees Selection */}
@@ -992,6 +1149,153 @@ const MeetingsPage: React.FC = () => {
                   }}
                 >
                   Create Meeting
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Meeting Modal */}
+      {showEditMeetingModal && editingMeeting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              Edit Meeting
+            </h3>
+            <form className="space-y-6" onSubmit={handleUpdateMeeting}>
+              {/* Meeting Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meeting Name
+                </label>
+                <input
+                  type="text"
+                  value={editMeeting.name}
+                  onChange={e =>
+                    setEditMeeting(prev => ({ ...prev, name: e.target.value }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  placeholder="Enter meeting name"
+                  required
+                />
+              </div>
+
+              {/* Date and Time */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={editMeeting.date}
+                    onChange={e =>
+                      setEditMeeting(prev => ({ ...prev, date: e.target.value }))
+                    }
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    value={editMeeting.startTime}
+                    onChange={e =>
+                      setEditMeeting(prev => ({
+                        ...prev,
+                        startTime: e.target.value
+                      }))
+                    }
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    value={editMeeting.endTime}
+                    onChange={e =>
+                      setEditMeeting(prev => ({
+                        ...prev,
+                        endTime: e.target.value
+                      }))
+                    }
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Meeting Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meeting Type
+                </label>
+                <select
+                  value={editMeeting.type}
+                  onChange={e =>
+                    setEditMeeting(prev => ({
+                      ...prev,
+                      type: e.target.value as 'FULL_BODY' | 'REGULAR'
+                    }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  required
+                >
+                  <option value="REGULAR">Regular</option>
+                  <option value="FULL_BODY">Full Body</option>
+                </select>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes
+                </label>
+                <textarea
+                  value={editMeeting.notes}
+                  onChange={e =>
+                    setEditMeeting(prev => ({ ...prev, notes: e.target.value }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  placeholder="Enter meeting notes"
+                  rows={4}
+                  required
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-4 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditMeetingModal(false);
+                    setEditingMeeting(null);
+                    setEditMeeting({
+                      name: '',
+                      date: '',
+                      startTime: '',
+                      endTime: '',
+                      notes: '',
+                      type: 'REGULAR'
+                    });
+                  }}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium"
+                >
+                  Update Meeting
                 </button>
               </div>
             </form>
