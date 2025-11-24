@@ -35,6 +35,7 @@ export interface MeetingApiData {
   startTime: string;
   endTime: string;
   notes: string;
+  type?: 'FULL_BODY' | 'REGULAR';
   attendance: AttendanceApiData[];
 }
 
