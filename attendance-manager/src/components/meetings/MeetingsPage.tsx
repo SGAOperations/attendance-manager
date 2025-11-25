@@ -283,7 +283,7 @@ const MeetingsPage: React.FC = () => {
           body: JSON.stringify({
             userId: user.id,
             meetingId: meetingId,
-            status: 'UNEXCUSED_ABSENCE'
+            status: 'PENDING'
           })
         });
 
