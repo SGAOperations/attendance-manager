@@ -8,6 +8,7 @@ import {
   RequestForm
 } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import VotingModal, { VotingType } from './VotingModal';
 import ViewRequestsPanel from './ViewRequestsPanel';
 import ViewRequestsModal from './ViewRequestsModal';
 import AbsencesBanner from './AbsencesBanner';
@@ -56,6 +57,8 @@ const MeetingsPage: React.FC = () => {
     explanation: ''
   });
   const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
+  const [showVotingModal, setShowVotingModal] = useState(false);
+  const [selectedVotingType, setSelectedVotingType] = useState<VotingType | null>(null);
 
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
@@ -534,6 +537,18 @@ const MeetingsPage: React.FC = () => {
           setShowMyRequestsModal={setShowMyRequestsModal}
         />
       )}
+
+      {/* Voting Modal */}
+      <VotingModal
+        isOpen={showVotingModal}
+        onClose={() => {
+          setShowVotingModal(false);
+          setSelectedVotingType(null);
+        }}
+        members={members}
+        votingType={selectedVotingType}
+        onVotingTypeSelect={setSelectedVotingType}
+      />
     </div>
   );
 };
