@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { MeetingApiData, Member } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import VotingModal, { VotingType } from './VotingModal';
 
 /* interface MeetingRecord {
   id: string;
@@ -56,6 +57,8 @@ const MeetingsPage: React.FC = () => {
     explanation: ''
   });
   const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
+  const [showVotingModal, setShowVotingModal] = useState(false);
+  const [selectedVotingType, setSelectedVotingType] = useState<VotingType | null>(null);
   
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
@@ -548,12 +551,18 @@ const MeetingsPage: React.FC = () => {
 
           {/* Create Meeting Button - Only for Admins */}
           {isAdmin && (
-            <div className='mt-6'>
+            <div className='mt-6 space-y-3'>
               <button
                 onClick={() => setShowCreateMeetingModal(true)}
                 className='w-full px-4 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl'
               >
                 + Create New Meeting
+              </button>
+              <button
+                onClick={() => setShowVotingModal(true)}
+                className='w-full px-4 py-3 bg-[#A4804A] text-white rounded-xl hover:bg-[#8A6D3F] transition-colors font-medium shadow-lg hover:shadow-xl'
+              >
+                + Start New Voting
               </button>
             </div>
           )}
@@ -1324,6 +1333,18 @@ const MeetingsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Voting Modal */}
+      <VotingModal
+        isOpen={showVotingModal}
+        onClose={() => {
+          setShowVotingModal(false);
+          setSelectedVotingType(null);
+        }}
+        members={members}
+        votingType={selectedVotingType}
+        onVotingTypeSelect={setSelectedVotingType}
+      />
     </div>
   );
 };
