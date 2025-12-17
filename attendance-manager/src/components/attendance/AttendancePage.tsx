@@ -499,7 +499,12 @@ useEffect(() => {
                       <td className='py-3 px-4 text-center'>
                         <div className='text-sm font-medium text-gray-900'>{attendanceRecord[record.meetingId]?.filter((record) => record.status === 'PRESENT').length}</div>
                         <div className='text-xs text-gray-500'>of {attendanceRecord[record.meetingId]?.length}</div>
-                        <div className='text-xs text-[#C8102E] font-medium'>{(attendanceRecord[record.meetingId]?.filter((record) => record.status === 'PRESENT').length)/(attendanceRecord[record.meetingId]?.length)*100}%</div>
+                        <div className='text-xs text-[#C8102E] font-medium'>
+                          {Math.floor(
+                            ((attendanceRecord[record.meetingId]?.filter(r => r.status === 'PRESENT').length ?? 0) /
+                              (attendanceRecord[record.meetingId]?.length ?? 1)) * 10000
+                          ) / 100}%
+                        </div>
                       </td>
                       <td className='py-3 px-4 text-center'>
                         <div className='flex justify-center space-x-2'>
@@ -705,7 +710,12 @@ useEffect(() => {
                                   ).length ?? 0} / {attendanceRecord[meeting.meetingId]?.length ?? 0} present
                               </div>
                               <div className='text-xs text-[#C8102E] font-medium'>
-                                {(attendanceRecord[meeting.meetingId]?.filter((record) => record.status === 'PRESENT').length / attendanceRecord[meeting.meetingId]?.length) * 100}%
+                               {Math.floor(
+                                  ((attendanceRecord[meeting.meetingId]?.filter(
+                                    record => record.status === 'PRESENT'
+                                  ).length ?? 0) /
+                                    (attendanceRecord[meeting.meetingId]?.length ?? 1)) * 10000
+                                ) / 100}%
                               </div>
                             </div>
                           </div>
@@ -763,7 +773,6 @@ useEffect(() => {
                       ) : (
                         <div className='divide-y divide-gray-200'>
                           {attendanceUsers.map((user) => {
-                            // const isPresent = attendanceRecord[selectedMeetingForCheck.meetingId].
                             const isPresent = attendanceRecord[selectedMeetingForCheck.meetingId]?.some(
                               (record) => record.userId === user.userId && record.status === 'PRESENT'
                             );
@@ -902,7 +911,7 @@ useEffect(() => {
       )}
 
       {/* Edit Attendance Modal - Admin Checklist */}
-      {showEditAttendanceModal && selectedMeeting && (
+      {showEditAttendanceModal && selectedMeeting &&  selectedMeetingForCheck && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto'>
             <h3 className='text-lg font-semibold text-gray-900 mb-2'>Edit Attendance</h3>
@@ -922,7 +931,11 @@ useEffect(() => {
                       Select members who attended:
                     </p>
                     <p className='text-sm text-gray-600'>
-                      {attendanceUsers.filter(u => u.status === 'PRESENT' || u.status === 'Present').length} / {attendanceUsers.length} present
+                      {attendanceRecord[selectedMeeting.meetingId]?.filter(
+                          record => record.status === 'PRESENT'
+                        ).length ?? 0}
+                      {' / '}
+                      {attendanceUsers.length} present
                     </p>
                   </div>
                 </div>
@@ -934,7 +947,9 @@ useEffect(() => {
                   ) : (
                     <div className='divide-y divide-gray-200'>
                       {attendanceUsers.map((user) => {
-                        const isPresent = user.status === 'PRESENT' || user.status === 'Present';
+                        const isPresent = attendanceRecord[(selectedMeetingForCheck).meetingId]?.some(
+                          (record) => record.userId === user.userId && record.status === 'PRESENT'
+                        );
                         return (
                           <label
                             key={user.userId}
