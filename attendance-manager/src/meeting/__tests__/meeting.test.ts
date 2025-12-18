@@ -92,22 +92,24 @@ describe('MeetingServices', () => {
   });
 });
 
-
 describe('MeetingController', () => {
   afterAll(async () => {
     await prisma.$disconnect();
   });
 
   it('should update a meeting via controller', async () => {
-    // Create a test meeting 
-    const testMeeting = await MeetingService.createMeeting({
-      name: 'Controller Test Meeting',
-      startTime: '10:00',
-      date: '2025-12-01',
-      endTime: '11:00',
-      notes: 'Test notes',
-      type: MeetingType.REGULAR,
-    });
+    // Create a test meeting
+    const testMeeting = await MeetingService.createMeeting(
+      {
+        name: 'Controller Test Meeting',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: MeetingType.REGULAR
+      },
+      []
+    );
 
     // Create a mock request with update data
     const updateData = {
@@ -116,15 +118,15 @@ describe('MeetingController', () => {
       date: '2025-12-02',
       endTime: '15:00',
       notes: 'Updated notes',
-      type: MeetingType.FULL_BODY,
+      type: MeetingType.FULL_BODY
     };
 
     const mockRequest = {
-      json: async () => updateData,
+      json: async () => updateData
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId,
+      meetingId: testMeeting.meetingId
     });
 
     expect(response).toBeDefined();
@@ -136,64 +138,67 @@ describe('MeetingController', () => {
     expect(responseData.notes).toBe('Updated notes');
     expect(responseData.type).toBe(MeetingType.FULL_BODY);
 
-    
     await MeetingService.deleteMeeting(testMeeting.meetingId);
   });
 
   it('should reject invalid meeting type via controller', async () => {
-    // Create a test meeting 
-    const testMeeting = await MeetingService.createMeeting({
-      name: 'Invalid Type Test',
-      startTime: '10:00',
-      date: '2025-12-01',
-      endTime: '11:00',
-      notes: 'Test notes',
-      type: MeetingType.REGULAR,
-    });
+    // Create a test meeting
+    const testMeeting = await MeetingService.createMeeting(
+      {
+        name: 'Invalid Type Test',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: MeetingType.REGULAR
+      },
+      []
+    );
 
     // Create mock request with invalid type
     const updateData = {
-      type: 'INVALID_TYPE',
+      type: 'INVALID_TYPE'
     };
 
     const mockRequest = {
-      json: async () => updateData,
+      json: async () => updateData
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId,
+      meetingId: testMeeting.meetingId
     });
 
     expect(response.status).toBe(400);
     const responseData = await response.json();
     expect(responseData.error).toContain('Invalid meeting type');
 
-   
     await MeetingService.deleteMeeting(testMeeting.meetingId);
   });
 
   it('should allow partial updates via controller', async () => {
-    
-    const testMeeting = await MeetingService.createMeeting({
-      name: 'Partial Update Test',
-      startTime: '10:00',
-      date: '2025-12-01',
-      endTime: '11:00',
-      notes: 'Original notes',
-      type: MeetingType.REGULAR,
-    });
+    const testMeeting = await MeetingService.createMeeting(
+      {
+        name: 'Partial Update Test',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Original notes',
+        type: MeetingType.REGULAR
+      },
+      []
+    );
 
     // Update only the name
     const updateData = {
-      name: 'Partially Updated Name',
+      name: 'Partially Updated Name'
     };
 
     const mockRequest = {
-      json: async () => updateData,
+      json: async () => updateData
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId,
+      meetingId: testMeeting.meetingId
     });
 
     expect(response).toBeDefined();
@@ -203,45 +208,47 @@ describe('MeetingController', () => {
     expect(responseData.startTime).toBe('10:00');
     expect(responseData.notes).toBe('Original notes');
 
-    
     await MeetingService.deleteMeeting(testMeeting.meetingId);
   });
 
   it('should handle non-existent meetingId', async () => {
     const updateData = {
-      name: 'Non-existent Meeting',
+      name: 'Non-existent Meeting'
     };
 
     const mockRequest = {
-      json: async () => updateData,
+      json: async () => updateData
     } as Request;
 
     // throw an error for non-existent meetingId
     await expect(
       MeetingController.updateMeeting(mockRequest, {
-        meetingId: 'non-existent-id-12345',
+        meetingId: 'non-existent-id-12345'
       })
     ).rejects.toThrow();
   });
 
   it('should handle empty request body', async () => {
-    const testMeeting = await MeetingService.createMeeting({
-      name: 'Empty Body Test',
-      startTime: '10:00',
-      date: '2025-12-01',
-      endTime: '11:00',
-      notes: 'Test notes',
-      type: MeetingType.REGULAR,
-    });
+    const testMeeting = await MeetingService.createMeeting(
+      {
+        name: 'Empty Body Test',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: MeetingType.REGULAR
+      },
+      []
+    );
 
     const updateData = {};
 
     const mockRequest = {
-      json: async () => updateData,
+      json: async () => updateData
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId,
+      meetingId: testMeeting.meetingId
     });
 
     expect(response).toBeDefined();
@@ -252,25 +259,28 @@ describe('MeetingController', () => {
   });
 
   it('should handle malformed JSON in request', async () => {
-    const testMeeting = await MeetingService.createMeeting({
-      name: 'Malformed JSON Test',
-      startTime: '10:00',
-      date: '2025-12-01',
-      endTime: '11:00',
-      notes: 'Test notes',
-      type: MeetingType.REGULAR,
-    });
+    const testMeeting = await MeetingService.createMeeting(
+      {
+        name: 'Malformed JSON Test',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: MeetingType.REGULAR
+      },
+      []
+    );
 
-    const mockRequest = {
+    const mockRequest = ({
       json: async () => {
         throw new Error('Invalid JSON');
-      },
-    } as unknown as Request;
+      }
+    } as unknown) as Request;
 
     // Should throw error when parsing fails
     await expect(
       MeetingController.updateMeeting(mockRequest, {
-        meetingId: testMeeting.meetingId,
+        meetingId: testMeeting.meetingId
       })
     ).rejects.toThrow('Invalid JSON');
 
@@ -278,25 +288,28 @@ describe('MeetingController', () => {
   });
 
   it('should accept valid FULL_BODY type', async () => {
-    const testMeeting = await MeetingService.createMeeting({
-      name: 'Full Body Type Test',
-      startTime: '10:00',
-      date: '2025-12-01',
-      endTime: '11:00',
-      notes: 'Test notes',
-      type: MeetingType.REGULAR,
-    });
+    const testMeeting = await MeetingService.createMeeting(
+      {
+        name: 'Full Body Type Test',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: MeetingType.REGULAR
+      },
+      []
+    );
 
     const updateData = {
-      type: MeetingType.FULL_BODY,
+      type: MeetingType.FULL_BODY
     };
 
     const mockRequest = {
-      json: async () => updateData,
+      json: async () => updateData
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId,
+      meetingId: testMeeting.meetingId
     });
 
     expect(response).toBeDefined();
@@ -307,25 +320,28 @@ describe('MeetingController', () => {
   });
 
   it('should accept valid REGULAR type', async () => {
-    const testMeeting = await MeetingService.createMeeting({
-      name: 'Regular Type Test',
-      startTime: '10:00',
-      date: '2025-12-01',
-      endTime: '11:00',
-      notes: 'Test notes',
-      type: MeetingType.FULL_BODY,
-    });
+    const testMeeting = await MeetingService.createMeeting(
+      {
+        name: 'Regular Type Test',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: MeetingType.FULL_BODY
+      },
+      []
+    );
 
     const updateData = {
-      type: MeetingType.REGULAR,
+      type: MeetingType.REGULAR
     };
 
     const mockRequest = {
-      json: async () => updateData,
+      json: async () => updateData
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId,
+      meetingId: testMeeting.meetingId
     });
 
     expect(response).toBeDefined();
