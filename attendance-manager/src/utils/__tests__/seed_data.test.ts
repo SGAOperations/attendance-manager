@@ -45,7 +45,7 @@ describe('AttendanceController', () => {
       data: {
         nuid: '001234570',
         password: 'password',
-        email: 'testuser2@example.com',
+        email: 'testuser2@example.edu',
         firstName: 'Test2',
         lastName: 'User2',
         roleId: memberRole.roleId
@@ -57,7 +57,7 @@ describe('AttendanceController', () => {
       data: {
         nuid: '001234571',
         password: 'password',
-        email: 'admin@northeastern.com',
+        email: 'admin@northeastern.edu',
         firstName: 'Test3',
         lastName: 'User3',
         roleId: adminRole.roleId
