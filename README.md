@@ -17,12 +17,12 @@ Backend:
 
 - Framework: [Next.js](https://nextjs.org/docs)
 - ORM: [Prisma](https://www.prisma.io/docs)
-- Database: [PostgreSQL](https://www.postgresql.org/docs/) (hosted on [Firebase](https://firebase.google.com/docs))
+- Database: [PostgreSQL](https://www.postgresql.org/docs/) (hosted on [Supabase](https://supabase.com/docs))
 
 Hosting/Deployment:
 - [Vercel](https://vercel.com/docs)
 
-Authentication: TBD
+Authentication: Supabase Auth
 
 Components: TBD
 
@@ -37,8 +37,8 @@ Prerequisites: make sure everything is installed
 First, clone the repo and `cd` into the directory
 
 ```bash
-git clone https://github.com/SGAOperationalAffairs/new-attendance-manager.git
-cd new-attendance-manager
+git clone https://github.com/SGAOperations/attendance-manager.git
+cd attendance-manager
 cd attendance-manager
 ```
 
@@ -70,21 +70,9 @@ Anusha Narang
 Daniel Kaplan
 Logan Ravinuthala
 Natalia Ivanov
+Mahika Sharma
+Grace Sosa
 ```
 
 ## Todos
-- [ ] Add functionality for doing attendance and confirming
-- [ ] Add functionality for making requests
-- [ ] Differentiate full body meeting and regular meeting
-- [ ] Allow adming to change individual attendance
-- [ ] Have a locally hosted database for dev instead of on Render
-
-- [ ] Refactor code to match common NextJS design
-
-- [ ] Clean up pipeline checks
-
-- [ ] Deploy on Vercel
-- [ ] Bulk Add Members
-- [ ] Add documentation on linking Linear to GitHub
-- [ ] Unit test for both frontend and backend
-- [ ] Allow users to make requests and admin to approve/deny requests
+https://linear.app/nusga/team/ATM/active 
