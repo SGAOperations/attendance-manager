@@ -453,8 +453,8 @@ const MeetingsPage: React.FC = () => {
       });
       setShowCreateRequestModal(false);
     } catch (error) {
-      console.error('Error creating request:', error);
-      alert(`Failed to create request: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to create request: ${message}`);
     }
   };
 
@@ -514,8 +514,9 @@ const MeetingsPage: React.FC = () => {
                   const userRequests = await response.json();
                   setMyRequests(userRequests || []);
                 } catch (error) {
-                  console.error('Error fetching my requests:', error);
-                  alert(`Failed to load requests: ${error.message}`);
+                  const message =
+                    error instanceof Error ? error.message : 'Unknown error';
+                  alert(`Failed to load requests: ${message}`);
                   setMyRequests([]);
                 }
               }}

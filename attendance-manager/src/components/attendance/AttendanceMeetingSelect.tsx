@@ -7,18 +7,18 @@ interface AttendanceMeetingSelectProps {
     startTime: string;
     endTime: string;
   }[];
-  attendanceRecord: {
-    [meetingId: string]: { status: 'PRESENT' | 'ABSENT' }[];
-  };
+  attendanceRecord: Record<string, { status: string }[]>;
   handleMeetingSelection: (meeting: any) => void;
   closeAttendanceCheck: () => void;
+  editAttendance?: boolean;
 }
 
 const AttedanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
   meetingsWithAttendance,
   attendanceRecord,
   handleMeetingSelection,
-  closeAttendanceCheck
+  closeAttendanceCheck,
+  editAttendance = false,
 }) => {
   return (
     <>
@@ -113,7 +113,9 @@ const AttedanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
         )}
       </div>
 
-      <div className='flex space-x-3 mt-6'>
+      {
+        !editAttendance && (
+             <div className='flex space-x-3 mt-6'>
         <button
           type='button'
           onClick={closeAttendanceCheck}
@@ -122,6 +124,9 @@ const AttedanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
           Cancel
         </button>
       </div>
+        )
+      }
+     
     </>
   );
 };
