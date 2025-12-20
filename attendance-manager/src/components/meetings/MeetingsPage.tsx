@@ -34,7 +34,9 @@ const MeetingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'past' | 'upcoming'>('past');
   const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
   const [showEditMeetingModal, setShowEditMeetingModal] = useState(false);
-  const [editingMeeting, setEditingMeeting] = useState<MeetingApiData | null>(null);
+  const [editingMeeting, setEditingMeeting] = useState<MeetingApiData | null>(
+    null
+  );
   const [newMeeting, setNewMeeting] = useState({
     name: '',
     date: '',
@@ -66,11 +68,14 @@ const MeetingsPage: React.FC = () => {
     explanation: ''
   });
   const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
-  
+
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
   const isMember = user?.role === 'MEMBER';
-  const [remainingAbsences, setRemainingAbsences] = useState<RemainingAbsences | null>(null);
+  const [
+    remainingAbsences,
+    setRemainingAbsences
+  ] = useState<RemainingAbsences | null>(null);
 
   const fetchMeetings = () => {
     fetch('/api/meeting')
@@ -107,23 +112,25 @@ const MeetingsPage: React.FC = () => {
       const response = await fetch(`/api/meeting/${editingMeeting.meetingId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(editMeeting),
+        body: JSON.stringify(editMeeting)
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(`Failed to update meeting: ${errorData.error || 'Unknown error'}`);
+        alert(
+          `Failed to update meeting: ${errorData.error || 'Unknown error'}`
+        );
         return;
       }
 
       const updatedMeeting = await response.json();
       console.log('Meeting updated:', updatedMeeting);
-      
+
       // Refresh meetings list
       fetchMeetings();
-      
+
       // Close modal and reset
       setShowEditMeetingModal(false);
       setEditingMeeting(null);
@@ -166,15 +173,17 @@ const MeetingsPage: React.FC = () => {
     fetch('/api/users')
       .then(response => response.json())
       .then(json => {
-        setMembers(json.map((u: any) => ({
-          id: u.userId,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          email: u.email,
-          role: u.role,
-          joinDate: new Date(),
-          status: 'active'
-        })));
+        setMembers(
+          json.map((u: any) => ({
+            id: u.userId,
+            firstName: u.firstName,
+            lastName: u.lastName,
+            email: u.email,
+            role: u.role,
+            joinDate: new Date(),
+            status: 'active'
+          }))
+        );
       })
       .catch(error => console.error(error));
   }, []);
@@ -187,10 +196,13 @@ const MeetingsPage: React.FC = () => {
     () => nonEboardMembers.map(member => member.id),
     [nonEboardMembers]
   );
-  const allMemberIds = useMemo(() => members.map(member => member.id), [members]);
-  const selectedAttendeeSet = useMemo(() => new Set(newMeeting.selectedAttendees), [
-    newMeeting.selectedAttendees
+  const allMemberIds = useMemo(() => members.map(member => member.id), [
+    members
   ]);
+  const selectedAttendeeSet = useMemo(
+    () => new Set(newMeeting.selectedAttendees),
+    [newMeeting.selectedAttendees]
+  );
 
   const bulkSelectButtonClasses = (active: boolean) =>
     `px-3 py-1 text-xs font-medium border rounded-full transition-colors ${
@@ -235,23 +247,20 @@ const MeetingsPage: React.FC = () => {
     if (!allSelected) {
       setBulkSelectionActive(prev => ({ ...prev, nonEboard: false }));
     }
-  }, [
-    bulkSelectionActive.nonEboard,
-    nonEboardMemberIds,
-    selectedAttendeeSet
-  ]);
+  }, [bulkSelectionActive.nonEboard, nonEboardMemberIds, selectedAttendeeSet]);
 
   useEffect(() => {
     if (!bulkSelectionActive.allMembers) return;
     const allSelected =
-      allMemberIds.length > 0 && allMemberIds.every(id => selectedAttendeeSet.has(id));
+      allMemberIds.length > 0 &&
+      allMemberIds.every(id => selectedAttendeeSet.has(id));
     if (!allSelected) {
       setBulkSelectionActive(prev => ({ ...prev, allMembers: false }));
     }
   }, [bulkSelectionActive.allMembers, allMemberIds, selectedAttendeeSet]);
 
-// Mock Meeting
-/* const mockMeetings: MeetingApiData[] = [
+  // Mock Meeting
+  /* const mockMeetings: MeetingApiData[] = [
     {
       type: 'FULL_BODY',
       meetingId: '1',
@@ -271,23 +280,28 @@ const MeetingsPage: React.FC = () => {
     const meetingDate = new Date(m.date);
     if (meetingDate > today) return false; // Skip upcoming meetings
     // Check if current user attended this meeting
-    return m.attendance.some(a => a.userId === user?.id && a.status === 'PRESENT');
+    return m.attendance.some(
+      a => a.userId === user?.id && a.status === 'PRESENT'
+    );
   }).length;
 
   const missedMeetings = meetings.filter(m => {
     const meetingDate = new Date(m.date);
     if (meetingDate > today) return false; // Skip upcoming meetings
     // Check if current user was absent
-    return m.attendance.some(a => 
-      a.userId === user?.id && 
-      (a.status === 'UNEXCUSED_ABSENCE' || a.status === 'EXCUSED_ABSENCE')
+    return m.attendance.some(
+      a =>
+        a.userId === user?.id &&
+        (a.status === 'UNEXCUSED_ABSENCE' || a.status === 'EXCUSED_ABSENCE')
     );
   }).length;
 
-  const upcomingMeetings = meetings.filter(m => new Date(m.date) > today).length; 
+  const upcomingMeetings = meetings.filter(m => new Date(m.date) > today)
+    .length;
 
   // Filter meetings based on active tab
-  const filteredMeetings = meetings.filter(m => { // change to 'meetings' for implementation
+  const filteredMeetings = meetings.filter(m => {
+    // change to 'meetings' for implementation
     const meetingDate = new Date(m.date);
     if (activeTab === 'past') {
       return meetingDate <= today;
@@ -296,9 +310,9 @@ const MeetingsPage: React.FC = () => {
     }
   });
   function parseEST(dateString: string) {
-  return new Date(`${dateString}T00:00:00-05:00`);
-}
-  
+    return new Date(`${dateString}T00:00:00-05:00`);
+  }
+
   // Get upcoming meetings for request creation
   const upcomingMeetingsList = meetings.filter(m => parseEST(m.date) > today);
 
@@ -314,9 +328,11 @@ const MeetingsPage: React.FC = () => {
       return;
     }
 
-    if (!requestForm.requestTypes.leavingEarly && 
-        !requestForm.requestTypes.comingLate && 
-        !requestForm.requestTypes.goingOnline) {
+    if (
+      !requestForm.requestTypes.leavingEarly &&
+      !requestForm.requestTypes.comingLate &&
+      !requestForm.requestTypes.goingOnline
+    ) {
       alert('Please select at least one request type');
       return;
     }
@@ -325,15 +341,25 @@ const MeetingsPage: React.FC = () => {
       alert('Please provide an explanation');
       return;
     }
-    
+
     // Map frontend form data to backend format
     // attendanceMode: if goingOnline is checked, use ONLINE, otherwise IN_PERSON
-    const attendanceMode = requestForm.requestTypes.goingOnline ? 'ONLINE' : 'IN_PERSON';
-    
+    const attendanceMode = requestForm.requestTypes.goingOnline
+      ? 'ONLINE'
+      : 'IN_PERSON';
+
     // timeAdjustment: can only have one (leavingEarly or comingLate)
-    let timeAdjustment: 'ARRIVING_LATE' | 'LEAVING_EARLY' | undefined = undefined;
-    if (requestForm.requestTypes.leavingEarly && requestForm.requestTypes.comingLate) {
-      alert('Please select only one time adjustment (either leaving early OR coming late)');
+    let timeAdjustment:
+      | 'ARRIVING_LATE'
+      | 'LEAVING_EARLY'
+      | undefined = undefined;
+    if (
+      requestForm.requestTypes.leavingEarly &&
+      requestForm.requestTypes.comingLate
+    ) {
+      alert(
+        'Please select only one time adjustment (either leaving early OR coming late)'
+      );
       return;
     } else if (requestForm.requestTypes.leavingEarly) {
       timeAdjustment = 'LEAVING_EARLY';
@@ -358,20 +384,28 @@ const MeetingsPage: React.FC = () => {
         });
 
         if (!attendanceResponse.ok) {
-          throw new Error(`Failed to create/update attendance for meeting ${meetingId}`);
+          throw new Error(
+            `Failed to create/update attendance for meeting ${meetingId}`
+          );
         }
 
         // Fetch the user's attendance to find the one we just created/updated
-        const userAttendanceResponse = await fetch(`/api/attendance/user/${user.id}`);
+        const userAttendanceResponse = await fetch(
+          `/api/attendance/user/${user.id}`
+        );
         if (!userAttendanceResponse.ok) {
           throw new Error('Failed to fetch attendance record'); // single quotes
         }
-        
+
         const userAttendance = await userAttendanceResponse.json();
-        const attendanceRecord = userAttendance.find((a: any) => a.meetingId === meetingId);
-        
+        const attendanceRecord = userAttendance.find(
+          (a: any) => a.meetingId === meetingId
+        );
+
         if (!attendanceRecord || !attendanceRecord.attendanceId) {
-          throw new Error(`Attendance record not found for meeting ${meetingId}`);
+          throw new Error(
+            `Attendance record not found for meeting ${meetingId}`
+          );
         }
 
         const attendanceId = attendanceRecord.attendanceId;
@@ -382,7 +416,7 @@ const MeetingsPage: React.FC = () => {
           reason: requestForm.explanation,
           attendanceMode
         };
-        
+
         if (timeAdjustment) {
           requestPayload.timeAdjustment = timeAdjustment;
         }
@@ -395,7 +429,10 @@ const MeetingsPage: React.FC = () => {
 
         if (!requestResponse.ok) {
           const errorData = await requestResponse.json();
-          throw new Error(errorData.error || `Failed to create request for meeting ${meetingId}`);
+          throw new Error(
+            errorData.error ||
+              `Failed to create request for meeting ${meetingId}`
+          );
         }
 
         const newRequest = await requestResponse.json();
@@ -403,7 +440,7 @@ const MeetingsPage: React.FC = () => {
       }
 
       alert(`Successfully created ${requests.length} request(s)!`);
-      
+
       // Reset form and close modal
       setRequestForm({
         selectedMeetings: [],
@@ -415,7 +452,7 @@ const MeetingsPage: React.FC = () => {
         explanation: ''
       });
       setShowCreateRequestModal(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating request:', error);
       alert(`Failed to create request: ${error.message}`);
     }
@@ -423,16 +460,16 @@ const MeetingsPage: React.FC = () => {
 
   // visibleMeetings are meetings post-type-filter
   const visibleMeetings = typeFilter
-  ? filteredMeetings.filter((m) => m.type === typeFilter)
-  : filteredMeetings; 
+    ? filteredMeetings.filter(m => m.type === typeFilter)
+    : filteredMeetings;
 
   // Determine banner color based on remaining absences
   const getBannerColor = () => {
     if (!remainingAbsences) return 'bg-blue-50 border-blue-200';
-    
+
     const regularRemaining = remainingAbsences.regular.remaining;
     const fullBodyRemaining = remainingAbsences.fullBody.remaining;
-    
+
     // Red if no absences left for either type
     if (regularRemaining === 0 || fullBodyRemaining === 0) {
       return 'bg-red-50 border-red-200';
@@ -468,13 +505,15 @@ const MeetingsPage: React.FC = () => {
                 setShowMyRequestsModal(true);
                 try {
                   // Fetch user's requests using the new endpoint
-                  const response = await fetch(`/api/attendance/user/requests/${user?.id}`);
+                  const response = await fetch(
+                    `/api/attendance/user/requests/${user?.id}`
+                  );
                   if (!response.ok) {
                     throw new Error('Failed to fetch requests');
                   }
                   const userRequests = await response.json();
                   setMyRequests(userRequests || []);
-                } catch (error: any) {
+                } catch (error) {
                   console.error('Error fetching my requests:', error);
                   alert(`Failed to load requests: ${error.message}`);
                   setMyRequests([]);
@@ -491,55 +530,59 @@ const MeetingsPage: React.FC = () => {
       {/* Remaining Unexcused Absences Banner */}
       {remainingAbsences && (
         <div className={`mb-6 rounded-lg border-2 p-4 ${getBannerColor()}`}>
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
+          <div className='flex items-start'>
+            <div className='flex-shrink-0'>
               <svg
-                className="w-6 h-6 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                className='w-6 h-6 text-gray-600'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
                   strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
                 />
               </svg>
             </div>
-            <div className="ml-3 flex-1">
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">
+            <div className='ml-3 flex-1'>
+              <h3 className='text-sm font-semibold text-gray-900 mb-2'>
                 Remaining Unexcused Absences
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">Regular Meetings:</span>{' '}
-                    <span className={`font-bold ${
-                      remainingAbsences.regular.remaining === 0
-                        ? 'text-red-600'
-                        : remainingAbsences.regular.remaining <= 1
-                        ? 'text-yellow-600'
-                        : 'text-green-600'
-                    }`}>
+                  <p className='text-sm text-gray-700'>
+                    <span className='font-medium'>Regular Meetings:</span>{' '}
+                    <span
+                      className={`font-bold ${
+                        remainingAbsences.regular.remaining === 0
+                          ? 'text-red-600'
+                          : remainingAbsences.regular.remaining <= 1
+                          ? 'text-yellow-600'
+                          : 'text-green-600'
+                      }`}
+                    >
                       {remainingAbsences.regular.remaining}
-                    </span>
-                    {' '}remaining out of {remainingAbsences.regular.allowed} allowed
-                    {' '}({remainingAbsences.regular.used} used)
+                    </span>{' '}
+                    remaining out of {remainingAbsences.regular.allowed} allowed{' '}
+                    ({remainingAbsences.regular.used} used)
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">Full-Body Meetings:</span>{' '}
-                    <span className={`font-bold ${
-                      remainingAbsences.fullBody.remaining === 0
-                        ? 'text-red-600'
-                        : 'text-green-600'
-                    }`}>
+                  <p className='text-sm text-gray-700'>
+                    <span className='font-medium'>Full-Body Meetings:</span>{' '}
+                    <span
+                      className={`font-bold ${
+                        remainingAbsences.fullBody.remaining === 0
+                          ? 'text-red-600'
+                          : 'text-green-600'
+                      }`}
+                    >
                       {remainingAbsences.fullBody.remaining}
-                    </span>
-                    {' '}remaining out of {remainingAbsences.fullBody.allowed} allowed
-                    {' '}({remainingAbsences.fullBody.used} used)
+                    </span>{' '}
+                    remaining out of {remainingAbsences.fullBody.allowed}{' '}
+                    allowed ({remainingAbsences.fullBody.used} used)
                   </p>
                 </div>
               </div>
@@ -681,44 +724,46 @@ const MeetingsPage: React.FC = () => {
                         <summary className='list-none cursor-pointer hover:underline select-none'>
                           Type&#9662;{typeFilter ? ` (${typeFilter})` : ''}
                         </summary>
-                            <div className='absolute z-10 mt-2 w-40 rounded-md border bg-white shadow'>
+                        <div className='absolute z-10 mt-2 w-40 rounded-md border bg-white shadow'>
+                          <button
+                            className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                              typeFilter === null ? 'font-semibold' : ''
+                            }`}
+                            onClick={() => {
+                              setTypeFilter(null);
+                              (document.activeElement as HTMLElement | null)?.blur(); // close <details> quickly
+                            }}
+                          >
+                            All
+                          </button>
+                          <div className='border-t my-1' />
+                          {['FULL_BODY', 'REGULAR'].map(t => {
+                            const label =
+                              t === 'FULL_BODY'
+                                ? 'Full Body'
+                                : t.charAt(0) + t.slice(1).toLowerCase(); // REGULAR → Regular
+                            return (
                               <button
-                                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${typeFilter === null ? 'font-semibold' : ''}`}
+                                key={t}
+                                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                  typeFilter === t ? 'font-semibold' : ''
+                                }`}
                                 onClick={() => {
-                                setTypeFilter(null);
-                                (document.activeElement as HTMLElement | null)?.blur(); // close <details> quickly
-                                                }}
-                                >
-                                All
-                              </button>
-                            <div className='border-t my-1' />
-                              {['FULL_BODY', 'REGULAR'].map((t) => {
-                                const label =
-                                  t === 'FULL_BODY'
-                                  ? 'Full Body'
-                                  : t.charAt(0) + t.slice(1).toLowerCase(); // REGULAR → Regular
-                                return (
-                                  <button
-                                      key={t}
-                                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                                      typeFilter === t ? 'font-semibold' : ''
-                                      }`}
-                                    onClick={() => {
-                                      setTypeFilter(t as 'FULL_BODY' | 'REGULAR');
-                                      (document.activeElement as HTMLElement | null)?.blur();
-                                    }}
-                                  >
+                                  setTypeFilter(t as 'FULL_BODY' | 'REGULAR');
+                                  (document.activeElement as HTMLElement | null)?.blur();
+                                }}
+                              >
                                 {label}
-                                  </button>
-                                );
-                             })}
-                              </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </details>
                     </th>
                     <th className='text-right py-3 px-4 font-medium text-gray-900'>
                       # of Members
                     </th>
-                    <th className="text-center py-3 px-4 font-medium text-gray-900">
+                    <th className='text-center py-3 px-4 font-medium text-gray-900'>
                       Actions
                     </th>
                   </tr>
@@ -726,7 +771,10 @@ const MeetingsPage: React.FC = () => {
                 <tbody>
                   {meetings.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-8 text-gray-500">
+                      <td
+                        colSpan={5}
+                        className='text-center py-8 text-gray-500'
+                      >
                         No meetings found
                       </td>
                     </tr>
@@ -734,38 +782,38 @@ const MeetingsPage: React.FC = () => {
                     meetings.map(meeting => (
                       <tr
                         key={meeting.meetingId}
-                        className="border-b border-gray-100 hover:bg-gray-50"
+                        className='border-b border-gray-100 hover:bg-gray-50'
                       >
-                        <td className="py-3 px-4">
-                          <div className="text-sm text-gray-900">
+                        <td className='py-3 px-4'>
+                          <div className='text-sm text-gray-900'>
                             {meeting.date}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className='text-xs text-gray-500'>
                             {meeting.startTime} - {meeting.endTime}
                           </div>
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm font-medium text-gray-900">
+                        <td className='py-3 px-4'>
+                          <div className='text-sm font-medium text-gray-900'>
                             {meeting.name}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className='text-xs text-gray-500'>
                             {meeting.type}
                           </div>
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="text-sm text-gray-600">
+                        <td className='py-3 px-4'>
+                          <div className='text-sm text-gray-600'>
                             {meeting.notes}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-right">
-                          <div className="text-sm font-medium text-gray-900">
+                        <td className='py-3 px-4 text-right'>
+                          <div className='text-sm font-medium text-gray-900'>
                             {meeting.attendance?.length || 0}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-center">
+                        <td className='py-3 px-4 text-center'>
                           <button
                             onClick={() => handleEditMeeting(meeting)}
-                            className="px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors"
+                            className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
                           >
                             Edit
                           </button>
@@ -947,7 +995,10 @@ const MeetingsPage: React.FC = () => {
                 <select
                   value={newMeeting.type || 'REGULAR'}
                   onChange={e =>
-                    setNewMeeting(prev => ({ ...prev, type: e.target.value as 'FULL_BODY' | 'REGULAR' }))
+                    setNewMeeting(prev => ({
+                      ...prev,
+                      type: e.target.value as 'FULL_BODY' | 'REGULAR'
+                    }))
                   }
                   className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
                 >
@@ -958,7 +1009,7 @@ const MeetingsPage: React.FC = () => {
 
               {/* Meeting Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Meeting Type
                 </label>
                 <select
@@ -969,17 +1020,17 @@ const MeetingsPage: React.FC = () => {
                       type: e.target.value as 'FULL_BODY' | 'REGULAR'
                     }))
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
                   required
                 >
-                  <option value="REGULAR">Regular</option>
-                  <option value="FULL_BODY">Full Body</option>
+                  <option value='REGULAR'>Regular</option>
+                  <option value='FULL_BODY'>Full Body</option>
                 </select>
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Notes
                 </label>
                 <textarea
@@ -987,8 +1038,8 @@ const MeetingsPage: React.FC = () => {
                   onChange={e =>
                     setNewMeeting(prev => ({ ...prev, notes: e.target.value }))
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
-                  placeholder="Enter meeting notes"
+                  className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
+                  placeholder='Enter meeting notes'
                   rows={4}
                   required
                 />
@@ -1003,14 +1054,18 @@ const MeetingsPage: React.FC = () => {
                   <button
                     type='button'
                     onClick={toggleNonEboardSelection}
-                    className={bulkSelectButtonClasses(bulkSelectionActive.nonEboard)}
+                    className={bulkSelectButtonClasses(
+                      bulkSelectionActive.nonEboard
+                    )}
                   >
                     Select All Members (Non-Eboard)
                   </button>
                   <button
                     type='button'
                     onClick={toggleAllMembersSelection}
-                    className={bulkSelectButtonClasses(bulkSelectionActive.allMembers)}
+                    className={bulkSelectButtonClasses(
+                      bulkSelectionActive.allMembers
+                    )}
                   >
                     Select Everyone (Eboard + Members)
                   </button>
@@ -1063,7 +1118,9 @@ const MeetingsPage: React.FC = () => {
                               : 'bg-gray-100 text-gray-600'
                           }`}
                         >
-                          {member.role.roleType === 'EBOARD' ? 'Eboard' : 'Member'}
+                          {member.role.roleType === 'EBOARD'
+                            ? 'Eboard'
+                            : 'Member'}
                         </span>
                       </div>
                     </label>
@@ -1097,14 +1154,14 @@ const MeetingsPage: React.FC = () => {
                 <button
                   type='submit'
                   className='flex-1 px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium'
-                  onClick={async (e) => {
+                  onClick={async e => {
                     e.preventDefault();
-                    
+
                     try {
                       const response = await fetch('/api/meeting', {
                         method: 'POST',
                         headers: {
-                          'Content-Type': 'application/json',
+                          'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
                           name: newMeeting.name,
@@ -1113,22 +1170,22 @@ const MeetingsPage: React.FC = () => {
                           endTime: newMeeting.endTime,
                           notes: newMeeting.notes,
                           type: newMeeting.type,
-                          attendeeIds: newMeeting.selectedAttendees,
-                        }),
+                          attendeeIds: newMeeting.selectedAttendees
+                        })
                       });
-                      
+
                       if (!response.ok) {
                         throw new Error('Failed to create meeting');
                       }
-                      
+
                       const createdMeeting = await response.json();
                       console.log('Meeting created:', createdMeeting);
-                      
+
                       // Refresh meetings list
                       const meetingsResponse = await fetch('/api/meeting');
                       const updatedMeetings = await meetingsResponse.json();
                       setMeetings(updatedMeetings);
-                      
+
                       // Close modal and reset form
                       setShowCreateMeetingModal(false);
                       setNewMeeting({
@@ -1140,7 +1197,7 @@ const MeetingsPage: React.FC = () => {
                         type: 'REGULAR',
                         selectedAttendees: []
                       });
-                      
+
                       alert('Meeting created successfully!');
                     } catch (error) {
                       console.error('Error creating meeting:', error);
@@ -1158,51 +1215,54 @@ const MeetingsPage: React.FC = () => {
 
       {/* Edit Meeting Modal */}
       {showEditMeetingModal && editingMeeting && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto'>
+            <h3 className='text-xl font-semibold text-gray-900 mb-6'>
               Edit Meeting
             </h3>
-            <form className="space-y-6" onSubmit={handleUpdateMeeting}>
+            <form className='space-y-6' onSubmit={handleUpdateMeeting}>
               {/* Meeting Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Meeting Name
                 </label>
                 <input
-                  type="text"
+                  type='text'
                   value={editMeeting.name}
                   onChange={e =>
                     setEditMeeting(prev => ({ ...prev, name: e.target.value }))
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
-                  placeholder="Enter meeting name"
+                  className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
+                  placeholder='Enter meeting name'
                   required
                 />
               </div>
 
               {/* Date and Time */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
                     Date
                   </label>
                   <input
-                    type="date"
+                    type='date'
                     value={editMeeting.date}
                     onChange={e =>
-                      setEditMeeting(prev => ({ ...prev, date: e.target.value }))
+                      setEditMeeting(prev => ({
+                        ...prev,
+                        date: e.target.value
+                      }))
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
                     Start Time
                   </label>
                   <input
-                    type="time"
+                    type='time'
                     value={editMeeting.startTime}
                     onChange={e =>
                       setEditMeeting(prev => ({
@@ -1210,16 +1270,16 @@ const MeetingsPage: React.FC = () => {
                         startTime: e.target.value
                       }))
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
                     End Time
                   </label>
                   <input
-                    type="time"
+                    type='time'
                     value={editMeeting.endTime}
                     onChange={e =>
                       setEditMeeting(prev => ({
@@ -1227,7 +1287,7 @@ const MeetingsPage: React.FC = () => {
                         endTime: e.target.value
                       }))
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                    className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
                     required
                   />
                 </div>
@@ -1235,7 +1295,7 @@ const MeetingsPage: React.FC = () => {
 
               {/* Meeting Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Meeting Type
                 </label>
                 <select
@@ -1246,17 +1306,17 @@ const MeetingsPage: React.FC = () => {
                       type: e.target.value as 'FULL_BODY' | 'REGULAR'
                     }))
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
+                  className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
                   required
                 >
-                  <option value="REGULAR">Regular</option>
-                  <option value="FULL_BODY">Full Body</option>
+                  <option value='REGULAR'>Regular</option>
+                  <option value='FULL_BODY'>Full Body</option>
                 </select>
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Notes
                 </label>
                 <textarea
@@ -1264,17 +1324,17 @@ const MeetingsPage: React.FC = () => {
                   onChange={e =>
                     setEditMeeting(prev => ({ ...prev, notes: e.target.value }))
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]"
-                  placeholder="Enter meeting notes"
+                  className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
+                  placeholder='Enter meeting notes'
                   rows={4}
                   required
                 />
               </div>
 
               {/* Action Buttons */}
-              <div className="flex space-x-4 pt-6 border-t border-gray-200">
+              <div className='flex space-x-4 pt-6 border-t border-gray-200'>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => {
                     setShowEditMeetingModal(false);
                     setEditingMeeting(null);
@@ -1287,13 +1347,13 @@ const MeetingsPage: React.FC = () => {
                       type: 'REGULAR'
                     });
                   }}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                  className='flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium'
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium"
+                  type='submit'
+                  className='flex-1 px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium'
                 >
                   Update Meeting
                 </button>
@@ -1310,7 +1370,7 @@ const MeetingsPage: React.FC = () => {
             <h3 className='text-xl font-semibold text-gray-900 mb-6'>
               Create Attendance Request
             </h3>
-            
+
             {/* Select Upcoming Meetings */}
             <div className='mb-6'>
               <label className='block text-sm font-medium text-gray-700 mb-3'>
@@ -1318,7 +1378,9 @@ const MeetingsPage: React.FC = () => {
               </label>
               <div className='max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-3'>
                 {upcomingMeetingsList.length === 0 ? (
-                  <p className='text-center py-4 text-gray-500'>No upcoming meetings available</p>
+                  <p className='text-center py-4 text-gray-500'>
+                    No upcoming meetings available
+                  </p>
                 ) : (
                   upcomingMeetingsList.map(meeting => (
                     <label
@@ -1327,12 +1389,17 @@ const MeetingsPage: React.FC = () => {
                     >
                       <input
                         type='checkbox'
-                        checked={requestForm.selectedMeetings.includes(meeting.meetingId)}
+                        checked={requestForm.selectedMeetings.includes(
+                          meeting.meetingId
+                        )}
                         onChange={e => {
                           if (e.target.checked) {
                             setRequestForm(prev => ({
                               ...prev,
-                              selectedMeetings: [...prev.selectedMeetings, meeting.meetingId]
+                              selectedMeetings: [
+                                ...prev.selectedMeetings,
+                                meeting.meetingId
+                              ]
                             }));
                           } else {
                             setRequestForm(prev => ({
@@ -1350,10 +1417,13 @@ const MeetingsPage: React.FC = () => {
                           {meeting.name}
                         </p>
                         <p className='text-xs text-gray-500'>
-                          {new Date(meeting.date).toLocaleDateString()} • {meeting.startTime} - {meeting.endTime}
+                          {new Date(meeting.date).toLocaleDateString()} •{' '}
+                          {meeting.startTime} - {meeting.endTime}
                         </p>
                         {meeting.notes && (
-                          <p className='text-xs text-gray-400 mt-1'>{meeting.notes}</p>
+                          <p className='text-xs text-gray-400 mt-1'>
+                            {meeting.notes}
+                          </p>
                         )}
                       </div>
                     </label>
@@ -1387,8 +1457,12 @@ const MeetingsPage: React.FC = () => {
                     className='w-4 h-4 text-[#C8102E] border-gray-300 rounded focus:ring-[#C8102E]'
                   />
                   <div className='flex-1'>
-                    <p className='text-sm font-medium text-gray-900'>Leaving Early</p>
-                    <p className='text-xs text-gray-500'>I need to leave the meeting early</p>
+                    <p className='text-sm font-medium text-gray-900'>
+                      Leaving Early
+                    </p>
+                    <p className='text-xs text-gray-500'>
+                      I need to leave the meeting early
+                    </p>
                   </div>
                 </label>
 
@@ -1408,8 +1482,12 @@ const MeetingsPage: React.FC = () => {
                     className='w-4 h-4 text-[#C8102E] border-gray-300 rounded focus:ring-[#C8102E]'
                   />
                   <div className='flex-1'>
-                    <p className='text-sm font-medium text-gray-900'>Coming Late</p>
-                    <p className='text-xs text-gray-500'>I will arrive late to the meeting</p>
+                    <p className='text-sm font-medium text-gray-900'>
+                      Coming Late
+                    </p>
+                    <p className='text-xs text-gray-500'>
+                      I will arrive late to the meeting
+                    </p>
                   </div>
                 </label>
 
@@ -1429,8 +1507,12 @@ const MeetingsPage: React.FC = () => {
                     className='w-4 h-4 text-[#C8102E] border-gray-300 rounded focus:ring-[#C8102E]'
                   />
                   <div className='flex-1'>
-                    <p className='text-sm font-medium text-gray-900'>Attending Online</p>
-                    <p className='text-xs text-gray-500'>I will attend the meeting online instead of in person</p>
+                    <p className='text-sm font-medium text-gray-900'>
+                      Attending Online
+                    </p>
+                    <p className='text-xs text-gray-500'>
+                      I will attend the meeting online instead of in person
+                    </p>
                   </div>
                 </label>
               </div>
@@ -1444,7 +1526,10 @@ const MeetingsPage: React.FC = () => {
               <textarea
                 value={requestForm.explanation}
                 onChange={e =>
-                  setRequestForm(prev => ({ ...prev, explanation: e.target.value }))
+                  setRequestForm(prev => ({
+                    ...prev,
+                    explanation: e.target.value
+                  }))
                 }
                 className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
                 placeholder='Please provide a brief explanation for your request...'
@@ -1492,8 +1577,10 @@ const MeetingsPage: React.FC = () => {
             <h3 className='text-xl font-semibold text-gray-900 mb-6'>
               My Submitted Requests
             </h3>
-            
-            {myRequests.filter((r: any) => r.AttendanceStatus !== 'EXCUSED_ABSENCE').length === 0 ? (
+
+            {myRequests.filter(
+              (r: any) => r.AttendanceStatus !== 'EXCUSED_ABSENCE'
+            ).length === 0 ? (
               <div className='text-center py-12'>
                 <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
                   <svg
@@ -1521,97 +1608,106 @@ const MeetingsPage: React.FC = () => {
               <div className='space-y-4'>
                 {myRequests
                   .filter((r: any) => r.AttendanceStatus !== 'EXCUSED_ABSENCE')
-                  .map((request) => (
-                  <div
-                    key={request.requestId}
-                    className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
-                  >
-                    <div className='flex justify-between items-start mb-4'>
-                      <div className='flex-1'>
-                        {/* Meeting Info */}
-                        <div className='mb-3'>
-                          <h4 className='text-lg font-semibold text-gray-900 mb-1'>
-                            {request.attendance.meeting.name}
-                          </h4>
-                          <div className='flex items-center space-x-4 text-sm text-gray-600 mb-2'>
-                            <div className='flex items-center space-x-1'>
-                              <svg
-                                className='w-4 h-4'
-                                fill='none'
-                                stroke='currentColor'
-                                viewBox='0 0 24 24'
-                              >
-                                <path
-                                  strokeLinecap='round'
-                                  strokeLinejoin='round'
-                                  strokeWidth={2}
-                                  d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z'
-                                />
-                              </svg>
-                              <span>{new Date(request.attendance.meeting.date).toLocaleDateString()}</span>
+                  .map(request => (
+                    <div
+                      key={request.requestId}
+                      className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
+                    >
+                      <div className='flex justify-between items-start mb-4'>
+                        <div className='flex-1'>
+                          {/* Meeting Info */}
+                          <div className='mb-3'>
+                            <h4 className='text-lg font-semibold text-gray-900 mb-1'>
+                              {request.attendance.meeting.name}
+                            </h4>
+                            <div className='flex items-center space-x-4 text-sm text-gray-600 mb-2'>
+                              <div className='flex items-center space-x-1'>
+                                <svg
+                                  className='w-4 h-4'
+                                  fill='none'
+                                  stroke='currentColor'
+                                  viewBox='0 0 24 24'
+                                >
+                                  <path
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    strokeWidth={2}
+                                    d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z'
+                                  />
+                                </svg>
+                                <span>
+                                  {new Date(
+                                    request.attendance.meeting.date
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <div className='flex items-center space-x-1'>
+                                <svg
+                                  className='w-4 h-4'
+                                  fill='none'
+                                  stroke='currentColor'
+                                  viewBox='0 0 24 24'
+                                >
+                                  <path
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
+                                    strokeWidth={2}
+                                    d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
+                                  />
+                                </svg>
+                                <span>
+                                  {request.attendance.meeting.startTime} -{' '}
+                                  {request.attendance.meeting.endTime}
+                                </span>
+                              </div>
                             </div>
-                            <div className='flex items-center space-x-1'>
-                              <svg
-                                className='w-4 h-4'
-                                fill='none'
-                                stroke='currentColor'
-                                viewBox='0 0 24 24'
-                              >
-                                <path
-                                  strokeLinecap='round'
-                                  strokeLinejoin='round'
-                                  strokeWidth={2}
-                                  d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                                />
-                              </svg>
-                              <span>{request.attendance.meeting.startTime} - {request.attendance.meeting.endTime}</span>
-                            </div>
-                          </div>
-                          {request.attendance.meeting.notes && (
-                            <p className='text-xs text-gray-500 mt-1'>{request.attendance.meeting.notes}</p>
-                          )}
-                        </div>
-
-                        {/* Request Details */}
-                        <div className='bg-gray-50 rounded-lg p-3 mb-3'>
-                          <div className='flex flex-wrap gap-2 mb-2'>
-                            {request.attendanceMode === 'ONLINE' && (
-                              <span className='inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full'>
-                                🌐 Attending Online
-                              </span>
-                            )}
-                            {request.attendanceMode === 'IN_PERSON' && (
-                              <span className='inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full'>
-                                👤 Attending In Person
-                              </span>
-                            )}
-                            {request.timeAdjustment === 'ARRIVING_LATE' && (
-                              <span className='inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full'>
-                                ⏰ Arriving Late
-                              </span>
-                            )}
-                            {request.timeAdjustment === 'LEAVING_EARLY' && (
-                              <span className='inline-block px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full'>
-                                🚪 Leaving Early
-                              </span>
+                            {request.attendance.meeting.notes && (
+                              <p className='text-xs text-gray-500 mt-1'>
+                                {request.attendance.meeting.notes}
+                              </p>
                             )}
                           </div>
-                          <p className='text-sm text-gray-700'>
-                            <span className='font-medium'>Explanation: </span>
-                            {request.reason}
-                          </p>
-                        </div>
 
-                        {/* Request Status (pending only in this view) */}
-                        <div className='mt-3'>
-                          <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
-                            ⏳ Pending
-                          </span>
+                          {/* Request Details */}
+                          <div className='bg-gray-50 rounded-lg p-3 mb-3'>
+                            <div className='flex flex-wrap gap-2 mb-2'>
+                              {request.attendanceMode === 'ONLINE' && (
+                                <span className='inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full'>
+                                  🌐 Attending Online
+                                </span>
+                              )}
+                              {request.attendanceMode === 'IN_PERSON' && (
+                                <span className='inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full'>
+                                  👤 Attending In Person
+                                </span>
+                              )}
+                              {request.timeAdjustment === 'ARRIVING_LATE' && (
+                                <span className='inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full'>
+                                  ⏰ Arriving Late
+                                </span>
+                              )}
+                              {request.timeAdjustment === 'LEAVING_EARLY' && (
+                                <span className='inline-block px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full'>
+                                  🚪 Leaving Early
+                                </span>
+                              )}
+                            </div>
+                            <p className='text-sm text-gray-700'>
+                              <span className='font-medium'>Explanation: </span>
+                              {request.reason}
+                            </p>
+                          </div>
+
+                          {/* Request Status (pending only in this view) */}
+                          <div className='mt-3'>
+                            <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                              ⏳ Pending
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
 
