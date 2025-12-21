@@ -6,54 +6,15 @@ export interface User {
   avatar?: string;
 }
 
-export interface Member {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  joinDate: Date;
-  status: 'active' | 'inactive';
-  role: { [key: string]: string };
-}
-
-export interface Meeting {
-  id: string;
-  title: string;
-  description: string;
-  date: Date;
-  startTime: string;
-  endTime: string;
-  attendees: string[];
-  location?: string;
-  type: 'in-person' | 'virtual';
-}
-
 export interface MeetingApiData {
-  type: MeetingType;
   meetingId: string;
   name: string;
   date: string;
   startTime: string;
   endTime: string;
   notes: string;
+  type: MeetingType;
   attendance: AttendanceApiData[];
-}
-
-export interface AttendanceApiData {
-  attendanceId: string;
-  userId: string;
-  meetingId: string;
-  status: 'PRESENT' | 'EXCUSED_ABSENCE' | 'UNEXCUSED_ABSENCE';
-  user: UserApiData;
-}
-
-export interface UserApiData {
-  userId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  roleId: string;
-  password: string;
 }
 
 export interface AttendanceRecord {
@@ -68,12 +29,16 @@ export interface AttendanceRecord {
   attendanceRate: number;
 }
 
-export interface Attendance {
-  attendanceId: string;
-  userId: string;
+export interface MeetingRecord {
   meetingId: string;
-  status: 'PRESENT' | 'EXCUSED_ABSENCE' | 'UNEXCUSED_ABSENCE';
-  timestamp: Date;
+  date: string;
+  startTime: string;
+  endTime: string;
+  name: string;
+  notes: string;
+  totalMembers: number;
+  attendedMembers: number;
+  percentage: number;
 }
 
 export interface LoginCredentials {
@@ -104,3 +69,21 @@ export interface UserData {
 }
 
 export type MeetingType = 'FULL_BODY' | 'REGULAR';
+
+export interface UserApiData {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  nuid: string;
+  status: string;
+  attendanceId?: string;
+  role: RoleData
+}
+
+export interface AttendanceApiData {
+  attendanceId: string;
+  userId: string;
+  meetingId: string;
+  status: string;
+}

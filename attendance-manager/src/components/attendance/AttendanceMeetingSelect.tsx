@@ -18,7 +18,7 @@ const AttedanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
   attendanceRecord,
   handleMeetingSelection,
   closeAttendanceCheck,
-  editAttendance = false,
+  editAttendance = false
 }) => {
   return (
     <>
@@ -113,20 +113,17 @@ const AttedanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
         )}
       </div>
 
-      {
-        !editAttendance && (
-             <div className='flex space-x-3 mt-6'>
-        <button
-          type='button'
-          onClick={closeAttendanceCheck}
-          className='flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50'
-        >
-          Cancel
-        </button>
-      </div>
-        )
-      }
-     
+      {!editAttendance && (
+        <div className='flex space-x-3 mt-6'>
+          <button
+            type='button'
+            onClick={closeAttendanceCheck}
+            className='flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50'
+          >
+            Cancel
+          </button>
+        </div>
+      )}
     </>
   );
 };

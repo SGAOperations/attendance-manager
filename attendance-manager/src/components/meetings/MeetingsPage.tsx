@@ -1,18 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { MeetingApiData, Member } from '../../types';
+import { MeetingApiData, UserApiData } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
-
-/* interface MeetingRecord {
-  id: string;
-  date: string;
-  time: string;
-  meetingName: string;
-  description: string;
-  meetingType: MeetingType;
-  attendedMembers: number;
-  totalMembers: number;
-  status: 'attended' | 'missed' | 'upcoming';
-} */
 
 type MeetingType = 'FULL_BODY' | 'REGULAR';
 
@@ -163,7 +151,7 @@ const MeetingsPage: React.FC = () => {
     }
   }, [user]);
 
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<UserApiData[]>([]);
   const [bulkSelectionActive, setBulkSelectionActive] = useState({
     nonEboard: false,
     allMembers: false
@@ -171,21 +159,12 @@ const MeetingsPage: React.FC = () => {
 
   useEffect(() => {
     fetch('/api/users')
-      .then(response => response.json())
-      .then(json => {
-        setMembers(
-          json.map((u: any) => ({
-            id: u.userId,
-            firstName: u.firstName,
-            lastName: u.lastName,
-            email: u.email,
-            role: u.role,
-            joinDate: new Date(),
-            status: 'active'
-          }))
-        );
+      .then(res => res.json())
+      .then(data => {
+        console.log('Fetched members:', data); // <-- check this
+        setMembers(data);
       })
-      .catch(error => console.error(error));
+      .catch(err => console.error(err));
   }, []);
 
   const nonEboardMembers = useMemo(
@@ -193,10 +172,10 @@ const MeetingsPage: React.FC = () => {
     [members]
   );
   const nonEboardMemberIds = useMemo(
-    () => nonEboardMembers.map(member => member.id),
+    () => nonEboardMembers.map(member => member.userId),
     [nonEboardMembers]
   );
-  const allMemberIds = useMemo(() => members.map(member => member.id), [
+  const allMemberIds = useMemo(() => members.map(member => member.userId), [
     members
   ]);
   const selectedAttendeeSet = useMemo(
@@ -1074,13 +1053,13 @@ const MeetingsPage: React.FC = () => {
                 <div className='max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-3'>
                   {members.map(member => (
                     <label
-                      key={member.id}
+                      key={member.userId}
                       className='flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer'
                     >
                       <input
                         type='checkbox'
                         checked={newMeeting.selectedAttendees.includes(
-                          member.id
+                          member.userId
                         )}
                         onChange={e => {
                           if (e.target.checked) {
@@ -1088,14 +1067,14 @@ const MeetingsPage: React.FC = () => {
                               ...prev,
                               selectedAttendees: [
                                 ...prev.selectedAttendees,
-                                member.id
+                                member.userId
                               ]
                             }));
                           } else {
                             setNewMeeting(prev => ({
                               ...prev,
                               selectedAttendees: prev.selectedAttendees.filter(
-                                id => id !== member.id
+                                id => id !== member.userId
                               )
                             }));
                           }
