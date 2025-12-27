@@ -25,6 +25,15 @@ model User {
   password   String
   attendance Attendance[]
   role       Role         @relation(fields: [roleId], references: [roleId])
+  
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  updatedBy  String?
+  updatedByUser User?     @relation("UserUpdatedBy", fields: [updatedBy], references: [userId])
+  updatedUsers User[]     @relation("UserUpdatedBy")
+  updatedMeetings Meeting[] @relation("MeetingUpdatedBy")
+  updatedRequests Request[] @relation("RequestUpdatedBy")
 }
 
 model Meeting {
@@ -36,6 +45,12 @@ model Meeting {
   notes      String
   type       MeetingType
   attendance Attendance[]
+  
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  updatedBy  String?
+  updatedByUser User?      @relation("MeetingUpdatedBy", fields: [updatedBy], references: [userId])
 }
 
 model Attendance {
@@ -57,6 +72,12 @@ model Request {
   attendanceMode AttendanceMode
   timeAdjustment TimeAdjustment?
   attendance     Attendance      @relation(fields: [attendanceId], references: [attendanceId])
+  
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  updatedBy      String?
+  updatedByUser  User?           @relation("RequestUpdatedBy", fields: [updatedBy], references: [userId])
 }
 
 enum RoleType {
