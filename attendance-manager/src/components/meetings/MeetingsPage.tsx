@@ -238,20 +238,6 @@ const MeetingsPage: React.FC = () => {
     }
   }, [bulkSelectionActive.allMembers, allMemberIds, selectedAttendeeSet]);
 
-  // Mock Meeting
-  /* const mockMeetings: MeetingApiData[] = [
-    {
-      type: 'FULL_BODY',
-      meetingId: '1',
-      date: '01/07/2025',
-      startTime: '6:00PM',
-      endTime: '7:00PM',
-      name: 'General Meeting',
-      notes: 'First General Meeting of the semester',
-      attendance: []
-    },
-] */
-
   // Calculate statistics from real meetings
   const today = new Date();
   // Calculate statistics from real data

@@ -60,6 +60,7 @@ export interface RoleData {
 
 export interface UserData {
   userId: string;
+  nuid: string
   username: string;
   email: string;
   firstName: string;
@@ -86,4 +87,15 @@ export interface AttendanceApiData {
   userId: string;
   meetingId: string;
   status: string;
+  meeting: MeetingApiData;
+  user: UserData
+}
+
+export interface RequestApiData {
+  requestId: string;
+  attendanceId: string;
+  reason: string;
+  attendanceMode: 'ONLINE' | 'IN_PERSON';
+  timeAdjustment: 'ARRIVING_LATE' | 'LEAVING_EARLY';
+  attendance: AttendanceApiData;
 }
