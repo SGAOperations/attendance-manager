@@ -13,7 +13,7 @@ describe('AttendanceController', () => {
   let testMeeting3Id: string;
   let testUser3Id: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     await prisma.request.deleteMany();
     await prisma.attendance.deleteMany();
     await prisma.meeting.deleteMany();
@@ -138,7 +138,7 @@ describe('AttendanceController', () => {
     // This request will be approved
     const attendance1 = await prisma.attendance.create({
       data: {
-        userId: testUser2Id,
+        userId: testUser3Id,
         meetingId: testMeetingId,
         status: 'EXCUSED_ABSENCE',
         request: {}
@@ -149,13 +149,24 @@ describe('AttendanceController', () => {
     // This request will be unapproved
     const attendance2 = await prisma.attendance.create({
       data: {
-        userId: testUser3Id,
+        userId: testUser2Id,
         meetingId: testMeetingId,
         status: 'UNEXCUSED_ABSENCE',
         request: {}
       }
     });
     const testAttendanceId3 = attendance2.attendanceId;
+
+    // This request will be pending
+    const attendance3 = await prisma.attendance.create({
+      data: {
+        userId: testUser2Id,
+        meetingId: testMeeting2Id,
+        status: 'PENDING',
+        request: {}
+      }
+    });
+    const testAttendanceId4 = attendance3.attendanceId;
 
     // CREATE REQUESTS
     await prisma.request.create({
@@ -174,6 +185,14 @@ describe('AttendanceController', () => {
         timeAdjustment: 'ARRIVING_LATE'
       }
     });
+     await prisma.request.create({
+      data: {
+        attendanceId: testAttendanceId4,
+        reason: 'Initial test reason',
+        attendanceMode: 'ONLINE',
+        timeAdjustment: 'ARRIVING_LATE'
+      }
+    });
   });
 
   it('should get attendance by userId', async () => {
@@ -186,7 +205,7 @@ describe('AttendanceController', () => {
       testUser2Id
     );
     expect(attendance2).toBeDefined();
-    expect(attendance2.length).toBe(1);
+    expect(attendance2.length).toBe(2);
     expect(attendance2[0].userId).toBe(testUser2Id);
   });
 });

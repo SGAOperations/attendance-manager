@@ -9,6 +9,8 @@ function convertToAttendanceStatus(status: string): AttendanceStatus {
       return AttendanceStatus.EXCUSED_ABSENCE;
     case 'UNEXCUSED_ABSENCE':
       return AttendanceStatus.UNEXCUSED_ABSENCE;
+    case 'PENDING':
+      return AttendanceStatus.PENDING;
     default:
       throw new Error(`Invalid attendance status: ${status}`);
   }
