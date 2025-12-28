@@ -89,8 +89,7 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        const { confirmPassword, ...safeCredentials } = signupCredentials;
-        console.log('credentials', safeCredentials);
+        const { confirmPassword: _confirmPassword, ...safeCredentials } = signupCredentials;
         const response = await fetch('/api/users', {
           method: 'POST',
           headers: {
@@ -98,7 +97,6 @@ const LoginPage: React.FC = () => {
           },
           body: JSON.stringify({ ...safeCredentials })
         });
-        console.log('here', response);
         if (!response.ok) {
           const errorData = await response.json();
           setError(errorData.message || 'Signup failed. Please try again.');
