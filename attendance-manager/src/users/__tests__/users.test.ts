@@ -28,8 +28,14 @@ describe('UsersService', () => {
   let testRoleId: string;
 
   beforeAll(async () => {
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
+    await prisma.meeting.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.role.deleteMany();
+
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' },
+      data: { roleType: 'MEMBER' }
     });
     testRoleId = role.roleId;
 
@@ -111,7 +117,7 @@ describe('UsersController.validateNuid', () => {
 
   beforeAll(async () => {
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' },
+      data: { roleType: 'MEMBER' }
     });
     testRoleId = role.roleId;
 
@@ -144,7 +150,9 @@ describe('UsersController.validateNuid', () => {
     expect(response).toBeInstanceOf(NextResponse);
     const data = await response.json();
     expect(data.valid).toBe(true);
-    expect(data.message).toBe('NUID format is valid and matches the provided name');
+    expect(data.message).toBe(
+      'NUID format is valid and matches the provided name'
+    );
     expect(data.user).toBeDefined();
     expect(data.user.nuid).toBe('001234567');
     expect(data.user.firstName).toBe('John');
@@ -162,7 +170,9 @@ describe('UsersController.validateNuid', () => {
     expect(response).toBeInstanceOf(NextResponse);
     const data = await response.json();
     expect(data.valid).toBe(false);
-    expect(data.error).toBe('Missing required fields: nuid, firstName, lastName');
+    expect(data.error).toBe(
+      'Missing required fields: nuid, firstName, lastName'
+    );
   });
 
   it('should reject invalid NUID format', async () => {

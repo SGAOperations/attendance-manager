@@ -14,6 +14,12 @@ describe('AttendanceController', () => {
   let testUser3Id: string;
 
   beforeAll(async () => {
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
+    await prisma.meeting.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.role.deleteMany();
+
     // Test role
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
 

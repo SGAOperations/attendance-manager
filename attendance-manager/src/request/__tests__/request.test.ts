@@ -31,6 +31,12 @@ describe('RequestController', () => {
   let secondTestRequestId: string;
 
   beforeAll(async () => {
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
+    await prisma.meeting.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.role.deleteMany();
+
     // Create a test role
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
     testRoleId = role.roleId;
@@ -149,8 +155,8 @@ describe('RequestController', () => {
     if (!requests) throw new Error('Request not found');
     expect(requests).toHaveLength(2);
     requests.forEach((req: AttendanceRequest) => {
-    expect(req.attendance.attendanceId).toBe(req.attendanceId);
-  });
+      expect(req.attendance.attendanceId).toBe(req.attendanceId);
+    });
   });
 
   it('should create a new request', async () => {
@@ -294,8 +300,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         startTime: '14:00',
         endTime: '15:00',
         notes: 'Meeting for route endpoint tests',
-        type: 'REGULAR',
-      },
+        type: 'REGULAR'
+      }
     });
     routeTestMeetingId = newMeeting.meetingId;
 
@@ -303,8 +309,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       data: {
         userId: routeTestUserId,
         meetingId: routeTestMeetingId,
-        status: 'EXCUSED_ABSENCE',
-      },
+        status: 'EXCUSED_ABSENCE'
+      }
     });
     routeTestAttendanceId = attendance.attendanceId;
   });
@@ -322,14 +328,17 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
     const requestBody = {
       reason: 'Test reason from route',
       attendanceMode: 'ONLINE',
-      timeAdjustment: 'ARRIVING_LATE',
+      timeAdjustment: 'ARRIVING_LATE'
     };
 
-    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      `http://localhost/api/attendance/${routeTestAttendanceId}/requests`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
     const response = await POST(req, { params });
@@ -352,28 +361,31 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         startTime: '15:00',
         endTime: '16:00',
         notes: 'Second meeting for route tests',
-        type: 'REGULAR',
-      },
+        type: 'REGULAR'
+      }
     });
 
     const attendance2 = await prisma.attendance.create({
       data: {
         userId: routeTestUserId,
         meetingId: meeting2.meetingId,
-        status: 'EXCUSED_ABSENCE',
-      },
+        status: 'EXCUSED_ABSENCE'
+      }
     });
 
     const requestBody = {
       reason: 'Test reason without time adjustment',
-      attendanceMode: 'IN_PERSON',
+      attendanceMode: 'IN_PERSON'
     };
 
-    const req = new Request(`http://localhost/api/attendance/${attendance2.attendanceId}/requests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      `http://localhost/api/attendance/${attendance2.attendanceId}/requests`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ attendanceId: attendance2.attendanceId });
     const response = await POST(req, { params });
@@ -387,14 +399,17 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
 
   it('should return 400 when reason is missing', async () => {
     const requestBody = {
-      attendanceMode: 'ONLINE',
+      attendanceMode: 'ONLINE'
     };
 
-    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      `http://localhost/api/attendance/${routeTestAttendanceId}/requests`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
     const response = await POST(req, { params });
@@ -406,14 +421,17 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
 
   it('should return 400 when attendanceMode is missing', async () => {
     const requestBody = {
-      reason: 'Test reason',
+      reason: 'Test reason'
     };
 
-    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      `http://localhost/api/attendance/${routeTestAttendanceId}/requests`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
     const response = await POST(req, { params });
@@ -426,11 +444,14 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
   it('should return 400 when both reason and attendanceMode are missing', async () => {
     const requestBody = {};
 
-    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      `http://localhost/api/attendance/${routeTestAttendanceId}/requests`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
     const response = await POST(req, { params });
@@ -449,28 +470,31 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         startTime: '16:00',
         endTime: '17:00',
         notes: 'Third meeting for route tests',
-        type: 'REGULAR',
-      },
+        type: 'REGULAR'
+      }
     });
 
     const attendance3 = await prisma.attendance.create({
       data: {
         userId: routeTestUserId,
         meetingId: meeting3.meetingId,
-        status: 'EXCUSED_ABSENCE',
-      },
+        status: 'EXCUSED_ABSENCE'
+      }
     });
 
     const requestBody = {
       reason: 'Test with attendanceId from URL',
-      attendanceMode: 'ONLINE',
+      attendanceMode: 'ONLINE'
     };
 
-    const req = new Request(`http://localhost/api/attendance/${attendance3.attendanceId}/requests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      `http://localhost/api/attendance/${attendance3.attendanceId}/requests`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ attendanceId: attendance3.attendanceId });
     const response = await POST(req, { params });
@@ -483,14 +507,17 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
   it('should return 500 when controller throws an error', async () => {
     const requestBody = {
       reason: 'Test reason',
-      attendanceMode: 'INVALID_MODE', 
+      attendanceMode: 'INVALID_MODE'
     };
 
-    const req = new Request(`http://localhost/api/attendance/${routeTestAttendanceId}/requests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      `http://localhost/api/attendance/${routeTestAttendanceId}/requests`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
     const response = await POST(req, { params });

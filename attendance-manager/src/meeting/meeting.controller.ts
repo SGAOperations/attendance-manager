@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { MeetingService } from './meeting.service';
-import { MeetingType } from '@/generated/prisma';
+import { MeetingType } from '../generated/prisma';
 
 export const MeetingController = {
   async listMeetings() {
