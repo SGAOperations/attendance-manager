@@ -91,13 +91,16 @@ const LoginPage: React.FC = () => {
       try {
         const { confirmPassword, ...safeCredentials } = signupCredentials;
         console.log('credentials', safeCredentials);
-        const response = await fetch('/api/users', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({...safeCredentials}),
-});
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...safeCredentials
+            // roleId will default to MEMBER in signup route
+          }),
+        });
 console.log('here', response);
 if (!response.ok) {
   const errorData = await response.json();

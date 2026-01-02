@@ -20,24 +20,28 @@ describe('AttendanceController', () => {
     // Test user
     const user = await prisma.user.create({
       data: {
+        userId: 'test-attendance-user-1',
+        supabaseAuthId: 'test-supabase-auth-id-1',
         nuid: '001234569',
-        password: 'testpassword',
         email: 'testuser@example.com',
         firstName: 'Test',
         lastName: 'User',
-        roleId: role.roleId
+        roleId: role.roleId,
+        password: null
       }
     });
     testUserId = user.userId;
 
     const user2 = await prisma.user.create({
       data: {
+        userId: 'test-attendance-user-2',
+        supabaseAuthId: 'test-supabase-auth-id-2',
         nuid: '001234570',
-        password: 'testpassword2',
         email: 'testuser2@example.com',
         firstName: 'Test2',
         lastName: 'User2',
-        roleId: role.roleId
+        roleId: role.roleId,
+        password: null
       }
     });
     testUser2Id = user2.userId;
@@ -81,12 +85,14 @@ describe('AttendanceController', () => {
 
     const user3 = await prisma.user.create({
       data: {
+        userId: 'test-attendance-user-3',
+        supabaseAuthId: 'test-supabase-auth-id-3',
         nuid: '001234571',
-        password: 'testpassword3',
         email: 'testuser3@example.com',
         firstName: 'Test3',
         lastName: 'User3',
-        roleId: role.roleId
+        roleId: role.roleId,
+        password: null
       }
     });
     testUser3Id = user3.userId;
@@ -302,11 +308,13 @@ describe('getRemainingUnexcusedAbsences', () => {
     const user4 = await prisma.user.create({
       data: {
         nuid: '001234572',
-        password: 'testpassword4',
+        userId: 'test-attendance-user-4',
+        supabaseAuthId: 'test-supabase-auth-id-4',
         email: 'testuser4@example.com',
         firstName: 'Test4',
         lastName: 'User4',
-        roleId: role.roleId
+        roleId: role.roleId,
+        password: null
       }
     });
     testUser4Id = user4.userId;
@@ -314,11 +322,13 @@ describe('getRemainingUnexcusedAbsences', () => {
     const user5 = await prisma.user.create({
       data: {
         nuid: '001234573',
-        password: 'testpassword5',
+        userId: 'test-attendance-user-5',
+        supabaseAuthId: 'test-supabase-auth-id-5',
         email: 'testuser5@example.com',
         firstName: 'Test5',
         lastName: 'User5',
-        roleId: role.roleId
+        roleId: role.roleId,
+        password: null
       }
     });
     testUser5Id = user5.userId;

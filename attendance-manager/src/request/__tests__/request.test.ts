@@ -38,25 +38,29 @@ describe('RequestController', () => {
     // Create a test user
     const user = await prisma.user.create({
       data: {
+        userId: 'test-request-user-1',
+        supabaseAuthId: 'test-supabase-auth-id-1',
         nuid: '001234567',
-        password: 'testpassword',
         email: 'requestuser@example.com',
         firstName: 'Request',
         lastName: 'User',
-        roleId: testRoleId
-      }
+        roleId: testRoleId,
+        password: null,
+      },
     });
     testUserId = user.userId;
 
     // Create a test user
     const secondUser = await prisma.user.create({
       data: {
+        userId: 'test-request-user-2',
+        supabaseAuthId: 'test-supabase-auth-id-2',
         nuid: '001234568',
-        password: 'testpassword',
         email: 'otherrequestuser@example.com',
         firstName: 'Other',
         lastName: 'Request',
-        roleId: testRoleId
+        roleId: testRoleId,
+        password: null,
       }
     });
     secondTestUserId = secondUser.userId;
@@ -272,11 +276,13 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
     const user = await prisma.user.create({
       data: {
         nuid: '001234570',
-        password: 'testpassword',
+        userId: 'test-request-user-3',
+        supabaseAuthId: 'test-supabase-auth-id-3',
         email: 'requestrouteuser@example.com',
         firstName: 'Request',
         lastName: 'Route',
         roleId: routeTestRoleId,
+        password: null,
       },
     });
     routeTestUserId = user.userId;

@@ -1,8 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, LoginCredentials, AuthContextType, UserData } from '../types';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import { User, LoginCredentials, AuthContextType } from '../types';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -20,69 +22,97 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const supabase = createClient();
+
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          // Fetch user details from Prisma
+          await loadUserProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await loadUserProfile(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const loadUserProfile = async (supabaseAuthId: string) => {
+    try {
+      // Fetch user from Prisma by supabaseAuthId
+      const res = await fetch(`/api/users/by-supabase-id/${supabaseAuthId}`);
+      if (!res.ok) throw new Error('User profile not found');
+      
+      const userDetails = await res.json();
+      
+      const user: User = {
+        id: userDetails.userId,
+        email: userDetails.email,
+        name: `${userDetails.firstName} ${userDetails.lastName}`,
+        role: userDetails.role.roleType,
+        avatar: undefined
+      };
+      
+      setUser(user);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  };
 
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
-    console.log(decodeURIComponent(credentials.email));
     try {
-      const res = await fetch(`/api/users/get-user-by-email/${credentials.email}`);
-      if (!res.ok) {
-        console.error(
-          `Response status: ${res.status}\n. Response Msg: ${await res.text}`
-        );
-        throw new Error(
-          `Response status: ${res.status}\n. Response Msg: ${await res.text}`
-        );
-      }
-
-      let user_details: UserData = await res.json();
-      console.log(user_details);
-      if (!user_details) {
-        alert('User does not exist');
-        return;
-      }
-      if (
-        !(
-          user_details.role.roleType === 'EBOARD' ||
-          user_details.role.roleType === 'MEMBER'
-        )
-      ) {
-        alert('Incorrect Roles');
-        return;
-      }
-      if (
-        (
-          credentials.password !== user_details.password
-        )
-      ) {
-        alert('Invalid email or password');
-        return;
-      }
-
-      // Mock user data based on email
-      const user: User = {
-        id: user_details.userId,
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: credentials.email,
-        name: user_details.firstName + ' ' + user_details.lastName,
-        role: user_details.role.roleType,
-        avatar: undefined
-      };
+        password: credentials.password,
+      });
 
-      setUser(user);
-      console.log(user);
-      router.push('/homepage');
+      if (error) {
+        alert('Invalid email or password');
+        throw error;
+      }
+
+      if (data.user) {
+        await loadUserProfile(data.user.id);
+        router.push('/homepage');
+      }
     } catch (error) {
-      alert(`Login failed: ${error}`);
+      console.error('Login failed:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
+    router.push('/login');
   };
 
   const value: AuthContextType = {
