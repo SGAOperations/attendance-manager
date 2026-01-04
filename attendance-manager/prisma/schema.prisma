@@ -27,7 +27,7 @@ model User {
   attendance Attendance[]
   role       Role         @relation(fields: [roleId], references: [roleId])
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  updatedAt      DateTime     @default(now()) @updatedAt
 }
 
 model Meeting {
