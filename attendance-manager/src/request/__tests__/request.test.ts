@@ -133,7 +133,6 @@ describe('RequestController', () => {
     await prisma.meeting.deleteMany();
     await prisma.user.deleteMany();
     await prisma.role.deleteMany();
-    await prisma.$disconnect();
   });
 
   it('should get a request by requestId', async () => {

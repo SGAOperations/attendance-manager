@@ -160,7 +160,6 @@ describe('AttendanceController', () => {
   it('should get request with status by userId ', async () => {
     const attendance = await AttendanceController.getRequestsByUser(testUserId);
     expect(attendance).toBeDefined();
-    console.log('attendance', attendance);
     const firstRequest = attendance[0];
     expect(firstRequest.AttendanceStatus).toBe('EXCUSED_ABSENCE');
   });

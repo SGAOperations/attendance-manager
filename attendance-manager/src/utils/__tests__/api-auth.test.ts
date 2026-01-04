@@ -18,6 +18,12 @@ describe('API Auth Utilities', () => {
   let mockSupabaseClient: any;
 
   beforeAll(async () => {
+    // Clean up any existing test data first
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
+    await prisma.user.deleteMany({ where: { nuid: '001234888' } });
+    await prisma.role.deleteMany();
+
     // Create test role
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' },
@@ -41,9 +47,11 @@ describe('API Auth Utilities', () => {
   });
 
   afterAll(async () => {
+    // Delete in correct order to respect foreign key constraints
+    await prisma.request.deleteMany();
+    await prisma.attendance.deleteMany();
     await prisma.user.deleteMany();
     await prisma.role.deleteMany();
-    await prisma.$disconnect();
   });
 
   beforeEach(() => {

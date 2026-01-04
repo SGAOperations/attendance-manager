@@ -27,9 +27,21 @@ jobs:
         working-directory: attendance-manager
         run: npx prisma generate
       
+      - name: Run database migrations
+        working-directory: attendance-manager
+        run: npx prisma migrate deploy
+      
       - name: Lint
         working-directory: attendance-manager
         run: npm run lint
+      
+      - name: Test Middleware
+        working-directory: attendance-manager
+        run: npm run test -- src/middleware/__tests__/middleware.test.ts
+      
+      - name: Test API Auth Utilities
+        working-directory: attendance-manager
+        run: npm run test -- src/utils/__tests__/api-auth.test.ts
       
       - name: Test Users
         working-directory: attendance-manager
@@ -46,5 +58,7 @@ jobs:
       - name: Test Requests
         working-directory: attendance-manager
         run: npm run test -- src/request/__tests__/request.test.ts
-
-
+      
+      - name: Test Auth Flow
+        working-directory: attendance-manager
+        run: npm run test -- src/auth/__tests__/auth-flow.test.ts
