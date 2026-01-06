@@ -1543,10 +1543,8 @@ const MeetingsPage: React.FC = () => {
             <h3 className='text-xl font-semibold text-gray-900 mb-6'>
               My Submitted Requests
             </h3>
-
-            {myRequests.filter(
-              (r: any) => r.AttendanceStatus !== 'EXCUSED_ABSENCE'
-            ).length === 0 ? (
+            
+            {myRequests.length === 0 ? (
               <div className='text-center py-12'>
                 <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
                   <svg
@@ -1573,7 +1571,6 @@ const MeetingsPage: React.FC = () => {
             ) : (
               <div className='space-y-4'>
                 {myRequests
-                  .filter((r: any) => r.AttendanceStatus !== 'EXCUSED_ABSENCE')
                   .map(request => (
                     <div
                       key={request.requestId}
@@ -1666,10 +1663,28 @@ const MeetingsPage: React.FC = () => {
 
                           {/* Request Status (pending only in this view) */}
                           <div className='mt-3'>
-                            <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
-                              ⏳ Pending
-                            </span>
-                          </div>
+                            {
+                            request.attendance.status === 'PENDING' && (
+                              <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                                  ⏳ Pending
+                                </span>
+                              )
+                          }
+                          {
+                            request.attendance.status === 'UNEXCUSED_ABSENCE' && (
+                              <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                                ❌ Denied
+                              </span>
+                            )
+                          }
+                          {
+                            request.attendance.status === 'EXCUSED_ABSENCE' && (
+                              <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                                ✅ Approved
+                              </span>
+                            )
+                          }
+                        </div>
                         </div>
                       </div>
                     </div>
