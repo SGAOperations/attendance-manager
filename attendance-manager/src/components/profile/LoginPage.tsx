@@ -89,7 +89,10 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        const { confirmPassword: _confirmPassword, ...safeCredentials } = signupCredentials;
+        const {
+          confirmPassword: _confirmPassword,
+          ...safeCredentials
+        } = signupCredentials;
         const response = await fetch('/api/users', {
           method: 'POST',
           headers: {

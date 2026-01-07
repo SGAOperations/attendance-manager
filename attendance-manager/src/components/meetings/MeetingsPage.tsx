@@ -1543,7 +1543,7 @@ const MeetingsPage: React.FC = () => {
             <h3 className='text-xl font-semibold text-gray-900 mb-6'>
               My Submitted Requests
             </h3>
-            
+
             {myRequests.length === 0 ? (
               <div className='text-center py-12'>
                 <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
@@ -1570,125 +1570,119 @@ const MeetingsPage: React.FC = () => {
               </div>
             ) : (
               <div className='space-y-4'>
-                {myRequests
-                  .map(request => (
-                    <div
-                      key={request.requestId}
-                      className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
-                    >
-                      <div className='flex justify-between items-start mb-4'>
-                        <div className='flex-1'>
-                          {/* Meeting Info */}
-                          <div className='mb-3'>
-                            <h4 className='text-lg font-semibold text-gray-900 mb-1'>
-                              {request.attendance.meeting.name}
-                            </h4>
-                            <div className='flex items-center space-x-4 text-sm text-gray-600 mb-2'>
-                              <div className='flex items-center space-x-1'>
-                                <svg
-                                  className='w-4 h-4'
-                                  fill='none'
-                                  stroke='currentColor'
-                                  viewBox='0 0 24 24'
-                                >
-                                  <path
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                    strokeWidth={2}
-                                    d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z'
-                                  />
-                                </svg>
-                                <span>
-                                  {new Date(
-                                    request.attendance.meeting.date
-                                  ).toLocaleDateString()}
-                                </span>
-                              </div>
-                              <div className='flex items-center space-x-1'>
-                                <svg
-                                  className='w-4 h-4'
-                                  fill='none'
-                                  stroke='currentColor'
-                                  viewBox='0 0 24 24'
-                                >
-                                  <path
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                    strokeWidth={2}
-                                    d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                                  />
-                                </svg>
-                                <span>
-                                  {request.attendance.meeting.startTime} -{' '}
-                                  {request.attendance.meeting.endTime}
-                                </span>
-                              </div>
+                {myRequests.map(request => (
+                  <div
+                    key={request.requestId}
+                    className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
+                  >
+                    <div className='flex justify-between items-start mb-4'>
+                      <div className='flex-1'>
+                        {/* Meeting Info */}
+                        <div className='mb-3'>
+                          <h4 className='text-lg font-semibold text-gray-900 mb-1'>
+                            {request.attendance.meeting.name}
+                          </h4>
+                          <div className='flex items-center space-x-4 text-sm text-gray-600 mb-2'>
+                            <div className='flex items-center space-x-1'>
+                              <svg
+                                className='w-4 h-4'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                              >
+                                <path
+                                  strokeLinecap='round'
+                                  strokeLinejoin='round'
+                                  strokeWidth={2}
+                                  d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z'
+                                />
+                              </svg>
+                              <span>
+                                {new Date(
+                                  request.attendance.meeting.date
+                                ).toLocaleDateString()}
+                              </span>
                             </div>
-                            {request.attendance.meeting.notes && (
-                              <p className='text-xs text-gray-500 mt-1'>
-                                {request.attendance.meeting.notes}
-                              </p>
+                            <div className='flex items-center space-x-1'>
+                              <svg
+                                className='w-4 h-4'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                              >
+                                <path
+                                  strokeLinecap='round'
+                                  strokeLinejoin='round'
+                                  strokeWidth={2}
+                                  d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
+                                />
+                              </svg>
+                              <span>
+                                {request.attendance.meeting.startTime} -{' '}
+                                {request.attendance.meeting.endTime}
+                              </span>
+                            </div>
+                          </div>
+                          {request.attendance.meeting.notes && (
+                            <p className='text-xs text-gray-500 mt-1'>
+                              {request.attendance.meeting.notes}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Request Details */}
+                        <div className='bg-gray-50 rounded-lg p-3 mb-3'>
+                          <div className='flex flex-wrap gap-2 mb-2'>
+                            {request.attendanceMode === 'ONLINE' && (
+                              <span className='inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full'>
+                                🌐 Attending Online
+                              </span>
+                            )}
+                            {request.attendanceMode === 'IN_PERSON' && (
+                              <span className='inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full'>
+                                👤 Attending In Person
+                              </span>
+                            )}
+                            {request.timeAdjustment === 'ARRIVING_LATE' && (
+                              <span className='inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full'>
+                                ⏰ Arriving Late
+                              </span>
+                            )}
+                            {request.timeAdjustment === 'LEAVING_EARLY' && (
+                              <span className='inline-block px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full'>
+                                🚪 Leaving Early
+                              </span>
                             )}
                           </div>
-
-                          {/* Request Details */}
-                          <div className='bg-gray-50 rounded-lg p-3 mb-3'>
-                            <div className='flex flex-wrap gap-2 mb-2'>
-                              {request.attendanceMode === 'ONLINE' && (
-                                <span className='inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full'>
-                                  🌐 Attending Online
-                                </span>
-                              )}
-                              {request.attendanceMode === 'IN_PERSON' && (
-                                <span className='inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full'>
-                                  👤 Attending In Person
-                                </span>
-                              )}
-                              {request.timeAdjustment === 'ARRIVING_LATE' && (
-                                <span className='inline-block px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full'>
-                                  ⏰ Arriving Late
-                                </span>
-                              )}
-                              {request.timeAdjustment === 'LEAVING_EARLY' && (
-                                <span className='inline-block px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full'>
-                                  🚪 Leaving Early
-                                </span>
-                              )}
-                            </div>
-                            <p className='text-sm text-gray-700'>
-                              <span className='font-medium'>Explanation: </span>
-                              {request.reason}
-                            </p>
-                          </div>
-
-                          {/* Request Status (pending only in this view) */}
-                          <div className='mt-3'>
-                            {
-                            request.attendance.status === 'PENDING' && (
-                              <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
-                                  ⏳ Pending
-                                </span>
-                              )
-                          }
-                          {
-                            request.attendance.status === 'UNEXCUSED_ABSENCE' && (
-                              <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
-                                ❌ Denied
-                              </span>
-                            )
-                          }
-                          {
-                            request.attendance.status === 'EXCUSED_ABSENCE' && (
-                              <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
-                                ✅ Approved
-                              </span>
-                            )
-                          }
+                          <p className='text-sm text-gray-700'>
+                            <span className='font-medium'>Explanation: </span>
+                            {request.reason}
+                          </p>
                         </div>
+
+                        {/* Request Status (pending only in this view) */}
+                        <div className='mt-3'>
+                          {request.attendance.status === 'PENDING' && (
+                            <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                              ⏳ Pending
+                            </span>
+                          )}
+                          {request.attendance.status ===
+                            'UNEXCUSED_ABSENCE' && (
+                            <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                              ❌ Denied
+                            </span>
+                          )}
+                          {request.attendance.status === 'EXCUSED_ABSENCE' && (
+                            <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                              ✅ Approved
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             )}
 
