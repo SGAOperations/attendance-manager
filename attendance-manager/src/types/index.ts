@@ -99,3 +99,26 @@ export interface RequestApiData {
   timeAdjustment: 'ARRIVING_LATE' | 'LEAVING_EARLY';
   attendance: AttendanceApiData;
 }
+
+export interface RemainingAbsences {
+  regular: {
+    used: number;
+    allowed: number;
+    remaining: number;
+  };
+  fullBody: {
+    used: number;
+    allowed: number;
+    remaining: number;
+  };
+}
+
+export interface RequestForm {
+    selectedMeetings: string[];
+    requestTypes: {
+      leavingEarly: boolean;
+      comingLate: boolean;
+      goingOnline: boolean;
+    };
+    explanation: string;
+}
