@@ -208,12 +208,11 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                       </div>
 
                       {/* Action Buttons for Active tab only */}
-                      {requestsView === 'active' && (
+                      {requestsView === 'active' ? (
                         <div className='flex space-x-3 pt-3 border-t border-gray-200'>
                           <button
                             onClick={async () => {
                               try {
-                                // Update attendance status to EXCUSED_ABSENCE
                                 const updateResponse = await fetch(
                                   `/api/attendance/${request.attendance.attendanceId}`,
                                   {
@@ -227,17 +226,15 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                                   }
                                 );
 
-                                if (!updateResponse.ok) {
+                                if (!updateResponse.ok)
                                   throw new Error(
                                     'Failed to update attendance'
                                   );
-                                }
 
                                 alert(
                                   `Request accepted! Attendance updated for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`
                                 );
 
-                                // Refresh requests to move this into History
                                 const response = await fetch('/api/requests');
                                 if (response.ok) {
                                   const fetchedRequests = await response.json();
@@ -245,17 +242,20 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                                   setDeclinedRequestIds([]);
                                 }
                               } catch (error) {
-                                const message =
-                                  error instanceof Error
-                                    ? error.message
-                                    : 'Unknown error';
-                                alert(`Failed to accept request: ${message}`);
+                                alert(
+                                  `Failed to accept request: ${
+                                    error instanceof Error
+                                      ? error.message
+                                      : 'Unknown error'
+                                  }`
+                                );
                               }
                             }}
                             className='flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium'
                           >
                             ✓ Accept
                           </button>
+
                           <button
                             onClick={async () => {
                               try {
@@ -272,12 +272,11 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                                   }
                                 );
 
-                                if (!updateResponse.ok) {
+                                if (!updateResponse.ok)
                                   throw new Error(
                                     'Failed to update attendance'
                                   );
-                                }
-                                // For now, declined is tracked only in UI state
+
                                 alert(
                                   `Request rejected for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`
                                 );
@@ -287,17 +286,40 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                                   request.requestId
                                 ]);
                               } catch (error) {
-                                const message =
-                                  error instanceof Error
-                                    ? error.message
-                                    : 'Unknown error';
-                                alert(`Failed to reject request: ${message}`);
+                                alert(
+                                  `Failed to reject request: ${
+                                    error instanceof Error
+                                      ? error.message
+                                      : 'Unknown error'
+                                  }`
+                                );
                               }
                             }}
                             className='flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium'
                           >
                             ✗ Reject
                           </button>
+                        </div>
+                      ) : (
+                        <div className='mt-3'>
+                          {request.attendance.status === 'PENDING' && (
+                            <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800'>
+                              ⏳ Pending
+                            </span>
+                          )}
+
+                          {request.attendance.status ===
+                            'UNEXCUSED_ABSENCE' && (
+                            <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800'>
+                              ❌ Denied
+                            </span>
+                          )}
+
+                          {request.attendance.status === 'EXCUSED_ABSENCE' && (
+                            <span className='inline-block px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800'>
+                              ✅ Approved
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
