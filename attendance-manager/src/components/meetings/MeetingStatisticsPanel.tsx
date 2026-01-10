@@ -4,6 +4,7 @@ interface MeetingStatisticsPanelProps {
   upcomingMeetings: number;
   isAdmin: boolean;
   setShowCreateMeetingModal: (show: boolean) => void;
+  setShowVotingModal: (show: boolean) => void;
 }
 
 const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
@@ -11,7 +12,8 @@ const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
   missedMeetings,
   upcomingMeetings,
   isAdmin,
-  setShowCreateMeetingModal
+  setShowCreateMeetingModal,
+  setShowVotingModal
 }) => {
   return (
     <div className='lg:col-span-1'>

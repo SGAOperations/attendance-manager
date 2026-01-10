@@ -477,6 +477,7 @@ const MeetingsPage: React.FC = () => {
           upcomingMeetings={upcomingMeetings}
           isAdmin={isAdmin}
           setShowCreateMeetingModal={setShowCreateMeetingModal}
+          setShowVotingModal={setShowVotingModal}
         />
 
         {/* Right Panel - Meeting History */}
