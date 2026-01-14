@@ -90,7 +90,6 @@ const LoginPage: React.FC = () => {
 
       try {
         const { confirmPassword, ...safeCredentials } = signupCredentials;
-        console.log('credentials', safeCredentials);
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: {
@@ -101,12 +100,13 @@ const LoginPage: React.FC = () => {
             // roleId will default to MEMBER in signup route
           }),
         });
-console.log('here', response);
-if (!response.ok) {
-  const errorData = await response.json();
-  setError(errorData.message || 'Signup failed. Please try again.');
-  return;
-}
+
+        console.log('here', response);
+        if (!response.ok) {
+          const errorData = await response.json();
+          setError(errorData.message || 'Signup failed. Please try again.');
+          return;
+        }
 
         const result = await response.json();
         console.log('User created:', result);
