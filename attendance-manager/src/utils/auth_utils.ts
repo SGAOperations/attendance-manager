@@ -26,7 +26,6 @@ export const login = async (
     }
 
     let user_details: UserData = await res.json();
-    console.log(user_details);
     if (
       !(
         user_details.role.roleType === 'EBOARD' ||

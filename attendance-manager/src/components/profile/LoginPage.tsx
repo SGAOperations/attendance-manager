@@ -89,17 +89,19 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        const {
-          confirmPassword: _confirmPassword,
-          ...safeCredentials
-        } = signupCredentials;
-        const response = await fetch('/api/users', {
+        const { confirmPassword, ...safeCredentials } = signupCredentials;
+        const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ ...safeCredentials })
+          body: JSON.stringify({
+            ...safeCredentials
+            // roleId will default to MEMBER in signup route
+          }),
         });
+
+        console.log('here', response);
         if (!response.ok) {
           const errorData = await response.json();
           setError(errorData.message || 'Signup failed. Please try again.');

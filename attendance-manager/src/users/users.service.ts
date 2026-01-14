@@ -44,14 +44,21 @@ export const UsersService = {
   },
 
   async createUser(data: {
+    userId: string;
+    supabaseAuthId?: string;
     nuid: string;
-    password: string;
     email: string;
     firstName: string;
     lastName: string;
     roleId: string;
+    password?: string | null;
   }) {
-    return prisma.user.create({ data });
+    return prisma.user.create({ 
+      data: {
+        ...data,
+        password: data.password ?? null
+      }
+    });
   },
 
   async createRole(data: { roleType: RoleType }) {
@@ -70,7 +77,6 @@ export const UsersService = {
     userId: string,
     updates: Partial<{
       nuid: string;
-      password: string;
       email: string;
       firstName: string;
       lastName: string;
@@ -114,6 +120,13 @@ export const UsersService = {
       include: {
         role: true
       }
+    });
+  },
+
+  async getUserBySupabaseId(supabaseAuthId: string) {
+    return prisma.user.findUnique({
+      where: { supabaseAuthId },
+      include: { role: true }
     });
   }
 };
