@@ -4,6 +4,7 @@ import { prisma } from '../../lib/prisma';
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { RoleType } from '@/generated/prisma';
+import { cleanupTestData } from '../../utils/test-helpers';
 
 jest.setTimeout(20000);
 
@@ -28,11 +29,7 @@ describe('UsersService', () => {
   let testRoleId: string;
 
   beforeAll(async () => {
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
 
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' }
@@ -52,11 +49,7 @@ describe('UsersService', () => {
   });
 
   afterAll(async () => {
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
     await prisma.$disconnect();
   });
 
@@ -135,8 +128,7 @@ describe('UsersController.validateNuid', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
     await prisma.$disconnect();
   });
 
@@ -244,8 +236,7 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
     await prisma.$disconnect();
   });
 
@@ -328,8 +319,7 @@ describe('POST /api/auth/signup', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
     await prisma.$disconnect();
   });
 

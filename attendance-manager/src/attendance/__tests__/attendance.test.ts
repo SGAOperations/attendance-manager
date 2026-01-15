@@ -1,5 +1,6 @@
 import { AttendanceController } from '../attendance.controller';
 import { prisma } from '../../lib/prisma';
+import { cleanupTestData } from '../../utils/test-helpers';
 import dotenv from 'dotenv';
 dotenv.config();
 jest.setTimeout(20000);
@@ -14,11 +15,7 @@ describe('AttendanceController', () => {
   let testUser3Id: string;
 
   beforeAll(async () => {
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
 
     // Test role
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
@@ -135,11 +132,7 @@ describe('AttendanceController', () => {
   });
 
   afterAll(async () => {
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
     await prisma.$disconnect();
   });
 
