@@ -33,6 +33,7 @@ Prerequisites: make sure everything is installed
 1. [node/npm](https://nodejs.org/en)
    - To check if it's installed: `node -v` and `npm -v`
    - To install: for [mac/linux](https://github.com/nvm-sh/nvm) and [windows](https://github.com/coreybutler/nvm-windows) (setup instructions are in the link under the `Installing and Updating` and `Installation & Upgrades` sections, respectively)
+   (For some reason, node version 25 does not support us. Please use node version 24)
 
 First, clone the repo and `cd` into the directory
 
