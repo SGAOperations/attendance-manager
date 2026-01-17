@@ -43,36 +43,78 @@ export async function POST(request: Request) {
     if (!finalRoleId) {
       finalRoleId = await UsersService.getRoleIdByRoleType(RoleType.MEMBER);
       if (!finalRoleId) {
-        return NextResponse.json(
-          { error: 'Failed to get default role' },
-          { status: 500 }
-        );
+        // Try to create the MEMBER role if it doesn't exist
+        try {
+          const newRole = await prisma.role.create({
+            data: { roleType: RoleType.MEMBER },
+          });
+          finalRoleId = newRole.roleId;
+        } catch (createRoleError) {
+          console.error('Failed to create MEMBER role:', createRoleError);
+          return NextResponse.json(
+            { error: 'Failed to get or create default role. Please contact an administrator.' },
+            { status: 500 }
+          );
+        }
       }
     }
 
     // Create user profile in Prisma with Supabase user ID
-    const userProfile = await prisma.user.create({
-      data: {
-        supabaseAuthId: authData.user.id, // Store Supabase auth ID
-        email,
-        firstName,
-        lastName,
-        nuid,
-        roleId: finalRoleId,
-        password: undefined, // Optional - Supabase handles authentication
-      },
-      include: {
-        role: true,
-      },
-    });
+    try {
+      const userProfile = await prisma.user.create({
+        data: {
+          supabaseAuthId: authData.user.id, // Store Supabase auth ID
+          email,
+          firstName,
+          lastName,
+          nuid,
+          roleId: finalRoleId,
+          password: undefined, // Optional - Supabase handles authentication
+        },
+        include: {
+          role: true,
+        },
+      });
 
-    return NextResponse.json(
-      { 
-        message: 'User created successfully',
-        user: userProfile 
-      },
-      { status: 201 }
-    );
+      return NextResponse.json(
+        { 
+          message: 'User created successfully',
+          user: userProfile 
+        },
+        { status: 201 }
+      );
+    } catch (dbError: any) {
+      // Handle Prisma unique constraint violations
+      if (dbError?.code === 'P2002') {
+        const target = dbError?.meta?.target;
+        if (Array.isArray(target)) {
+          if (target.includes('email')) {
+            return NextResponse.json(
+              { error: 'An account with this email already exists' },
+              { status: 400 }
+            );
+          }
+          if (target.includes('nuid')) {
+            return NextResponse.json(
+              { error: 'An account with this NUID already exists' },
+              { status: 400 }
+            );
+          }
+          if (target.includes('supabaseAuthId')) {
+            return NextResponse.json(
+              { error: 'An account with this authentication ID already exists' },
+              { status: 400 }
+            );
+          }
+        }
+        return NextResponse.json(
+          { error: 'A user with this information already exists' },
+          { status: 400 }
+        );
+      }
+      // Re-throw to be caught by outer catch block
+      throw dbError;
+    }
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(

@@ -2,25 +2,18 @@ import { MeetingService } from '../meeting.service';
 import { MeetingController } from '../meeting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingType } from '../../generated/prisma';
+import { cleanupTestData } from '../../utils/test-helpers';
 
 jest.setTimeout(20000);
 
 describe('MeetingServices', () => {
   afterAll(async () => {
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
     await prisma.$disconnect();
   });
 
   beforeAll(async () => {
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
   });
 
   it('should create a new meeting', async () => {

@@ -1,6 +1,7 @@
 import { RequestController } from '../request.controller';
 import { prisma } from '../../lib/prisma';
 import { POST } from '../../app/api/attendance/[attendanceId]/requests/route';
+import { cleanupTestData } from '../../utils/test-helpers';
 
 jest.setTimeout(20000);
 
@@ -31,11 +32,7 @@ describe('RequestController', () => {
   let secondTestRequestId: string;
 
   beforeAll(async () => {
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
 
     // Create a test role
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
@@ -128,11 +125,7 @@ describe('RequestController', () => {
   });
 
   afterAll(async () => {
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
   });
 
   it('should get a request by requestId', async () => {
@@ -315,12 +308,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
   });
 
   afterAll(async () => {
-    // Delete all requests, attendances, meetings, users, and roles created during tests
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.meeting.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    // Clean up all test data
+    await cleanupTestData();
   });
 
   it('should create a request successfully via POST endpoint', async () => {

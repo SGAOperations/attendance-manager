@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { UsersService } from '@/users/users.service';
 import { RoleType } from '@/generated/prisma';
+import { cleanupTestData } from '@/utils/test-helpers';
 
 jest.setTimeout(20000);
 
@@ -31,6 +32,9 @@ describe('Auth Flow Integration Tests', () => {
   const mockSignOut = jest.fn();
 
   beforeAll(async () => {
+    // Clean up any existing test data first
+    await cleanupTestData();
+    
     // Create test role
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' },
@@ -52,8 +56,7 @@ describe('Auth Flow Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    await cleanupTestData();
     await prisma.$disconnect();
   });
 

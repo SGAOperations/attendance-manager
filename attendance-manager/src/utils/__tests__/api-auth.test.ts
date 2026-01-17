@@ -2,6 +2,7 @@ import { getAuthenticatedUser, requireAuth } from '../api-auth';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { cleanupTestData } from '../test-helpers';
 
 jest.setTimeout(20000);
 
@@ -19,10 +20,7 @@ describe('API Auth Utilities', () => {
 
   beforeAll(async () => {
     // Clean up any existing test data first
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.user.deleteMany({ where: { nuid: '001234888' } });
-    await prisma.role.deleteMany();
+    await cleanupTestData();
 
     // Create test role
     const role = await prisma.role.create({
@@ -47,11 +45,8 @@ describe('API Auth Utilities', () => {
   });
 
   afterAll(async () => {
-    // Delete in correct order to respect foreign key constraints
-    await prisma.request.deleteMany();
-    await prisma.attendance.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
+    // Clean up test data
+    await cleanupTestData();
   });
 
   beforeEach(() => {
