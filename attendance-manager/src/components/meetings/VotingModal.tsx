@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Member } from '../../types';
+import { UserApiData } from '../../types';
 
 export type VotingType = 'UNANIMOUS_CONSENT' | 'PLACARD' | 'ROLL_CALL' | 'SECRET_BALLOT';
 
 interface VotingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  members: Member[];
+  members: UserApiData[];
   votingType: VotingType | null;
   onVotingTypeSelect: (type: VotingType) => void;
 }
@@ -138,16 +138,16 @@ const VotingModal: React.FC<VotingModalProps> = ({
 
           <div className='space-y-2 mb-4 max-h-64 overflow-y-auto'>
             {members.map(member => {
-              const hasPlacard = placardVotes.has(member.id);
+              const hasPlacard = placardVotes.has(member.userId);
               return (
                 <button
-                  key={member.id}
+                  key={member.userId}
                   onClick={() => {
                     const newVotes = new Set(placardVotes);
                     if (hasPlacard) {
-                      newVotes.delete(member.id);
+                      newVotes.delete(member.userId);
                     } else {
-                      newVotes.add(member.id);
+                      newVotes.add(member.userId);
                     }
                     setPlacardVotes(newVotes);
                   }}
@@ -183,7 +183,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
   // Roll Call
   if (selectedType === 'ROLL_CALL') {
     const currentMember = members[rollCallIndex];
-    const currentVote = currentMember ? rollCallVotes.get(currentMember.id) : null;
+    const currentVote = currentMember ? rollCallVotes.get(currentMember.userId) : null;
 
     return (
       <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -200,7 +200,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
                   <button
                     onClick={() => {
                       const newVotes = new Map(rollCallVotes);
-                      newVotes.set(currentMember.id, 'YES');
+                      newVotes.set(currentMember.userId, 'YES');
                       setRollCallVotes(newVotes);
                     }}
                     className='flex-1 px-4 py-2 bg-green-500 text-white rounded-lg'
@@ -210,7 +210,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
                   <button
                     onClick={() => {
                       const newVotes = new Map(rollCallVotes);
-                      newVotes.set(currentMember.id, 'NO');
+                      newVotes.set(currentMember.userId, 'NO');
                       setRollCallVotes(newVotes);
                     }}
                     className='flex-1 px-4 py-2 bg-red-500 text-white rounded-lg'
@@ -220,7 +220,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
                   <button
                     onClick={() => {
                       const newVotes = new Map(rollCallVotes);
-                      newVotes.set(currentMember.id, 'ABSTAIN');
+                      newVotes.set(currentMember.userId, 'ABSTAIN');
                       setRollCallVotes(newVotes);
                     }}
                     className='flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg'
@@ -295,9 +295,9 @@ const VotingModal: React.FC<VotingModalProps> = ({
 
           <div className='space-y-2 mb-4 max-h-64 overflow-y-auto'>
             {members.map(member => {
-              const vote = ballotVotes.get(member.id);
+              const vote = ballotVotes.get(member.userId);
               return (
-                <div key={member.id} className='p-3 border rounded-lg'>
+                <div key={member.userId} className='p-3 border rounded-lg'>
                   <p className='text-sm font-medium mb-2'>{member.firstName} {member.lastName}</p>
                   <div className='grid grid-cols-2 gap-2'>
                     {candidates.map((candidate, i) => (
@@ -305,7 +305,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
                         key={i}
                         onClick={() => {
                           const newVotes = new Map(ballotVotes);
-                          newVotes.set(member.id, candidate);
+                          newVotes.set(member.userId, candidate);
                           setBallotVotes(newVotes);
                         }}
                         className={`px-3 py-1 text-sm border rounded ${
@@ -318,7 +318,7 @@ const VotingModal: React.FC<VotingModalProps> = ({
                     <button
                       onClick={() => {
                         const newVotes = new Map(ballotVotes);
-                        newVotes.set(member.id, 'ABSTAIN');
+                        newVotes.set(member.userId, 'ABSTAIN');
                         setBallotVotes(newVotes);
                       }}
                       className={`px-3 py-1 text-sm border rounded ${
