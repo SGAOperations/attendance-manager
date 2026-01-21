@@ -90,23 +90,26 @@ const LoginPage: React.FC = () => {
 
       try {
         const { confirmPassword, ...safeCredentials } = signupCredentials;
-        console.log('credentials', safeCredentials);
-        const response = await fetch('/api/users', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({...safeCredentials}),
-});
-console.log('here', response);
-if (!response.ok) {
-  const errorData = await response.json();
-  setError(errorData.message || 'Signup failed. Please try again.');
-  return;
-}
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...safeCredentials
+            // roleId will default to MEMBER in signup route
+          }),
+        });
 
-const result = await response.json();
-console.log('User created:', result);
+        console.log('here', response);
+        if (!response.ok) {
+          const errorData = await response.json();
+          setError(errorData.message || 'Signup failed. Please try again.');
+          return;
+        }
+
+        const result = await response.json();
+        console.log('User created:', result);
         alert(
           `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Your account has been created successfully.`
         );
@@ -468,7 +471,9 @@ console.log('User created:', result);
                   type='submit'
                   disabled={isLoading}
                   className='group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-[#C8102E] hover:bg-[#A8102E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C8102E] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl'
-                  onClick={() => {console.log('clicked');}}
+                  onClick={() => {
+                    console.log('clicked');
+                  }}
                 >
                   {isLoading ? (
                     <div className='flex items-center'>

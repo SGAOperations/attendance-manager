@@ -17,14 +17,17 @@ model Role {
 
 model User {
   userId     String       @id @default(uuid())
+  supabaseAuthId String?  @unique
   nuid       String       @unique
   email      String       @unique
   firstName  String
   lastName   String
   roleId     String
-  password   String
+  password   String?  // Optional - Supabase handles authentication
   attendance Attendance[]
   role       Role         @relation(fields: [roleId], references: [roleId])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
 }
 
 model Meeting {
@@ -68,6 +71,7 @@ enum AttendanceStatus {
   PRESENT
   UNEXCUSED_ABSENCE
   EXCUSED_ABSENCE
+  PENDING
 }
 
 enum MeetingType {

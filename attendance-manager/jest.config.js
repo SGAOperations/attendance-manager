@@ -8,4 +8,7 @@ module.exports = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+  // Run tests sequentially to prevent database foreign key constraint violations
+  // when multiple test suites share the same database
+  maxWorkers: 1,
 };

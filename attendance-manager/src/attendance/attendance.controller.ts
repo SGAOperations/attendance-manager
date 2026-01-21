@@ -3,7 +3,8 @@ import { AttendanceService } from './attendance.service';
 const allowedStatuses = [
   'PRESENT',
   'EXCUSED_ABSENCE',
-  'UNEXCUSED_ABSENCE'
+  'UNEXCUSED_ABSENCE',
+  'PENDING',
 ] as const;
 
 type AttendanceStatus = typeof allowedStatuses[number];
@@ -88,6 +89,13 @@ export const AttendanceController = {
       throw new Error('Invalid or missing attendanceId');
     }
     return AttendanceService.deleteAttendance(attendanceId);
+  },
+
+  async getRemainingUnexcusedAbsences(userId: string) {
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('Invalid or missing userId');
+    }
+    return AttendanceService.getRemainingUnexcusedAbsences(userId);
   },
 
   async updateAttendanceStatus(requestId: string, status: string) {

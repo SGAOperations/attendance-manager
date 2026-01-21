@@ -27,7 +27,7 @@ export const UsersController = {
   async listUsersSantizied() {
     const users = await UsersService.getAllUsers();
     const sanitizedUsers = users.map(user => {
-      const { email: _email, password: _password, ...safeUser } = user;
+      const { email: _email, ...safeUser } = user;
       return safeUser;
     });
     return NextResponse.json(sanitizedUsers);
@@ -49,46 +49,27 @@ export const UsersController = {
     return roleId;
   },
 
-  async checkUserExists(params: { userEmail: string; userPassword: string }) {
+  async checkUserExists(params: { userEmail: string }) {
     const user = await UsersService.getUserByEmail(params.userEmail);
-    console.log(user);
     if (!user) {
       return NextResponse.json({
         exists: false,
         user: null
       });
     }
-    if (user.password === params.userPassword) {
-      const { password: _password, roleId: _roleId, ...userData } = user;
-      const res = NextResponse.json({
-        exists: true,
-        user: userData
-      });
-      res.headers.append('Access-Control-Allow-Credentials', 'true');
-      res.headers.append('Access-Control-Allow-Origin', '*');
-      res.headers.append(
-        'Access-Control-Allow-Methods',
-        'GET,DELETE,PATCH,POST,PUT'
-      );
-      res.headers.append(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-      );
-      console.log('Res:', res);
-      return res;
-    } else {
-      return NextResponse.json(
-        { error: 'Incorrect Password' },
-        { status: 400 }
-      );
-    }
+    
+    const { roleId: _roleId, ...userData } = user;
+    return NextResponse.json({
+      exists: true,
+      user: userData
+    });
   },
 
   async createUser(request: Request) {
     const body = await request.json();
     if (
+      !body.userId ||
       !body.nuid || // Added validation
-      !body.password ||
       !body.email ||
       !body.firstName ||
       !body.lastName
@@ -100,6 +81,7 @@ export const UsersController = {
     }
     const roleId = await UsersService.getRoleIdByRoleType(RoleType.MEMBER);
     body.roleId = roleId;
+    body.password = body.password ?? null;
     const newUser = await UsersService.createUser(body);
     return NextResponse.json(newUser, { status: 201 });
   },

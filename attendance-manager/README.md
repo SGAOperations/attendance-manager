@@ -79,5 +79,23 @@ To check that the database is valid, run npx prettier validate
 Once you're in the backend folder (and connected to the database), you can also run our endpoint tests through Jest by running the following command:
 
 ```bash
-npx jest --runInBand
+npx jest --runInBand --testPathIgnorePatterns="seed_data.test.ts"
+```
+
+### Seeding Data
+
+If you want to seed data for frontend testing, run the script
+
+```bash
+npx jest --runInBand seed_data.test.ts
+```
+
+### Styling
+
+If you want to clean up your code, running Prettier can be a great help!
+
+Start by going into a specific directory, such as `src/components`, just so you dont run it on the entire repo
+
+```bash
+npx prettier "**/*.{js,jsx,ts,tsx,json,css,md}" --write
 ```
