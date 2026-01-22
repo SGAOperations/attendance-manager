@@ -23,7 +23,6 @@ model User {
   firstName  String
   lastName   String
   roleId     String
-  password   String?  // Optional - Supabase handles authentication
   attendance Attendance[]
   role       Role         @relation(fields: [roleId], references: [roleId])
   createdAt      DateTime     @default(now())

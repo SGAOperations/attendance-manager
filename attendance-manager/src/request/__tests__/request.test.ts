@@ -48,7 +48,6 @@ describe('RequestController', () => {
         firstName: 'Request',
         lastName: 'User',
         roleId: testRoleId,
-        password: null,
       },
     });
     testUserId = user.userId;
@@ -63,7 +62,6 @@ describe('RequestController', () => {
         firstName: 'Other',
         lastName: 'Request',
         roleId: testRoleId,
-        password: null,
       }
     });
     secondTestUserId = secondUser.userId;
@@ -280,7 +278,6 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         firstName: 'Request',
         lastName: 'Route',
         roleId: routeTestRoleId,
-        password: null,
       },
     });
     routeTestUserId = user.userId;

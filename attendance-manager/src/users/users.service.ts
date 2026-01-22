@@ -51,12 +51,10 @@ export const UsersService = {
     firstName: string;
     lastName: string;
     roleId: string;
-    password?: string | null;
   }) {
     return prisma.user.create({ 
       data: {
         ...data,
-        password: data.password ?? null
       }
     });
   },
