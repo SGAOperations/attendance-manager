@@ -35,10 +35,10 @@ export const login = async (
       alert('Incorrect Roles');
       return;
     }
-    if (credentials.password !== user_details.password) {
-      alert('Invalid email or password');
-      return;
-    }
+    // if (credentials.password !== user_details.password) {
+    //   alert('Invalid email or password');
+    //   return;
+    // }
 
     // Mock user data based on email
     const user: User = {

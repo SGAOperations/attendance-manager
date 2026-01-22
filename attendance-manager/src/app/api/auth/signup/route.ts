@@ -69,7 +69,6 @@ export async function POST(request: Request) {
           lastName,
           nuid,
           roleId: finalRoleId,
-          password: undefined, // Optional - Supabase handles authentication
         },
         include: {
           role: true,

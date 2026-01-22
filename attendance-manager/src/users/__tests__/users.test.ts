@@ -44,7 +44,6 @@ describe('UsersService', () => {
       firstName: 'John',
       lastName: 'Doe',
       roleId: testRoleId,
-      password: null,
     });
   });
 
@@ -123,7 +122,6 @@ describe('UsersController.validateNuid', () => {
       firstName: 'John',
       lastName: 'Doe',
       roleId: testRoleId,
-      password: null,
     });
   });
 
@@ -228,7 +226,6 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
         firstName: 'Route',
         lastName: 'User',
         roleId: routeTestRoleId,
-        password: null,
       },
     });
     routeTestUserId = user.userId;
@@ -287,7 +284,6 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
         firstName: 'Eboard',
         lastName: 'Route',
         roleId: eboardRole.roleId,
-        password: null,
       },
     });
 

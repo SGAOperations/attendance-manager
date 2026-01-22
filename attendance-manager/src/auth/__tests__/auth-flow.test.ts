@@ -212,7 +212,6 @@ describe('Auth Flow Integration Tests', () => {
           firstName: 'Logout',
           lastName: 'Test',
           roleId: roleId,
-          password: null,
         },
       });
 

@@ -29,7 +29,6 @@ describe('AttendanceController', () => {
     const user = await prisma.user.create({
       data: {
         nuid: '001234569',
-        password: 'password',
         email: 'user@northeastern.edu',
         firstName: 'Test',
         lastName: 'User',
@@ -41,7 +40,6 @@ describe('AttendanceController', () => {
     const user2 = await prisma.user.create({
       data: {
         nuid: '001234570',
-        password: 'password',
         email: 'testuser2@example.edu',
         firstName: 'Test2',
         lastName: 'User2',
@@ -53,7 +51,6 @@ describe('AttendanceController', () => {
     const user3 = await prisma.user.create({
       data: {
         nuid: '001234571',
-        password: 'password',
         email: 'admin@northeastern.edu',
         firstName: 'Test3',
         lastName: 'User3',
