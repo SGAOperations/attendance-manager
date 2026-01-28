@@ -18,6 +18,7 @@ interface AttendanceRequest {
   reason: string;
   attendanceMode: 'ONLINE' | 'IN_PERSON';
   timeAdjustment: 'ARRIVING_LATE' | 'LEAVING_EARLY';
+  isLate: boolean;
   attendance: Attendance;
 }
 
@@ -48,8 +49,8 @@ describe('RequestController', () => {
         firstName: 'Request',
         lastName: 'User',
         roleId: testRoleId,
-        password: null,
-      },
+        password: null
+      }
     });
     testUserId = user.userId;
 
@@ -63,7 +64,7 @@ describe('RequestController', () => {
         firstName: 'Other',
         lastName: 'Request',
         roleId: testRoleId,
-        password: null,
+        password: null
       }
     });
     secondTestUserId = secondUser.userId;
@@ -107,7 +108,8 @@ describe('RequestController', () => {
         attendanceId: testAttendanceId,
         reason: 'Initial test reason',
         attendanceMode: 'ONLINE',
-        timeAdjustment: 'ARRIVING_LATE'
+        timeAdjustment: 'ARRIVING_LATE',
+        isLate: false
       }
     });
     testRequestId = request.requestId;
@@ -118,7 +120,8 @@ describe('RequestController', () => {
         attendanceId: secondTestAtendanceId,
         reason: 'Initial test reason',
         attendanceMode: 'IN_PERSON',
-        timeAdjustment: 'LEAVING_EARLY'
+        timeAdjustment: 'LEAVING_EARLY',
+        isLate: false
       }
     });
     secondTestRequestId = secondRequest.requestId;
@@ -138,6 +141,7 @@ describe('RequestController', () => {
     expect(request.attendanceId).toBe(testAttendanceId);
     expect(request.attendanceMode).toBe('ONLINE');
     expect(request.timeAdjustment).toBe('ARRIVING_LATE');
+    expect(request.isLate).toBe(false);
   });
 
   it('should get all requests', async () => {
@@ -183,6 +187,72 @@ describe('RequestController', () => {
     expect(newRequest.attendanceId).toBe(testAttendanceId2);
     expect(newRequest.attendanceMode).toBe('IN_PERSON');
     expect(newRequest.timeAdjustment).toBe('LEAVING_EARLY');
+    expect(newRequest.isLate).toBe(true);
+  });
+
+  it('should mark request as late when created within 24 hours of meeting', async () => {
+    const soonMeeting = await prisma.meeting.create({
+      data: {
+        name: 'Soon Meeting',
+        date: new Date(Date.now() + 6 * 60 * 60 * 1000) // 6 hours from now
+          .toISOString()
+          .split('T')[0],
+        startTime: new Date(Date.now() + 6 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[1]
+          .slice(0, 5),
+        endTime: '23:59',
+        notes: 'Soon meeting',
+        type: 'REGULAR'
+      }
+    });
+
+    const attendance = await prisma.attendance.create({
+      data: {
+        userId: testUserId,
+        meetingId: soonMeeting.meetingId,
+        status: 'EXCUSED_ABSENCE'
+      }
+    });
+
+    const request = await RequestController.createRequest({
+      attendanceId: attendance.attendanceId,
+      reason: 'Late request test',
+      attendanceMode: 'ONLINE'
+    });
+
+    expect(request.isLate).toBe(true);
+  });
+
+  it('should mark request as not late when meeting is more than 24 hours away', async () => {
+    const futureMeeting = await prisma.meeting.create({
+      data: {
+        name: 'Far Future Meeting',
+        date: new Date(Date.now() + 48 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0],
+        startTime: '12:00',
+        endTime: '13:00',
+        notes: 'Far future meeting',
+        type: 'REGULAR'
+      }
+    });
+
+    const attendance = await prisma.attendance.create({
+      data: {
+        userId: testUserId,
+        meetingId: futureMeeting.meetingId,
+        status: 'EXCUSED_ABSENCE'
+      }
+    });
+
+    const request = await RequestController.createRequest({
+      attendanceId: attendance.attendanceId,
+      reason: 'On-time request',
+      attendanceMode: 'ONLINE'
+    });
+
+    expect(request.isLate).toBe(false);
   });
 
   it('should update a requests reason', async () => {
@@ -247,7 +317,8 @@ describe('RequestController', () => {
       data: {
         attendanceId: testAttendanceId2,
         reason: 'To be deleted',
-        attendanceMode: 'ONLINE'
+        attendanceMode: 'ONLINE',
+        isLate: false
       }
     });
 
@@ -280,8 +351,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         firstName: 'Request',
         lastName: 'Route',
         roleId: routeTestRoleId,
-        password: null,
-      },
+        password: null
+      }
     });
     routeTestUserId = user.userId;
 
@@ -338,6 +409,7 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
     expect(data.attendanceId).toBe(routeTestAttendanceId);
     expect(data.attendanceMode).toBe('ONLINE');
     expect(data.timeAdjustment).toBe('ARRIVING_LATE');
+    expect(data.isLate).toBe(true);
   });
 
   it('should create a request without timeAdjustment via POST endpoint', async () => {
@@ -383,6 +455,7 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
     expect(data).toBeDefined();
     expect(data.reason).toBe('Test reason without time adjustment');
     expect(data.attendanceMode).toBe('IN_PERSON');
+    expect(data.isLate).toBe(true);
   });
 
   it('should return 400 when reason is missing', async () => {
