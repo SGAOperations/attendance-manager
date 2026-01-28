@@ -60,6 +60,7 @@ model Request {
   attendanceMode AttendanceMode
   timeAdjustment TimeAdjustment?
   attendance     Attendance      @relation(fields: [attendanceId], references: [attendanceId])
+  isLate Boolean @default(false)
 }
 
 enum RoleType {
