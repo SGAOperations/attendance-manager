@@ -4,6 +4,7 @@ interface MeetingStatisticsPanelProps {
   upcomingMeetings: number;
   isAdmin: boolean;
   setShowCreateMeetingModal: (show: boolean) => void;
+  setShowVotingModal: (show: boolean) => void;
 }
 
 const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
@@ -11,7 +12,8 @@ const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
   missedMeetings,
   upcomingMeetings,
   isAdmin,
-  setShowCreateMeetingModal
+  setShowCreateMeetingModal,
+  setShowVotingModal
 }) => {
   return (
     <div className='lg:col-span-1'>
@@ -82,12 +84,18 @@ const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
 
       {/* Create Meeting Button - Only for Admins */}
       {isAdmin && (
-        <div className='mt-6'>
+        <div className='mt-6 space-y-3'>
           <button
             onClick={() => setShowCreateMeetingModal(true)}
             className='w-full px-4 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl'
           >
             + Create New Meeting
+          </button>
+          <button
+                onClick={() => setShowVotingModal(true)}
+                className='w-full px-4 py-3 bg-[#A4804A] text-white rounded-xl hover:bg-[#8A6D3F] transition-colors font-medium shadow-lg hover:shadow-xl'
+              >
+                + Start New Voting
           </button>
         </div>
       )}
