@@ -8,7 +8,7 @@ interface AttendanceMeetingCheckInProps {
   attendanceRecord: Record<string, AttendanceApiData[]>;
   closeAttendanceCheck: () => void;
   setAttendanceCheckStep: (
-    step: 'select-meeting' | 'user-list' | 'check-in'
+    step: 'select-meeting' | 'user-list' | 'check-in',
   ) => void;
 }
 
@@ -19,12 +19,20 @@ const AttedanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
   handleMarkAttendance,
   attendanceRecord,
   closeAttendanceCheck,
-  setAttendanceCheckStep
+  setAttendanceCheckStep,
 }) => {
   return (
     <>
       <div className='mb-6'>
-        <h3 className='text-xl font-semibold text-gray-900 mb-1'>Check-In</h3>
+        <h3 className='text-xl font-semibold text-gray-900 mb-1 flex justify-between items-center'>
+          <div>Check-In</div>
+          <button
+            className='cursor-pointer text-gray-500 hover:text-gray-900'
+            onClick={closeAttendanceCheck}
+          >
+            X
+          </button>
+        </h3>
         <p className='text-sm text-gray-600'>
           {selectedMeetingForCheck.name} • {selectedMeetingForCheck.date}
         </p>
@@ -43,8 +51,8 @@ const AttedanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
         <input
           type='text'
           value={nuidInput}
-          onChange={e => setNuidInput(e.target.value)}
-          onKeyDown={e => {
+          onChange={(e) => setNuidInput(e.target.value)}
+          onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleMarkAttendance();
             }
@@ -61,7 +69,7 @@ const AttedanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
           <span className='text-sm font-semibold text-gray-900'>
             {
               attendanceRecord[selectedMeetingForCheck.meetingId]?.filter(
-                record => record.status === 'PRESENT'
+                (record) => record.status === 'PRESENT',
               ).length
             }{' '}
             / {attendanceRecord[selectedMeetingForCheck.meetingId].length}{' '}
@@ -72,11 +80,13 @@ const AttedanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
           <div
             className='bg-[#C8102E] h-2 rounded-full transition-all duration-300'
             style={{
-              width: `${(attendanceRecord[
-                selectedMeetingForCheck.meetingId
-              ]?.filter(record => record.status === 'PRESENT').length /
-                attendanceRecord[selectedMeetingForCheck.meetingId].length) *
-                100}%`
+              width: `${
+                (attendanceRecord[selectedMeetingForCheck.meetingId]?.filter(
+                  (record) => record.status === 'PRESENT',
+                ).length /
+                  attendanceRecord[selectedMeetingForCheck.meetingId].length) *
+                100
+              }%`,
             }}
           ></div>
         </div>
@@ -96,13 +106,6 @@ const AttedanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
           className='flex-1 px-4 py-2 bg-[#C8102E] text-white rounded-lg hover:bg-[#A8102E]'
         >
           Confirm Attendance
-        </button>
-        <button
-          type='button'
-          onClick={closeAttendanceCheck}
-          className='px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700'
-        >
-          Done
         </button>
       </div>
     </>
