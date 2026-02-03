@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AttedanceMeetingSelect from './AttendanceMeetingSelect';
 
 import {
-  MeetingRecord,
+  MeetingApiData,
   AttendanceApiData,
   UserApiData,
   RequestApiData
@@ -21,15 +21,15 @@ const AttendancePage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'members' | 'history'>('members');
   const [showBulkAddModal, setShowBulkAddModal] = useState(false);
-  const [meetings, setMeetings] = useState<MeetingRecord[]>([]);
+  const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
   const [meetingsWithAttendance, setMeetingsWithAttendance] = useState<
-    MeetingRecord[]
+    MeetingApiData[]
   >([]);
   const [users, setUsers] = useState<UserApiData[]>([]);
 
   // New state for attendance marking and editing
   const [showEditAttendanceModal, setShowEditAttendanceModal] = useState(false);
-  const [selectedMeeting, setSelectedMeeting] = useState<MeetingRecord | null>(
+  const [selectedMeeting, setSelectedMeeting] = useState<MeetingApiData | null>(
     null
   );
   const [nuidInput, setNuidInput] = useState('');
@@ -47,7 +47,7 @@ const AttendancePage: React.FC = () => {
   const [
     selectedMeetingForCheck,
     setSelectedMeetingForCheck
-  ] = useState<MeetingRecord | null>(null);
+  ] = useState<MeetingApiData | null>(null);
 
   // New state for Requests viewing (admin archive)
   const [showRequestsModal, setShowRequestsModal] = useState(false);
@@ -110,7 +110,7 @@ const AttendancePage: React.FC = () => {
     if (meetings.length === 0) return;
 
     const updateMeetingsWithAttendance = async () => {
-      const updatedMeetings: MeetingRecord[] = [];
+      const updatedMeetings: MeetingApiData[] = [];
 
       for (const meeting of meetings) {
         const attendances = await meetingAPI.getAttendances(meeting.meetingId);
@@ -157,7 +157,7 @@ const AttendancePage: React.FC = () => {
   };
 
   // Function to handle meeting selection in Attendance Check
-  const handleMeetingSelection = async (meeting: MeetingRecord) => {
+  const handleMeetingSelection = async (meeting: MeetingApiData) => {
     setSelectedMeetingForCheck(meeting);
     // await loadAttendanceUsers();
     setAttendanceCheckStep('user-list');
@@ -249,7 +249,8 @@ const AttendancePage: React.FC = () => {
   const toggleAttendanceStatus = async (
     attendanceId: string,
     currentStatus: string,
-    userId: string
+    userId: string,
+    meetingId: string
   ) => {
     try {
       const newStatus =
@@ -282,8 +283,21 @@ const AttendancePage: React.FC = () => {
               : u
           )
         );
-        const allMeetings = await meetingAPI.getAllMeetings();
-        setMeetings(allMeetings);
+        // TODO (jwuchen): either find a better way to do this or don't trigger this till edit attendance componenet is closed
+        setMeetings(prevMeetings =>
+          prevMeetings.map(meeting =>
+            meeting.meetingId === meetingId
+              ? {
+                  ...meeting,
+                  attendance: meeting.attendance.map(a =>
+                    a.attendanceId === attendanceId
+                      ? { ...a, status: newStatus }
+                      : a
+                  )
+                }
+              : meeting
+          )
+        );
       }
     } catch (error) {
       console.error('Error updating attendance:', error);
@@ -292,7 +306,7 @@ const AttendancePage: React.FC = () => {
   };
 
   // Function to open edit attendance modal
-  const openEditAttendanceModal = async (meeting: MeetingRecord) => {
+  const openEditAttendanceModal = async (meeting: MeetingApiData) => {
     setSelectedMeeting(meeting);
     await loadAttendanceUsers();
     setShowEditAttendanceModal(true);

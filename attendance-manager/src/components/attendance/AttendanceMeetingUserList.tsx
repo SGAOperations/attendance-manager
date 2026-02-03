@@ -1,7 +1,7 @@
-import { MeetingRecord, UserApiData, AttendanceApiData } from '@/types';
+import { MeetingApiData, UserApiData, AttendanceApiData } from '@/types';
 
 interface AttendanceMeetingUserListProps {
-  selectedMeetingForCheck: MeetingRecord;
+  selectedMeetingForCheck: MeetingApiData;
   isLoadingAttendance: boolean;
   attendanceUsers: UserApiData[];
   attendanceRecord: Record<string, AttendanceApiData[]>;

@@ -1,10 +1,10 @@
-import { MeetingRecord, AttendanceApiData } from '@/types';
+import { MeetingApiData, AttendanceApiData } from '@/types';
 
 interface AttendanceHistoryProps {
-  meetingsWithAttendance: MeetingRecord[];
+  meetingsWithAttendance: MeetingApiData[];
   attendanceRecord: Record<string, AttendanceApiData[]>;
   isAdmin: boolean;
-  openEditAttendanceModal: (meeting: MeetingRecord) => void;
+  openEditAttendanceModal: (meeting: MeetingApiData) => void;
 }
 
 const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({

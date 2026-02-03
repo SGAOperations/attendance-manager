@@ -1,17 +1,18 @@
-import { UserApiData, AttendanceApiData, MeetingRecord } from '@/types';
+import { UserApiData, AttendanceApiData, MeetingApiData } from '@/types';
 
 interface AttendanceMeetingSelectProps {
   attendanceUsers: UserApiData[];
   attendanceRecord: Record<string, AttendanceApiData[]>;
-  selectedMeeting: MeetingRecord;
+  selectedMeeting: MeetingApiData;
   toggleAttendanceStatus: (
     attendanceId: string,
     currentStatus: string,
-    userId: string
+    userId: string,
+    meetingId: string
   ) => void;
   isLoadingAttendance: boolean;
   setShowEditAttendanceModal: (show: boolean) => void;
-  setSelectedMeeting: (meeting: MeetingRecord | null) => void;
+  setSelectedMeeting: (meeting: MeetingApiData | null) => void;
 }
 
 const AttedanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
@@ -93,7 +94,8 @@ const AttedanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                               toggleAttendanceStatus(
                                 hasAttendanceForMeeting.attendanceId,
                                 hasAttendanceForMeeting.status,
-                                user.userId
+                                user.userId,
+                                hasAttendanceForMeeting.meetingId
                               );
                             }
                           }}

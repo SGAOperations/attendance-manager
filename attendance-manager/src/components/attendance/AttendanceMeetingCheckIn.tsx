@@ -1,7 +1,7 @@
-import { MeetingRecord, AttendanceApiData } from '@/types';
+import { MeetingApiData, AttendanceApiData } from '@/types';
 
 interface AttendanceMeetingCheckInProps {
-  selectedMeetingForCheck: MeetingRecord;
+  selectedMeetingForCheck: MeetingApiData;
   nuidInput: string;
   setNuidInput: (nuid: string) => void;
   handleMarkAttendance: () => void;
