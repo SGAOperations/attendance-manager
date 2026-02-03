@@ -77,7 +77,7 @@ export interface UserApiData {
   lastName: string;
   email: string;
   nuid: string;
-  status: string;
+  attendance: AttendanceApiData[];
   attendanceId?: string;
   role: RoleData
 }

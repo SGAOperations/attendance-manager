@@ -4,7 +4,11 @@ interface AttendanceMeetingSelectProps {
   attendanceUsers: UserApiData[];
   attendanceRecord: Record<string, AttendanceApiData[]>;
   selectedMeeting: MeetingRecord;
-  toggleAttendanceStatus: (attendanceId: string, currentStatus: string) => void;
+  toggleAttendanceStatus: (
+    attendanceId: string,
+    currentStatus: string,
+    userId: string
+  ) => void;
   isLoadingAttendance: boolean;
   setShowEditAttendanceModal: (show: boolean) => void;
   setSelectedMeeting: (meeting: MeetingRecord | null) => void;
@@ -66,6 +70,7 @@ const AttedanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                         record.userId === user.userId &&
                         record.status === 'PRESENT'
                     );
+
                     return (
                       <label
                         key={user.userId}
@@ -77,10 +82,18 @@ const AttedanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                           type='checkbox'
                           checked={isPresent}
                           onChange={() => {
-                            if (user.attendanceId && user.status) {
+                            console.log('user', user);
+                            const hasAttendanceForMeeting = user.attendance.find(
+                              attendance =>
+                                attendance.meetingId ===
+                                selectedMeeting.meetingId
+                            );
+
+                            if (hasAttendanceForMeeting) {
                               toggleAttendanceStatus(
-                                user.attendanceId,
-                                user.status
+                                hasAttendanceForMeeting.attendanceId,
+                                hasAttendanceForMeeting.status,
+                                user.userId
                               );
                             }
                           }}

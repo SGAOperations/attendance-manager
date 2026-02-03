@@ -8,7 +8,7 @@ import {
   UserApiData,
   RequestApiData
 } from '@/types';
-import AttedanceMeetingEdit from './AttendanceMeetingEdit';
+import AttendanceMeetingEdit from './AttendanceMeetingEdit';
 import AttedanceMeetingUserList from './AttendanceMeetingUserList';
 import AttedanceMeetingCheckIn from './AttendanceMeetingCheckIn';
 import AttendanceHistory from './AttendanceHistory';
@@ -159,7 +159,7 @@ const AttendancePage: React.FC = () => {
   // Function to handle meeting selection in Attendance Check
   const handleMeetingSelection = async (meeting: MeetingRecord) => {
     setSelectedMeetingForCheck(meeting);
-    await loadAttendanceUsers();
+    // await loadAttendanceUsers();
     setAttendanceCheckStep('user-list');
     const allUsers: UserApiData[] = await fetch('/api/users').then(res =>
       res.json()
@@ -186,9 +186,14 @@ const AttendancePage: React.FC = () => {
         alert('NUID not found. Please check and try again.');
         return;
       }
-
       // Check if already marked as present
-      if (userToMark.status === 'PRESENT' || userToMark.status === 'Present') {
+      const attendanceForMeeting = userToMark.attendance.find(
+        attendance => attendance.meetingId === selectedMeetingForCheck.meetingId
+      );
+      if (
+        attendanceForMeeting?.status === 'PRESENT' ||
+        attendanceForMeeting?.status === 'Present'
+      ) {
         alert(
           `${userToMark.firstName} ${userToMark.lastName} is already marked as present!`
         );
@@ -243,16 +248,16 @@ const AttendancePage: React.FC = () => {
   // Function to toggle attendance status in edit modal
   const toggleAttendanceStatus = async (
     attendanceId: string,
-    currentStatus: string
+    currentStatus: string,
+    userId: string
   ) => {
     try {
       const newStatus =
         currentStatus === 'PRESENT' || currentStatus === 'Present'
           ? 'PENDING'
           : 'PRESENT';
-
       const response = await fetch(`/api/attendance/${attendanceId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
@@ -263,9 +268,20 @@ const AttendancePage: React.FC = () => {
 
       // Reload attendance data
       if (selectedMeeting) {
-        await loadAttendanceUsers();
-
-        // Reload meetings to update statistics
+        setAttendanceUsers(prev =>
+          prev.map(u =>
+            u.userId === userId
+              ? {
+                  ...u,
+                  attendance: u.attendance.map(a =>
+                    a.attendanceId === attendanceId
+                      ? { ...a, status: newStatus }
+                      : a
+                  )
+                }
+              : u
+          )
+        );
         const allMeetings = await meetingAPI.getAllMeetings();
         setMeetings(allMeetings);
       }
@@ -470,7 +486,7 @@ const AttendancePage: React.FC = () => {
 
       {/* Edit Attendance Modal - Admin Checklist */}
       {showEditAttendanceModal && selectedMeeting && (
-        <AttedanceMeetingEdit
+        <AttendanceMeetingEdit
           attendanceUsers={attendanceUsers}
           attendanceRecord={attendanceRecord}
           selectedMeeting={selectedMeeting}
