@@ -74,6 +74,19 @@ model VotingEvent {
   deletedAt      DateTime?
   updatedBy      String?
   meeting        Meeting         @relation(fields: [meetingId], references: [meetingId])
+  votingRecords  VotingRecord[]
+}
+
+model VotingRecord {
+  votingRecordId String          @id @default(uuid())
+  votingEventId  String
+  userId         String
+  result         String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime?       @updatedAt
+  deletedAt      DateTime?
+  updatedBy      String?
+  votingEvent    VotingEvent     @relation(fields: [votingEventId], references: [votingEventId])
 }
 
 enum RoleType {
