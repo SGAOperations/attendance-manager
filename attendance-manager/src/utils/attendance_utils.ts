@@ -1,8 +1,8 @@
-import { AttendanceApiData, MeetingRecord, UserApiData } from '@/types';
+import { AttendanceApiData, MeetingApiData, UserApiData } from '@/types';
 
 // API service functions with endpoints
 export const meetingAPI = {
-  async getAllMeetings(): Promise<MeetingRecord[]> {
+  async getAllMeetings(): Promise<MeetingApiData[]> {
     try {
       const response = await fetch('/api/meeting');
 

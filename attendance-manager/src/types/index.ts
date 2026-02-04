@@ -29,7 +29,7 @@ export interface AttendanceRecord {
   attendanceRate: number;
 }
 
-export interface MeetingRecord {
+export interface MeetingApiData {
   meetingId: string;
   date: string;
   startTime: string;
@@ -71,13 +71,23 @@ export interface UserData {
 
 export type MeetingType = 'FULL_BODY' | 'REGULAR';
 
+export interface MeetingApiData {
+  meetingId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  name: string;
+  notes: string;
+  attendance: AttendanceApiData[];
+}
+
 export interface UserApiData {
   userId: string;
   firstName: string;
   lastName: string;
   email: string;
   nuid: string;
-  status: string;
+  attendance: AttendanceApiData[];
   attendanceId?: string;
   role: RoleData
 }

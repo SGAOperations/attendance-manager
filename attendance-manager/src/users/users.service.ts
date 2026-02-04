@@ -4,7 +4,7 @@ import { prisma } from '../lib/prisma';
 export const UsersService = {
   async getAllUsers() {
     return prisma.user.findMany({
-      include: { role: true }
+      include: { role: true, attendance: true }
     });
   },
 
@@ -24,7 +24,7 @@ export const UsersService = {
   async getUserById(userId: string) {
     return prisma.user.findUnique({
       where: { userId },
-      include: { role: true }
+      include: { role: true, attendance: true }
     });
   },
 
