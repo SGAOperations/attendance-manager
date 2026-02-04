@@ -39,6 +39,7 @@ model Meeting {
   notes      String
   type       MeetingType
   attendance Attendance[]
+  votingEvents VotingEvent[]
 }
 
 model Attendance {
@@ -61,6 +62,18 @@ model Request {
   timeAdjustment TimeAdjustment?
   attendance     Attendance      @relation(fields: [attendanceId], references: [attendanceId])
   isLate Boolean @default(false)
+}
+
+model VotingEvent {
+  votingEventId  String          @id @default(uuid())
+  meetingId      String
+  name           String
+  voteType       String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime?       @updatedAt
+  deletedAt      DateTime?
+  updatedBy      String?
+  meeting        Meeting         @relation(fields: [meetingId], references: [meetingId])
 }
 
 enum RoleType {
