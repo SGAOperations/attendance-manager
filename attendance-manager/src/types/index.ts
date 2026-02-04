@@ -60,7 +60,7 @@ export interface RoleData {
 
 export interface UserData {
   userId: string;
-  nuid: string
+  nuid: string;
   username: string;
   email: string;
   firstName: string;
@@ -89,7 +89,7 @@ export interface UserApiData {
   nuid: string;
   attendance: AttendanceApiData[];
   attendanceId?: string;
-  role: RoleData
+  role: RoleData;
 }
 
 export interface AttendanceApiData {
@@ -98,7 +98,7 @@ export interface AttendanceApiData {
   meetingId: string;
   status: string;
   meeting: MeetingApiData;
-  user: UserData
+  user: UserData;
 }
 
 export interface RequestApiData {
@@ -108,6 +108,7 @@ export interface RequestApiData {
   attendanceMode: 'ONLINE' | 'IN_PERSON';
   timeAdjustment: 'ARRIVING_LATE' | 'LEAVING_EARLY';
   attendance: AttendanceApiData;
+  isLate: boolean;
 }
 
 export interface RemainingAbsences {
@@ -124,11 +125,11 @@ export interface RemainingAbsences {
 }
 
 export interface RequestForm {
-    selectedMeetings: string[];
-    requestTypes: {
-      leavingEarly: boolean;
-      comingLate: boolean;
-      goingOnline: boolean;
-    };
-    explanation: string;
+  selectedMeetings: string[];
+  requestTypes: {
+    leavingEarly: boolean;
+    comingLate: boolean;
+    goingOnline: boolean;
+  };
+  explanation: string;
 }
