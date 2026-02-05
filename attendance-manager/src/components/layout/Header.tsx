@@ -13,9 +13,12 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
       <div className='w-full px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
           {/* Left side - SGA (always on far left) */}
-          <div className='flex-shrink-0'>
+          <div className="flex flex-row items-end flex-shrink-0">
             <div className='text-2xl font-bold text-[#C8102E] tracking-wider'>
               SGA
+            </div>
+            <div style={{paddingLeft: '8px'}} >
+              Version 2.0.2
             </div>
           </div>
 

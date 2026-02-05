@@ -517,7 +517,7 @@ const LoginPage: React.FC = () => {
           {/* Footer */}
           <div className='text-center'>
             <p className='text-sm text-gray-500'>
-              © 2025 Northeastern University Student Government Association. All
+              © 2026 Northeastern University Student Government Association. All
               rights reserved.
             </p>
           </div>
