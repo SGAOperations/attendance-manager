@@ -111,7 +111,7 @@ const LoginPage: React.FC = () => {
         const result = await response.json();
         console.log('User created:', result);
         alert(
-          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Your account has been created successfully.`
+          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`
         );
       } catch (error) {
         console.error('Login error:', error);
@@ -517,7 +517,7 @@ const LoginPage: React.FC = () => {
           {/* Footer */}
           <div className='text-center'>
             <p className='text-sm text-gray-500'>
-              © 2025 Northeastern University Student Government Association. All
+              © 2026 Northeastern University Student Government Association. All
               rights reserved.
             </p>
           </div>
