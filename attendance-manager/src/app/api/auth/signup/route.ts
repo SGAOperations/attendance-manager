@@ -18,10 +18,15 @@ export async function POST(request: Request) {
 
     const supabase = await createServerSupabaseClient();
 
+    // Use the request origin so verification links go to the same host
+    const origin = new URL(request.url).origin;
+    const emailRedirectTo = `${origin}/login`;
+
     // Create user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: { emailRedirectTo },
     });
 
     if (authError) {
