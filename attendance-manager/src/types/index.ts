@@ -51,6 +51,7 @@ export interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  isLoggingOut: boolean;
 }
 
 export interface RoleData {

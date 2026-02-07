@@ -23,6 +23,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -52,6 +53,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           await loadUserProfile(session.user.id);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          // Use window.location for immediate redirect to prevent flash of unauthenticated UI
+          window.location.href = '/login';
         }
       }
     );
@@ -110,16 +113,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async () => {
+    // Set before signOut so Layout shows loading instead of "not authenticated" during redirect
+    setIsLoggingOut(true);
     await supabase.auth.signOut();
     setUser(null);
-    router.push('/login');
+    window.location.href = '/login';
   };
 
   const value: AuthContextType = {
     user,
     login,
     logout,
-    isLoading
+    isLoading,
+    isLoggingOut
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
