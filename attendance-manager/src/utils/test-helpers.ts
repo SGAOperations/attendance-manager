@@ -16,6 +16,8 @@ import { prisma } from '@/lib/prisma';
 export async function cleanupTestData() {
   // Delete in strict order to respect foreign key constraints
   // Each await ensures the previous deletion completes before the next
+  await prisma.votingRecord.deleteMany();
+  await prisma.votingEvent.deleteMany();
   await prisma.request.deleteMany();
   await prisma.attendance.deleteMany();
   await prisma.user.deleteMany();
