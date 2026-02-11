@@ -165,23 +165,6 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
             </select>
           </div>
 
-          {/* Notes */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Notes
-            </label>
-            <textarea
-              value={newMeeting.notes}
-              onChange={e =>
-                setNewMeeting({ ...newMeeting, notes: e.target.value })
-              }
-              className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
-              placeholder='Enter meeting notes'
-              rows={4}
-              required
-            />
-          </div>
-
           {/* Attendees Selection */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-3'>
