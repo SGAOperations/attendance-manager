@@ -1,4 +1,5 @@
 import { UserApiData, MeetingType, MeetingApiData } from '@/types';
+import { useMemo, useState } from 'react';
 
 interface CreateMeetingModalProps {
   newMeeting: {
@@ -42,6 +43,22 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
   setShowCreateMeetingModal,
   setMeetings
 }) => {
+  const [searchMemberQuery, setSearchMemberQuery] = useState('');
+
+  const filteredMembers = useMemo(() => {
+    const query = searchMemberQuery?.trim() ?? '';
+    if (!query) return members;
+    const lowerQuery = query.toLowerCase();
+
+    return members.filter(
+      member =>
+        `${member.firstName} ${member.lastName}`
+          .toLowerCase()
+          .includes(lowerQuery) ||
+        member.email.toLowerCase().includes(lowerQuery)
+    );
+  }, [members, searchMemberQuery]);
+
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
       <div className='bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto'>
@@ -170,6 +187,13 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
             <label className='block text-sm font-medium text-gray-700 mb-3'>
               Select Attendees
             </label>
+            <input
+              type='text'
+              value={searchMemberQuery}
+              onChange={e => setSearchMemberQuery(e.target.value)}
+              placeholder='Search members...'
+              className='w-full mb-4 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
+            />
             <div className='flex flex-wrap gap-2 mb-4'>
               <button
                 type='button'
@@ -191,7 +215,11 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
               </button>
             </div>
             <div className='max-h-48 overflow-y-auto border border-gray-300 rounded-xl p-4 space-y-3'>
-              {members.map(member => (
+              {filteredMembers.length === 0 && (
+                <p className='text-sm text-gray-500'>No members found.</p>
+              )}
+
+              {filteredMembers.map(member => (
                 <label
                   key={member.userId}
                   className='flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer'
