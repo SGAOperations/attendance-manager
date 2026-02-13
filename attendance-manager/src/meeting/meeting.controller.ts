@@ -23,7 +23,6 @@ export const MeetingController = {
 
   async createMeeting(request: Request) {
     const body = await request.json();
-    console.log('Body', body);
     
     // Validate required fields
     if (
@@ -31,11 +30,16 @@ export const MeetingController = {
       !body.startTime ||
       !body.date ||
       !body.endTime ||
-      !body.notes ||
+      body === undefined ||
       !body.type
     ) {
+      const requiredFields = ['name', 'startTime', 'date', 'endTime', 'type'];
+      const missingFields = requiredFields.filter((field) => {
+      const value = body[field];
+        return value === undefined || value === null || value === '';
+      });
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields', missingFields },
         { status: 400 }
       );
     }
