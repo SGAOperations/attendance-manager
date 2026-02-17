@@ -8,6 +8,18 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
   const { user } = useAuth();
 
+/* Maps enum value to appropriate plain text */
+const rolePlainText = (role?: string) => {
+  switch (role) {
+    case 'EBOARD':
+      return 'E-Board';
+    case 'MEMBER':
+      return 'Member';
+    default:
+      return role;
+  }
+};
+
   return (
     <header className='bg-white shadow-lg border-b border-gray-200 w-full'>
       <div className='w-full px-4 sm:px-6 lg:px-8'>
@@ -30,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
                   {user?.name}
                 </p>
                 <p className='text-xs text-gray-500 capitalize'>
-                  {user?.role} Account
+                  {rolePlainText(user?.role)} Account
                 </p>
               </div>
               <div className='relative'>
