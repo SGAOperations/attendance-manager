@@ -146,7 +146,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
             value={name}
             onChange={e => setName(e.target.value)}
             className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]'
-            placeholder='e.g. Approve the budget for Q2?'
+            placeholder='Enter the vote question or title'
           />
         </div>
 
