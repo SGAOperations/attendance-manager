@@ -13,11 +13,9 @@ interface UseActiveVotingEventResult {
 }
 
 /**
- * Polls the backend for the currently active voting event.
- *
- * For now, "active" is defined as the most recently created VotingEvent
- * with deletedAt === null. This can be refined later if a dedicated status
- * field is added on VotingEvent.
+ * Polls the backend for the currently active voting event
+ * "active" is defined as the most recently created VotingEvent
+ * with deletedAt === null
  */
 export function useActiveVotingEvent(
   options: UseActiveVotingEventOptions = {}
@@ -69,7 +67,6 @@ export function useActiveVotingEvent(
     return () => {
       window.clearInterval(id);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pollIntervalMs]);
 
   return {
