@@ -19,7 +19,7 @@ const Layout: React.FC = () => {
   };
   const handleLogoClick = () => {
     setActiveTab('dashboard');
-  }
+  };
 
   // Render 404 page if user is not authenticated
   // if (!user) {
