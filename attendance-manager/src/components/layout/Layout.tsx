@@ -7,6 +7,8 @@ import AttendancePage from '@/components/attendance/AttendancePage';
 import ProfilePage from '@/components/profile/ProfilePage';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginPage from '../profile/LoginPage';
+import { useActiveVotingEvent } from '@/hooks/useActiveVotingEvent';
+import ActiveVotingModal from '@/components/voting/ActiveVotingModal';
 
 const Layout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
@@ -14,6 +16,7 @@ const Layout: React.FC = () => {
   >('dashboard');
   const { user } = useAuth();
   const isAdmin = user?.role === 'EBOARD';
+  const { activeEvent } = useActiveVotingEvent();
   const handleProfileClick = () => {
     setActiveTab('profile');
   };
@@ -122,14 +125,19 @@ const Layout: React.FC = () => {
     }
   };
 
-  return !user ? (
-      <LoginPage />
-    ) : (
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  return (
     <div className='min-h-screen bg-gray-50 flex flex-col'>
       <Header onProfileClick={handleProfileClick} />
       <div className='flex flex-1'>
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className='flex-1'>{renderContent()}</main>
+        <main className='flex-1 relative'>
+          {renderContent()}
+          {activeEvent && <ActiveVotingModal event={activeEvent} />}
+        </main>
       </div>
     </div>
   );
