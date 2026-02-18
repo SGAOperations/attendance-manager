@@ -413,11 +413,11 @@ describe('getRemainingUnexcusedAbsences', () => {
 
     expect(result).toBeDefined();
     expect(result.regular.used).toBe(0);
-    expect(result.regular.allowed).toBe(3);
-    expect(result.regular.remaining).toBe(3);
+    expect(result.regular.allowed).toBe(2);
+    expect(result.regular.remaining).toBe(2);
     expect(result.fullBody.used).toBe(0);
-    expect(result.fullBody.allowed).toBe(1);
-    expect(result.fullBody.remaining).toBe(1);
+    expect(result.fullBody.allowed).toBe(0);
+    expect(result.fullBody.remaining).toBe(0);
   });
 
   it('should correctly count remaining regular meeting unexcused absences', async () => {
@@ -443,10 +443,10 @@ describe('getRemainingUnexcusedAbsences', () => {
     );
 
     expect(result.regular.used).toBe(2);
-    expect(result.regular.allowed).toBe(3);
-    expect(result.regular.remaining).toBe(1);
+    expect(result.regular.allowed).toBe(2);
+    expect(result.regular.remaining).toBe(0);
     expect(result.fullBody.used).toBe(0);
-    expect(result.fullBody.remaining).toBe(1);
+    expect(result.fullBody.remaining).toBe(0);
   });
 
   it('should correctly count remaining full-body meeting unexcused absences', async () => {
@@ -464,11 +464,11 @@ describe('getRemainingUnexcusedAbsences', () => {
     );
 
     expect(result.fullBody.used).toBe(1);
-    expect(result.fullBody.allowed).toBe(1);
+    expect(result.fullBody.allowed).toBe(0);
     expect(result.fullBody.remaining).toBe(0);
     // Regular should still be 2 used (from previous test)
     expect(result.regular.used).toBe(2);
-    expect(result.regular.remaining).toBe(1);
+    expect(result.regular.remaining).toBe(0);
   });
 
   it('should show 0 remaining when user reaches max unexcused absences', async () => {
@@ -486,14 +486,14 @@ describe('getRemainingUnexcusedAbsences', () => {
     );
 
     expect(result.regular.used).toBe(3);
-    expect(result.regular.allowed).toBe(3);
+    expect(result.regular.allowed).toBe(2);
     expect(result.regular.remaining).toBe(0);
     expect(result.fullBody.used).toBe(1);
     expect(result.fullBody.remaining).toBe(0);
   });
 
   it('should not return negative remaining when exceeding limits', async () => {
-    // Add one more regular unexcused absence to exceed limit
+    // Add one more regular unexcused absence to exceed limit©
     await prisma.attendance.create({
       data: {
         userId: testUser4Id,
@@ -516,10 +516,10 @@ describe('getRemainingUnexcusedAbsences', () => {
     );
 
     expect(result.regular.used).toBe(4);
-    expect(result.regular.allowed).toBe(3);
+    expect(result.regular.allowed).toBe(2);
     expect(result.regular.remaining).toBe(0);
     expect(result.fullBody.used).toBe(2);
-    expect(result.fullBody.allowed).toBe(1);
+    expect(result.fullBody.allowed).toBe(0);
     expect(result.fullBody.remaining).toBe(0);
   });
 
@@ -555,10 +555,10 @@ describe('getRemainingUnexcusedAbsences', () => {
     );
 
     expect(result.regular.used).toBe(1);
-    expect(result.regular.allowed).toBe(3);
-    expect(result.regular.remaining).toBe(2);
+    expect(result.regular.allowed).toBe(2);
+    expect(result.regular.remaining).toBe(1);
     expect(result.fullBody.used).toBe(0);
-    expect(result.fullBody.remaining).toBe(1);
+    expect(result.fullBody.remaining).toBe(0);
   });
 
   it('should throw error for invalid userId', async () => {

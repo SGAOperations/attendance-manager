@@ -10,6 +10,18 @@ const ProfilePage: React.FC = () => {
     logout();
   };
 
+/* Maps enum value to appropriate plain text */
+const rolePlainText = (role?: string) => {
+  switch (role) {
+    case 'EBOARD':
+      return 'E-Board';
+    case 'MEMBER':
+      return 'Member';
+    default:
+      return role;
+  }
+};
+
   if (!user) {
     return (
       <div className='flex-1 p-6 bg-gray-50'>
@@ -41,7 +53,7 @@ const ProfilePage: React.FC = () => {
               </span>
             </div>
             <h2 className='text-2xl font-bold text-gray-900'>{user.name}</h2>
-            <p className='text-gray-600 capitalize'>{user.role} Account</p>
+            <p className='text-gray-600'>{rolePlainText(user?.role)} Account</p>
           </div>
 
           {/* Profile Information */}
@@ -69,7 +81,7 @@ const ProfilePage: React.FC = () => {
                 Account Role
               </label>
               <div className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 capitalize'>
-                {user.role}
+                {rolePlainText(user?.role)}
               </div>
             </div>
 
