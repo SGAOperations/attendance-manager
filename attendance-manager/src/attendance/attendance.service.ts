@@ -113,8 +113,8 @@ export const AttendanceService = {
     ).length;
 
     // Allowed absences: 3 for regular, 1 for full-body
-    const allowedRegular = 3;
-    const allowedFullBody = 1;
+    const allowedRegular = 2;
+    const allowedFullBody = 0;
 
     return {
       regular: {
