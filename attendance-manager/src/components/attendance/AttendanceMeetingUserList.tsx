@@ -53,7 +53,7 @@ const AttedanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
             ) : (
               <div className='divide-y divide-gray-200'>
                 {[...attendanceUsers]
-                  .sort((a, b) => a.firstName.localeCompare(b.firstName))
+                  .sort((a, b) => a.lastName.localeCompare(b.firstName))
                   .map(user => {
                     const isPresent = attendanceRecord[
                       selectedMeetingForCheck.meetingId
