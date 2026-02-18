@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick, onLogoClick }) => {
             </div>
             </Link>
             <div style={{paddingLeft: '8px'}} >
-              Version 2.0.2
+              Version 2.0.4
             </div>
           </div>
 
