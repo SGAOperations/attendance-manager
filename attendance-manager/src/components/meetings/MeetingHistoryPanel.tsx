@@ -1,4 +1,5 @@
 import { MeetingApiData, MeetingType } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MeetingHistoryPanelProps {
   setActiveTab: (option: 'past' | 'upcoming') => void;
@@ -19,6 +20,18 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
   handleEditMeeting,
   visibleMeetings
 }) => {
+  //helper function that formats meeting type from all caps to normal
+  const formatMeetingType = (type: string): string => {
+    if (type === 'FULL_BODY') {
+      return 'Full Body';
+    } else if (type === 'REGULAR') {
+      return 'Regular';
+    }
+    return type;
+  };
+  const { user } = useAuth();
+  const isEboard = user?.role === 'EBOARD';
+
   return (
     <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
       <div className='flex items-center justify-between mb-6'>
@@ -107,9 +120,11 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
               <th className='text-right py-3 px-4 font-medium text-gray-900'>
                 # of Members
               </th>
-              <th className='text-center py-3 px-4 font-medium text-gray-900'>
-                Actions
-              </th>
+              {isEboard && (
+                <th className='text-center py-3 px-4 font-medium text-gray-900'>
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -135,10 +150,15 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                     <div className='text-sm font-medium text-gray-900'>
                       {meeting.name}
                     </div>
-                    <div className='text-xs text-gray-500'>{meeting.type}</div>
+                    <div className='text-xs text-gray-500'>{formatMeetingType(meeting.type)}</div>
                   </td>
                   <td className='py-3 px-4'>
                     <div className='text-sm text-gray-600'>{meeting.notes}</div>
+                  </td>
+                  <td className='py-3 px-4'>
+                    <div className='text-sm font-medium text-gray-900'>
+                      {meeting.type}
+                    </div>
                   </td>
                   <td className='py-3 px-4 text-right'>
                     <div className='text-sm font-medium text-gray-900'>
@@ -146,12 +166,14 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                     </div>
                   </td>
                   <td className='py-3 px-4 text-center'>
-                    <button
-                      onClick={() => handleEditMeeting(meeting)}
-                      className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
-                    >
-                      Edit
-                    </button>
+                    {isEboard && (
+                      <button
+                        onClick={() => handleEditMeeting(meeting)}
+                        className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
+                      >
+                        Edit
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
