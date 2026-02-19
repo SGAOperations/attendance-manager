@@ -20,6 +20,15 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
   handleEditMeeting,
   visibleMeetings
 }) => {
+  //helper function that formats meeting type from all caps to normal
+  const formatMeetingType = (type: string): string => {
+    if (type === 'FULL_BODY') {
+      return 'Full Body';
+    } else if (type === 'REGULAR') {
+      return 'Regular';
+    }
+    return type;
+  };
   const { user } = useAuth();
   const isEboard = user?.role === 'EBOARD';
 
@@ -141,6 +150,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                     <div className='text-sm font-medium text-gray-900'>
                       {meeting.name}
                     </div>
+                    <div className='text-xs text-gray-500'>{formatMeetingType(meeting.type)}</div>
                   </td>
                   <td className='py-3 px-4'>
                     <div className='text-sm text-gray-600'>{meeting.notes}</div>
