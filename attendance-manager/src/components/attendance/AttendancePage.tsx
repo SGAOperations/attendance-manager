@@ -141,12 +141,11 @@ const AttendancePage: React.FC = () => {
   }, [meetings]);
 
   // Function to load attendance users for a meeting
-  const loadAttendanceUsers = async () => {
+  const loadAttendanceUsers = async (meetingId: string) => {
     setIsLoadingAttendance(true);
     try {
-      const allUsers: UserApiData[] = await fetch('/api/users').then(res =>
-        res.json()
-      );
+      const res = await fetch(`/api/meeting/${meetingId}/users`);
+      const allUsers: UserApiData[] = await res.json();
       setAttendanceUsers(allUsers);
     } catch (error) {
       console.error('Error loading attendance users:', error);
@@ -161,10 +160,7 @@ const AttendancePage: React.FC = () => {
     setSelectedMeetingForCheck(meeting);
     // await loadAttendanceUsers();
     setAttendanceCheckStep('user-list');
-    const allUsers: UserApiData[] = await fetch('/api/users').then(res =>
-      res.json()
-    );
-    setAttendanceUsers(allUsers);
+    loadAttendanceUsers(meeting.meetingId);
   };
 
   // Function to start check-in process
@@ -308,7 +304,7 @@ const AttendancePage: React.FC = () => {
   // Function to open edit attendance modal
   const openEditAttendanceModal = async (meeting: MeetingApiData) => {
     setSelectedMeeting(meeting);
-    await loadAttendanceUsers();
+    await loadAttendanceUsers(meeting.meetingId);
     setShowEditAttendanceModal(true);
   };
 
