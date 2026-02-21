@@ -136,7 +136,7 @@ describe('VotingService', () => {
 describe('VotingController', () => {
   let testMeetingId: string;
   let testMeeting2Id: string;
-  let testVotingEventId: string;
+  let _testVotingEventId: string;
 
   beforeAll(async () => {
     // Create test meetings
@@ -288,7 +288,7 @@ describe('VotingController', () => {
       expect(responseData.meetingId).toBe(testMeetingId);
       expect(responseData.votingEventId).toBeDefined();
 
-      testVotingEventId = responseData.votingEventId;
+      _testVotingEventId = responseData.votingEventId;
       await VotingService.deleteVotingEvent(responseData.votingEventId);
     });
 

@@ -1,7 +1,6 @@
 import { RequestController } from '../request.controller';
 import { prisma } from '../../lib/prisma';
 import { POST } from '../../app/api/attendance/[attendanceId]/requests/route';
-import { UsersController } from '@/users/users.controller';
 import { UsersService } from '@/users/users.service';
 import { MeetingService } from '@/meeting/meeting.service';
 import { AttendanceService } from '@/attendance/attendance.service';
