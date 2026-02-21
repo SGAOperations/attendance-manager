@@ -83,20 +83,39 @@ describe('UsersService', () => {
   });
 
   it('should update a user', async () => {
-    const [user] = await UsersService.getAllUsers();
-    const updatedUser = await UsersService.updateUser(user.userId, {
+    const newUser = await UsersService.createUser({
+      userId: 'test-user-id-4',
+      supabaseAuthId: 'test-supabase-auth-id-4',
+      nuid: '001234570',
+      email: 'jdoe3@northeastern.edu',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      roleId: testRoleId
+    });
+
+    const updatedUser = await UsersService.updateUser(newUser.userId, {
       email: 'updated@northeastern.edu',
       firstName: 'Updated',
       lastName: 'User'
     });
 
     expect(updatedUser.email).toBe('updated@northeastern.edu');
+    expect(updatedUser.firstName).toBe('Updated');
+    expect(updatedUser.lastName).toBe('User');
   });
 
   it('should delete a user', async () => {
-    const [user] = await UsersService.getAllUsers();
-    await UsersService.deleteUser(user.userId);
-    const deletedUser = await UsersService.getUserById(user.userId);
+    const newUser = await UsersService.createUser({
+      userId: 'test-user-id-5',
+      supabaseAuthId: 'test-supabase-auth-id-5',
+      nuid: '001234571',
+      email: 'jdoe4@northeastern.edu',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      roleId: testRoleId
+    });
+    await UsersService.deleteUser(newUser.userId);
+    const deletedUser = await UsersService.getUserById(newUser.userId);
     expect(deletedUser).toBeNull();
   });
 });
@@ -313,6 +332,7 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
     expect(data.role).toBeDefined();
     expect(data.role.roleId).toBe(eboardRole.roleId);
     expect(data.role.roleType).toBe('EBOARD');
+    await UsersService.deleteUser(eboardUser.userId);
   });
 });
 

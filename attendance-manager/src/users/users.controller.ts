@@ -18,7 +18,7 @@ export const UsersController = {
     await UsersService.deleteRole(params.roleId);
     return NextResponse.json(
       { message: 'Role deleted successfully' },
-      { status: 204 }
+      { status: 200 }
     );
   },
 
