@@ -40,7 +40,6 @@ First, clone the repo and `cd` into the directory
 ```bash
 git clone https://github.com/SGAOperations/attendance-manager.git
 cd attendance-manager
-cd attendance-manager
 ```
 
 Then, install the dependencies
