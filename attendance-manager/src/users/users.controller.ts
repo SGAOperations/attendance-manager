@@ -14,6 +14,14 @@ export const UsersController = {
     return NextResponse.json(roles);
   },
 
+  async deleteRole(params: { roleId: string }) {
+    await UsersService.deleteRole(params.roleId);
+    return NextResponse.json(
+      { message: 'Role deleted successfully' },
+      { status: 204 }
+    );
+  },
+
   async getUserByNUID(params: { nuid: string }) {
     const roles = await UsersService.getUserByNUID(params.nuid);
     return NextResponse.json(roles);

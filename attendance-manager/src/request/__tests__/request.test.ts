@@ -1,7 +1,11 @@
 import { RequestController } from '../request.controller';
 import { prisma } from '../../lib/prisma';
 import { POST } from '../../app/api/attendance/[attendanceId]/requests/route';
-import { cleanupTestData } from '../../utils/test-helpers';
+import { UsersController } from '@/users/users.controller';
+import { UsersService } from '@/users/users.service';
+import { MeetingService } from '@/meeting/meeting.service';
+import { AttendanceService } from '@/attendance/attendance.service';
+import { RequestService } from '../request.service';
 
 jest.setTimeout(20000);
 
@@ -33,8 +37,6 @@ describe('RequestController', () => {
   let secondTestRequestId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create a test role
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
     testRoleId = role.roleId;
@@ -128,7 +130,13 @@ describe('RequestController', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
+    await RequestService.deleteRequest(secondTestRequestId);
+    await RequestService.deleteRequest(testRequestId);
+    await AttendanceService.deleteAttendance(secondTestAtendanceId);
+    await AttendanceService.deleteAttendance(testAttendanceId);
+    await MeetingService.deleteMeeting(testMeetingId);
+    await UsersService.deleteUser(secondTestUserId);
+    await UsersService.deleteUser(testUserId);
   });
 
   it('should get a request by requestId', async () => {
@@ -188,6 +196,10 @@ describe('RequestController', () => {
     expect(newRequest.attendanceMode).toBe('IN_PERSON');
     expect(newRequest.timeAdjustment).toBe('LEAVING_EARLY');
     expect(newRequest.isLate).toBe(true);
+
+    await RequestService.deleteRequest(newRequest.requestId);
+    await AttendanceService.deleteAttendance(testAttendanceId2);
+    await MeetingService.deleteMeeting(newMeeting.meetingId);
   });
 
   it('should mark request as late when created within 24 hours of meeting', async () => {
@@ -222,6 +234,10 @@ describe('RequestController', () => {
     });
 
     expect(request.isLate).toBe(true);
+
+    await RequestService.deleteRequest(request.requestId);
+    await AttendanceService.deleteAttendance(attendance.attendanceId);
+    await MeetingService.deleteMeeting(soonMeeting.meetingId);
   });
 
   it('should mark request as not late when meeting is more than 24 hours away', async () => {
@@ -253,6 +269,9 @@ describe('RequestController', () => {
     });
 
     expect(request.isLate).toBe(false);
+    await RequestService.deleteRequest(request.requestId);
+    await AttendanceService.deleteAttendance(attendance.attendanceId);
+    await MeetingService.deleteMeeting(futureMeeting.meetingId);
   });
 
   it('should update a requests reason', async () => {
@@ -328,6 +347,8 @@ describe('RequestController', () => {
       where: { requestId: requestToDelete.requestId }
     });
     expect(deleted).toBeNull();
+    await AttendanceService.deleteAttendance(testAttendanceId2);
+    await MeetingService.deleteMeeting(newMeeting.meetingId);
   });
 });
 
@@ -379,8 +400,10 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
   });
 
   afterAll(async () => {
-    // Clean up all test data
-    await cleanupTestData();
+    await AttendanceService.deleteAttendance(routeTestAttendanceId);
+    await MeetingService.deleteMeeting(routeTestMeetingId);
+    await UsersService.deleteUser(routeTestUserId);
+    await UsersService.deleteRole(routeTestRoleId);
   });
 
   it('should create a request successfully via POST endpoint', async () => {
@@ -410,6 +433,7 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
     expect(data.attendanceMode).toBe('ONLINE');
     expect(data.timeAdjustment).toBe('ARRIVING_LATE');
     expect(data.isLate).toBe(true);
+    await RequestService.deleteRequest(data.requestId);
   });
 
   it('should create a request without timeAdjustment via POST endpoint', async () => {
@@ -456,6 +480,9 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
     expect(data.reason).toBe('Test reason without time adjustment');
     expect(data.attendanceMode).toBe('IN_PERSON');
     expect(data.isLate).toBe(true);
+    await RequestService.deleteRequest(data.requestId);
+    await AttendanceService.deleteAttendance(attendance2.attendanceId);
+    await MeetingService.deleteMeeting(meeting2.meetingId);
   });
 
   it('should return 400 when reason is missing', async () => {
@@ -563,6 +590,9 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
     expect(response.status).toBe(201);
     const data = await response.json();
     expect(data.attendanceId).toBe(attendance3.attendanceId);
+    await RequestService.deleteRequest(data.requestId);
+    await AttendanceService.deleteAttendance(attendance3.attendanceId);
+    await MeetingService.deleteMeeting(meeting3.meetingId);
   });
 
   it('should return 500 when controller throws an error', async () => {

@@ -58,3 +58,7 @@ jobs:
       - name: Test Auth Flow
         working-directory: attendance-manager
         run: npm run test -- src/auth/__tests__/auth-flow.test.ts
+
+      - name: Test Voting
+        working-directory: attendance-manager
+        run: npm run test -- src/voting/__tests__/voting.test.ts

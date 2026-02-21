@@ -1,7 +1,7 @@
 import { VotingService } from '../voting.service';
 import { VotingController } from '../voting.controller';
 import { prisma } from '../../lib/prisma';
-import { cleanupTestData } from '../../utils/test-helpers';
+import { MeetingService } from '@/meeting/meeting.service';
 
 jest.setTimeout(20000);
 
@@ -9,15 +9,7 @@ describe('VotingService', () => {
   let testMeetingId: string;
   let testMeeting2Id: string;
   let testVotingEventId: string;
-
-  afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
-  });
-
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create test meetings
     const meeting = await prisma.meeting.create({
       data: {
@@ -53,6 +45,18 @@ describe('VotingService', () => {
     testVotingEventId = votingEvent.votingEventId;
   });
 
+  afterAll(async () => {
+    await prisma.votingEvent.deleteMany({
+      where: {
+        meetingId: {
+          in: [testMeetingId, testMeeting2Id]
+        }
+      }
+    });
+    await MeetingService.deleteMeeting(testMeetingId);
+    await MeetingService.deleteMeeting(testMeeting2Id);
+  });
+
   it('should create a new voting event', async () => {
     const newVotingEvent = await VotingService.createVotingEvent({
       meetingId: testMeetingId,
@@ -78,7 +82,9 @@ describe('VotingService', () => {
   });
 
   it('should fetch a voting event by id', async () => {
-    const fetchedVotingEvent = await VotingService.getVotingEventById(testVotingEventId);
+    const fetchedVotingEvent = await VotingService.getVotingEventById(
+      testVotingEventId
+    );
     expect(fetchedVotingEvent?.votingEventId).toBe(testVotingEventId);
     expect(fetchedVotingEvent?.name).toBe('Test Voting Event');
   });
@@ -91,7 +97,9 @@ describe('VotingService', () => {
       voteType: 'YES_NO'
     });
 
-    const votingEvents = await VotingService.getVotingEventsByVoteType('YES_NO');
+    const votingEvents = await VotingService.getVotingEventsByVoteType(
+      'YES_NO'
+    );
     expect(Array.isArray(votingEvents)).toBe(true);
     expect(votingEvents.length).toBeGreaterThanOrEqual(2);
     votingEvents.forEach(event => {
@@ -115,7 +123,9 @@ describe('VotingService', () => {
   });
 
   it('should include meeting and votingRecords in responses', async () => {
-    const votingEvent = await VotingService.getVotingEventById(testVotingEventId);
+    const votingEvent = await VotingService.getVotingEventById(
+      testVotingEventId
+    );
     expect(votingEvent?.meeting).toBeDefined();
     expect(votingEvent?.meeting.meetingId).toBe(testMeetingId);
     expect(votingEvent?.votingRecords).toBeDefined();
@@ -129,8 +139,6 @@ describe('VotingController', () => {
   let testVotingEventId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create test meetings
     const meeting = await prisma.meeting.create({
       data: {
@@ -158,8 +166,15 @@ describe('VotingController', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await prisma.votingEvent.deleteMany({
+      where: {
+        meetingId: {
+          in: [testMeetingId, testMeeting2Id]
+        }
+      }
+    });
+    await MeetingService.deleteMeeting(testMeetingId);
+    await MeetingService.deleteMeeting(testMeeting2Id);
   });
 
   describe('GET ALL', () => {
@@ -176,6 +191,7 @@ describe('VotingController', () => {
       const responseData = await response.json();
       expect(Array.isArray(responseData)).toBe(true);
       expect(responseData.length).toBeGreaterThan(0);
+      await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
     });
   });
 
@@ -195,6 +211,7 @@ describe('VotingController', () => {
       const responseData = await response.json();
       expect(responseData.votingEventId).toBe(testVotingEvent.votingEventId);
       expect(responseData.name).toBe('GET SINGULAR Test Event');
+      await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
     });
 
     it('should return 404 for non-existent voting event', async () => {
@@ -211,13 +228,13 @@ describe('VotingController', () => {
   describe('GET by VoteType', () => {
     it('should return voting events filtered by vote type', async () => {
       // Create voting events with different vote types
-      await VotingService.createVotingEvent({
+      const votingEvent1 = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'Type Test Event 1',
         voteType: 'MULTIPLE_CHOICE'
       });
 
-      await VotingService.createVotingEvent({
+      const votingEvent2 = await VotingService.createVotingEvent({
         meetingId: testMeeting2Id,
         name: 'Type Test Event 2',
         voteType: 'MULTIPLE_CHOICE'
@@ -233,6 +250,8 @@ describe('VotingController', () => {
       responseData.forEach((event: any) => {
         expect(event.voteType).toBe('MULTIPLE_CHOICE');
       });
+      await VotingService.deleteVotingEvent(votingEvent1.votingEventId);
+      await VotingService.deleteVotingEvent(votingEvent2.votingEventId);
     });
 
     it('should return empty array for non-existent vote type', async () => {
@@ -270,6 +289,7 @@ describe('VotingController', () => {
       expect(responseData.votingEventId).toBeDefined();
 
       testVotingEventId = responseData.votingEventId;
+      await VotingService.deleteVotingEvent(responseData.votingEventId);
     });
 
     it('should reject missing required fields', async () => {
@@ -324,6 +344,7 @@ describe('VotingController', () => {
       expect(response.status).toBe(201);
       const responseData = await response.json();
       expect(responseData.updatedBy).toBeNull();
+      await VotingService.deleteVotingEvent(responseData.votingEventId);
     });
   });
 
@@ -356,6 +377,7 @@ describe('VotingController', () => {
       expect(responseData.voteType).toBe('APPROVAL');
       expect(responseData.updatedBy).toBe('test-updater');
       expect(responseData.updatedAt).toBeDefined(); // Should be set after update
+      await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
     });
 
     it('should allow partial updates', async () => {
@@ -383,6 +405,7 @@ describe('VotingController', () => {
       expect(responseData.name).toBe('Partially Updated Name');
       // Other fields should remain unchanged
       expect(responseData.voteType).toBe('YES_NO');
+      await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
     });
 
     it('should return 404 for non-existent voting event', async () => {
@@ -448,6 +471,7 @@ describe('VotingController', () => {
       expect(response.status).toBe(400);
       const responseData = await response.json();
       expect(responseData.error).toContain('must be a string');
+      await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
     });
 
     it('should handle soft delete via deletedAt', async () => {
@@ -472,6 +496,7 @@ describe('VotingController', () => {
       expect(response).toBeDefined();
       const responseData = await response.json();
       expect(responseData.deletedAt).toBeDefined();
+      await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
     });
   });
 });
@@ -481,8 +506,6 @@ describe('GET /api/voting-event', () => {
   let routeTestVotingEventId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create a test meeting
     const meeting = await prisma.meeting.create({
       data: {
@@ -506,8 +529,8 @@ describe('GET /api/voting-event', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await VotingService.deleteVotingEvent(routeTestVotingEventId);
+    await MeetingService.deleteMeeting(routeTestMeetingId);
   });
 
   it('should fetch all voting events successfully', async () => {
@@ -519,7 +542,9 @@ describe('GET /api/voting-event', () => {
     expect(response.status).toBe(200);
     expect(Array.isArray(data)).toBe(true);
     expect(data.length).toBeGreaterThan(0);
-    expect(data.some((event: any) => event.votingEventId === routeTestVotingEventId)).toBe(true);
+    expect(
+      data.some((event: any) => event.votingEventId === routeTestVotingEventId)
+    ).toBe(true);
   });
 });
 
@@ -528,8 +553,6 @@ describe('GET /api/voting-event/[id]', () => {
   let routeTestVotingEventId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create a test meeting
     const meeting = await prisma.meeting.create({
       data: {
@@ -553,13 +576,15 @@ describe('GET /api/voting-event/[id]', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await VotingService.deleteVotingEvent(routeTestVotingEventId);
+    await MeetingService.deleteMeeting(routeTestMeetingId);
   });
 
   it('should fetch voting event by id successfully', async () => {
     const { GET } = await import('../../app/api/voting-event/[id]/route');
-    const req = new Request(`http://localhost/api/voting-event/${routeTestVotingEventId}`);
+    const req = new Request(
+      `http://localhost/api/voting-event/${routeTestVotingEventId}`
+    );
 
     const params = Promise.resolve({ id: routeTestVotingEventId });
     const response = await GET(req, { params });
@@ -576,7 +601,9 @@ describe('GET /api/voting-event/[id]', () => {
 
   it('should return 404 when voting event is not found', async () => {
     const { GET } = await import('../../app/api/voting-event/[id]/route');
-    const req = new Request('http://localhost/api/voting-event/non-existent-id');
+    const req = new Request(
+      'http://localhost/api/voting-event/non-existent-id'
+    );
 
     const params = Promise.resolve({ id: 'non-existent-id' });
     const response = await GET(req, { params });
@@ -590,10 +617,10 @@ describe('GET /api/voting-event/[id]', () => {
 describe('GET /api/voting-event/by-type/[voteType]', () => {
   let routeTestMeetingId: string;
   let routeTestMeeting2Id: string;
+  let routeTestVotingEvent1Id: string;
+  let routeTestVotingEvent2Id: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create test meetings
     const meeting = await prisma.meeting.create({
       data: {
@@ -620,27 +647,35 @@ describe('GET /api/voting-event/by-type/[voteType]', () => {
     routeTestMeeting2Id = meeting2.meetingId;
 
     // Create voting events with specific vote types
-    await VotingService.createVotingEvent({
+    const votingEvent1 = await VotingService.createVotingEvent({
       meetingId: routeTestMeetingId,
       name: 'Route Type Test Event 1',
       voteType: 'APPROVAL'
     });
+    routeTestVotingEvent1Id = votingEvent1.votingEventId;
 
-    await VotingService.createVotingEvent({
+    const votingEvent2 = await VotingService.createVotingEvent({
       meetingId: routeTestMeeting2Id,
       name: 'Route Type Test Event 2',
       voteType: 'APPROVAL'
     });
+    routeTestVotingEvent2Id = votingEvent2.votingEventId;
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await VotingService.deleteVotingEvent(routeTestVotingEvent1Id);
+    await VotingService.deleteVotingEvent(routeTestVotingEvent2Id);
+    await MeetingService.deleteMeeting(routeTestMeetingId);
+    await MeetingService.deleteMeeting(routeTestMeeting2Id);
   });
 
   it('should fetch voting events by vote type successfully', async () => {
-    const { GET } = await import('../../app/api/voting-event/by-type/[voteType]/route');
-    const req = new Request('http://localhost/api/voting-event/by-type/APPROVAL');
+    const { GET } = await import(
+      '../../app/api/voting-event/by-type/[voteType]/route'
+    );
+    const req = new Request(
+      'http://localhost/api/voting-event/by-type/APPROVAL'
+    );
 
     const params = Promise.resolve({ voteType: 'APPROVAL' });
     const response = await GET(req, { params });
@@ -655,8 +690,12 @@ describe('GET /api/voting-event/by-type/[voteType]', () => {
   });
 
   it('should return empty array for non-existent vote type', async () => {
-    const { GET } = await import('../../app/api/voting-event/by-type/[voteType]/route');
-    const req = new Request('http://localhost/api/voting-event/by-type/NON_EXISTENT_TYPE');
+    const { GET } = await import(
+      '../../app/api/voting-event/by-type/[voteType]/route'
+    );
+    const req = new Request(
+      'http://localhost/api/voting-event/by-type/NON_EXISTENT_TYPE'
+    );
 
     const params = Promise.resolve({ voteType: 'NON_EXISTENT_TYPE' });
     const response = await GET(req, { params });
@@ -672,8 +711,6 @@ describe('POST /api/voting-event', () => {
   let routeTestMeetingId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create a test meeting
     const meeting = await prisma.meeting.create({
       data: {
@@ -689,8 +726,7 @@ describe('POST /api/voting-event', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await MeetingService.deleteMeeting(routeTestMeetingId);
   });
 
   it('should create a new voting event successfully', async () => {
@@ -705,7 +741,7 @@ describe('POST /api/voting-event', () => {
     const req = new Request('http://localhost/api/voting-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const response = await POST(req);
@@ -718,6 +754,7 @@ describe('POST /api/voting-event', () => {
     expect(data.meetingId).toBe(routeTestMeetingId);
     expect(data.votingEventId).toBeDefined();
     expect(data.updatedBy).toBe('test-user');
+    await VotingService.deleteVotingEvent(data.votingEventId);
   });
 
   it('should return 400 when required fields are missing', async () => {
@@ -730,7 +767,7 @@ describe('POST /api/voting-event', () => {
     const req = new Request('http://localhost/api/voting-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const response = await POST(req);
@@ -746,8 +783,6 @@ describe('PUT /api/voting-event/[id]', () => {
   let routeTestVotingEventId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create a test meeting
     const meeting = await prisma.meeting.create({
       data: {
@@ -771,8 +806,8 @@ describe('PUT /api/voting-event/[id]', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await VotingService.deleteVotingEvent(routeTestVotingEventId);
+    await MeetingService.deleteMeeting(routeTestMeetingId);
   });
 
   it('should update a voting event successfully', async () => {
@@ -783,11 +818,14 @@ describe('PUT /api/voting-event/[id]', () => {
       updatedBy: 'test-updater'
     };
 
-    const req = new Request(`http://localhost/api/voting-event/${routeTestVotingEventId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      `http://localhost/api/voting-event/${routeTestVotingEventId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ id: routeTestVotingEventId });
     const response = await PUT(req, { params });
@@ -808,11 +846,14 @@ describe('PUT /api/voting-event/[id]', () => {
       name: 'Non-existent Event'
     };
 
-    const req = new Request('http://localhost/api/voting-event/non-existent-id', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const req = new Request(
+      'http://localhost/api/voting-event/non-existent-id',
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const params = Promise.resolve({ id: 'non-existent-id' });
     const response = await PUT(req, { params });

@@ -4,13 +4,12 @@ import { prisma } from '../../lib/prisma';
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { RoleType } from '@/generated/prisma';
-import { cleanupTestData } from '../../utils/test-helpers';
 
 jest.setTimeout(20000);
 
 // Mock Supabase for signup tests
 jest.mock('@/lib/supabase-server', () => ({
-  createServerSupabaseClient: jest.fn(),
+  createServerSupabaseClient: jest.fn()
 }));
 
 // Mock UsersService for signup tests
@@ -20,8 +19,8 @@ jest.mock('../users.service', () => {
     ...actual,
     UsersService: {
       ...actual.UsersService,
-      getRoleIdByRoleType: jest.fn(),
-    },
+      getRoleIdByRoleType: jest.fn()
+    }
   };
 });
 
@@ -29,8 +28,6 @@ describe('UsersService', () => {
   let testRoleId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' }
     });
@@ -44,13 +41,12 @@ describe('UsersService', () => {
       firstName: 'John',
       lastName: 'Doe',
       roleId: testRoleId,
-      password: null,
+      password: null
     });
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await UsersService.deleteRole(testRoleId);
   });
 
   it('should fetch users by role type', async () => {
@@ -67,7 +63,7 @@ describe('UsersService', () => {
       email: 'jdoe2@northeastern.edu',
       firstName: 'Jane',
       lastName: 'Doe',
-      roleId: testRoleId,
+      roleId: testRoleId
     });
 
     expect(newUser).toBeDefined();
@@ -91,7 +87,7 @@ describe('UsersService', () => {
     const updatedUser = await UsersService.updateUser(user.userId, {
       email: 'updated@northeastern.edu',
       firstName: 'Updated',
-      lastName: 'User',
+      lastName: 'User'
     });
 
     expect(updatedUser.email).toBe('updated@northeastern.edu');
@@ -107,6 +103,7 @@ describe('UsersService', () => {
 
 describe('UsersController.validateNuid', () => {
   let testRoleId: string;
+  let testUserId: string;
 
   beforeAll(async () => {
     const role = await prisma.role.create({
@@ -115,7 +112,7 @@ describe('UsersController.validateNuid', () => {
     testRoleId = role.roleId;
 
     // Create a test user for validation
-    await UsersService.createUser({
+    const user = await UsersService.createUser({
       userId: 'test-user-id-1',
       supabaseAuthId: 'test-supabase-auth-id-1',
       nuid: '001234567',
@@ -123,13 +120,14 @@ describe('UsersController.validateNuid', () => {
       firstName: 'John',
       lastName: 'Doe',
       roleId: testRoleId,
-      password: null,
+      password: null
     });
+    testUserId = user.userId;
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await UsersService.deleteUser(testUserId);
+    await UsersService.deleteRole(testRoleId);
   });
 
   it('should validate correct NUID and name combination', async () => {
@@ -215,7 +213,7 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
   beforeAll(async () => {
     // Create a test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' },
+      data: { roleType: 'MEMBER' }
     });
     routeTestRoleId = role.roleId;
 
@@ -228,21 +226,25 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
         firstName: 'Route',
         lastName: 'User',
         roleId: routeTestRoleId,
-        password: null,
-      },
+        password: null
+      }
     });
     routeTestUserId = user.userId;
     routeTestSupabaseAuthId = user.supabaseAuthId!;
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await UsersService.deleteUser(routeTestUserId);
+    await UsersService.deleteRole(routeTestRoleId);
   });
 
   it('should fetch user by supabaseAuthId successfully', async () => {
-    const { GET } = await import('../../app/api/users/by-supabase-id/[supabaseAuthId]/route');
-    const req = new Request(`http://localhost/api/users/by-supabase-id/${routeTestSupabaseAuthId}`);
+    const { GET } = await import(
+      '../../app/api/users/by-supabase-id/[supabaseAuthId]/route'
+    );
+    const req = new Request(
+      `http://localhost/api/users/by-supabase-id/${routeTestSupabaseAuthId}`
+    );
 
     const params = Promise.resolve({ supabaseAuthId: routeTestSupabaseAuthId });
     const response = await GET(req, { params });
@@ -261,8 +263,12 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
   });
 
   it('should return 404 when user is not found', async () => {
-    const { GET } = await import('../../app/api/users/by-supabase-id/[supabaseAuthId]/route');
-    const req = new Request('http://localhost/api/users/by-supabase-id/non-existent-id');
+    const { GET } = await import(
+      '../../app/api/users/by-supabase-id/[supabaseAuthId]/route'
+    );
+    const req = new Request(
+      'http://localhost/api/users/by-supabase-id/non-existent-id'
+    );
 
     const params = Promise.resolve({ supabaseAuthId: 'non-existent-id' });
     const response = await GET(req, { params });
@@ -273,10 +279,12 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
   });
 
   it('should include role information in response', async () => {
-    const { GET } = await import('../../app/api/users/by-supabase-id/[supabaseAuthId]/route');
+    const { GET } = await import(
+      '../../app/api/users/by-supabase-id/[supabaseAuthId]/route'
+    );
     // Create a user with EBOARD role
     const eboardRole = await prisma.role.create({
-      data: { roleType: 'EBOARD' },
+      data: { roleType: 'EBOARD' }
     });
 
     const eboardUser = await prisma.user.create({
@@ -287,13 +295,17 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
         firstName: 'Eboard',
         lastName: 'Route',
         roleId: eboardRole.roleId,
-        password: null,
-      },
+        password: null
+      }
     });
 
-    const req = new Request('http://localhost/api/users/by-supabase-id/test-supabase-auth-id-eboard');
+    const req = new Request(
+      'http://localhost/api/users/by-supabase-id/test-supabase-auth-id-eboard'
+    );
 
-    const params = Promise.resolve({ supabaseAuthId: 'test-supabase-auth-id-eboard' });
+    const params = Promise.resolve({
+      supabaseAuthId: 'test-supabase-auth-id-eboard'
+    });
     const response = await GET(req, { params });
     const data = await response.json();
 
@@ -310,17 +322,18 @@ describe('POST /api/auth/signup', () => {
   beforeAll(async () => {
     // Create a test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' },
+      data: { roleType: 'MEMBER' }
     });
     signupTestRoleId = role.roleId;
 
     // Mock UsersService.getRoleIdByRoleType
-    (UsersService.getRoleIdByRoleType as jest.Mock).mockResolvedValue(signupTestRoleId);
+    (UsersService.getRoleIdByRoleType as jest.Mock).mockResolvedValue(
+      signupTestRoleId
+    );
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await UsersService.deleteRole(signupTestRoleId);
   });
 
   beforeEach(() => {
@@ -335,28 +348,30 @@ describe('POST /api/auth/signup', () => {
           data: {
             user: {
               id: 'test-supabase-auth-id-123',
-              email: 'newuser@example.com',
-            },
+              email: 'newuser@example.com'
+            }
           },
-          error: null,
-        }),
-      },
+          error: null
+        })
+      }
     };
 
-    (createServerSupabaseClient as jest.Mock).mockResolvedValue(mockSupabaseClient);
+    (createServerSupabaseClient as jest.Mock).mockResolvedValue(
+      mockSupabaseClient
+    );
 
     const requestBody = {
       email: 'newuser@example.com',
       password: 'password123',
       firstName: 'New',
       lastName: 'User',
-      nuid: '001234999',
+      nuid: '001234999'
     };
 
     const req = new Request('http://localhost/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const response = await POST(req);
@@ -374,7 +389,7 @@ describe('POST /api/auth/signup', () => {
 
     // Verify user was created in database
     const createdUser = await prisma.user.findUnique({
-      where: { supabaseAuthId: 'test-supabase-auth-id-123' },
+      where: { supabaseAuthId: 'test-supabase-auth-id-123' }
     });
     expect(createdUser).toBeDefined();
     expect(createdUser?.email).toBe('newuser@example.com');
@@ -383,14 +398,14 @@ describe('POST /api/auth/signup', () => {
   it('should return 400 when required fields are missing', async () => {
     const { POST } = await import('../../app/api/auth/signup/route');
     const requestBody = {
-      email: 'test@example.com',
+      email: 'test@example.com'
       // Missing password, firstName, lastName, nuid
     };
 
     const req = new Request('http://localhost/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const response = await POST(req);
@@ -406,25 +421,27 @@ describe('POST /api/auth/signup', () => {
       auth: {
         signUp: jest.fn().mockResolvedValue({
           data: { user: null },
-          error: { message: 'Email already registered' },
-        }),
-      },
+          error: { message: 'Email already registered' }
+        })
+      }
     };
 
-    (createServerSupabaseClient as jest.Mock).mockResolvedValue(mockSupabaseClient);
+    (createServerSupabaseClient as jest.Mock).mockResolvedValue(
+      mockSupabaseClient
+    );
 
     const requestBody = {
       email: 'existing@example.com',
       password: 'password123',
       firstName: 'Existing',
       lastName: 'User',
-      nuid: '001234998',
+      nuid: '001234998'
     };
 
     const req = new Request('http://localhost/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const response = await POST(req);
@@ -442,29 +459,31 @@ describe('POST /api/auth/signup', () => {
           data: {
             user: {
               id: 'test-supabase-auth-id-456',
-              email: 'member@example.com',
-            },
+              email: 'member@example.com'
+            }
           },
-          error: null,
-        }),
-      },
+          error: null
+        })
+      }
     };
 
-    (createServerSupabaseClient as jest.Mock).mockResolvedValue(mockSupabaseClient);
+    (createServerSupabaseClient as jest.Mock).mockResolvedValue(
+      mockSupabaseClient
+    );
 
     const requestBody = {
       email: 'member@example.com',
       password: 'password123',
       firstName: 'Member',
       lastName: 'User',
-      nuid: '001234996',
+      nuid: '001234996'
       // roleId not provided
     };
 
     const req = new Request('http://localhost/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const response = await POST(req);
@@ -472,6 +491,8 @@ describe('POST /api/auth/signup', () => {
 
     expect(response.status).toBe(201);
     expect(data.user.roleId).toBe(signupTestRoleId);
-    expect(UsersService.getRoleIdByRoleType).toHaveBeenCalledWith(RoleType.MEMBER);
+    expect(UsersService.getRoleIdByRoleType).toHaveBeenCalledWith(
+      RoleType.MEMBER
+    );
   });
 });
