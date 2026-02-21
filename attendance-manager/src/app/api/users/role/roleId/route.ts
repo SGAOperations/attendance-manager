@@ -9,8 +9,8 @@ import { UsersController } from '@/users/users.controller';
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { roleId: string } }
+  { params }: { params: Promise<{ roleId: string }> }
 ) {
-  const { roleId } = params;
+  const { roleId } = await params;
   return UsersController.deleteRole({ roleId: roleId });
 }
