@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { UsersController } from '@/users/users.controller';
 
 /**

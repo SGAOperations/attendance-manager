@@ -2,7 +2,7 @@ import { getAuthenticatedUser, requireAuth } from '../api-auth';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { cleanupTestData } from '../test-helpers';
+import { UsersService } from '@/users/users.service';
 
 jest.setTimeout(20000);
 
@@ -19,9 +19,6 @@ describe('API Auth Utilities', () => {
   let mockSupabaseClient: any;
 
   beforeAll(async () => {
-    // Clean up any existing test data first
-    await cleanupTestData();
-
     // Create test role
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' },
@@ -46,7 +43,8 @@ describe('API Auth Utilities', () => {
 
   afterAll(async () => {
     // Clean up test data
-    await cleanupTestData();
+    await UsersService.deleteUser(testUserId);
+    await UsersService.deleteRole(testRoleId);
   });
 
   beforeEach(() => {
