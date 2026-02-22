@@ -21,6 +21,14 @@ export const MeetingController = {
     return NextResponse.json(meeting);
   },
 
+  async getUsers(params: { meetingId: string }) {
+    const meeting = await MeetingService.getUsersByMeetingId(params.meetingId);
+    if (!meeting) {
+      return NextResponse.json({ error: 'Meeting not found' }, { status: 404 });
+    }
+    return NextResponse.json(meeting);
+  },
+
   async createMeeting(request: Request) {
     const body = await request.json();
     

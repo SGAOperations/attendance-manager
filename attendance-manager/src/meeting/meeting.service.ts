@@ -36,6 +36,14 @@ export const MeetingService = {
     });
   },
 
+  async getUsersByMeetingId(meetingId: string) {
+    const attendance = await prisma.attendance.findMany({
+      where: { meetingId },
+      include: { user: true },
+    });
+    return attendance.map(a => a.user);
+  },
+
   async createMeeting(
     meetingData: {
       name: string;
