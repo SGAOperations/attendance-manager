@@ -10,8 +10,8 @@ describe('AttendanceController', () => {
   let testUser2Id: string;
   let testMeetingId: string;
   let testMeeting2Id: string;
-  let testAttendanceId: string;
-  let testMeeting3Id: string;
+  let _testAttendanceId: string;
+  let _testMeeting3Id: string;
   let testUser3Id: string;
 
   beforeEach(async () => {
@@ -120,11 +120,11 @@ describe('AttendanceController', () => {
         type: 'FULL_BODY'
       }
     });
-    testMeeting3Id = meeting3.meetingId;
+    _testMeeting3Id = meeting3.meetingId;
 
     // CREATE ATTENDANCE RECORDS
     // This will not have a request
-    const attendance = await prisma.attendance.create({
+    const _attendance = await prisma.attendance.create({
       data: {
         userId: testUserId,
         meetingId: testMeetingId,

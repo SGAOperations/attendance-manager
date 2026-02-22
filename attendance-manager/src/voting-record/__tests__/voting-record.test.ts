@@ -1,7 +1,9 @@
 import { VotingRecordService } from '../voting-record.service';
 import { VotingRecordController } from '../voting-record.controller';
 import { prisma } from '../../lib/prisma';
-import { cleanupTestData } from '../../utils/test-helpers';
+import { VotingService } from '@/voting/voting.service';
+import { MeetingService } from '@/meeting/meeting.service';
+import { UsersService } from '@/users/users.service';
 
 jest.setTimeout(20000);
 
@@ -10,19 +12,14 @@ describe('VotingRecordService', () => {
   let testVotingEventId: string;
   let testUserId: string;
   let testVotingRecordId: string;
-
-  afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
-  });
+  let testRoleId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create test role
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' }
     });
+    testRoleId = role.roleId;
 
     // Create test user
     const user = await prisma.user.create({
@@ -74,6 +71,14 @@ describe('VotingRecordService', () => {
     testVotingRecordId = votingRecord.votingRecordId;
   });
 
+  afterAll(async () => {
+    await VotingRecordService.deleteVotingRecord(testVotingRecordId);
+    await VotingService.deleteVotingEvent(testVotingEventId);
+    await MeetingService.deleteMeeting(testMeetingId);
+    await UsersService.deleteUser(testUserId);
+    await UsersService.deleteRole(testRoleId);
+  });
+
   it('should create a new voting record', async () => {
     const newVotingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: testVotingEventId,
@@ -90,6 +95,9 @@ describe('VotingRecordService', () => {
     expect(newVotingRecord.updatedBy).toBe('test-user-2');
     expect(newVotingRecord.createdAt).toBeDefined();
     expect(newVotingRecord.updatedAt).toBeDefined();
+    await VotingRecordService.deleteVotingRecord(
+      newVotingRecord.votingRecordId
+    );
   });
 
   it('should fetch all voting records', async () => {
@@ -100,18 +108,21 @@ describe('VotingRecordService', () => {
 
   it('should fetch voting records by voting event', async () => {
     // Create another voting record for the same voting event
-    await VotingRecordService.createVotingRecord({
+    const votingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: testVotingEventId,
       userId: testUserId,
       result: 'ABSTAIN'
     });
 
-    const votingRecords = await VotingRecordService.getVotingRecordsByVotingEvent(testVotingEventId);
+    const votingRecords = await VotingRecordService.getVotingRecordsByVotingEvent(
+      testVotingEventId
+    );
     expect(Array.isArray(votingRecords)).toBe(true);
     expect(votingRecords.length).toBeGreaterThanOrEqual(2);
     votingRecords.forEach(record => {
       expect(record.votingEventId).toBe(testVotingEventId);
     });
+    await VotingRecordService.deleteVotingRecord(votingRecord.votingRecordId);
   });
 
   it('should include votingEvent and meeting in responses', async () => {
@@ -129,14 +140,14 @@ describe('VotingRecordController', () => {
   let testVotingEventId: string;
   let testUserId: string;
   let testVotingRecordId: string;
+  let testRoleId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create test role
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' }
     });
+    testRoleId = role.roleId;
 
     // Create test user
     const user = await prisma.user.create({
@@ -186,8 +197,11 @@ describe('VotingRecordController', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await VotingRecordService.deleteVotingRecord(testVotingRecordId);
+    await VotingService.deleteVotingEvent(testVotingEventId);
+    await MeetingService.deleteMeeting(testMeetingId);
+    await UsersService.deleteUser(testUserId);
+    await UsersService.deleteRole(testRoleId);
   });
 
   describe('GET ALL', () => {
@@ -203,15 +217,17 @@ describe('VotingRecordController', () => {
   describe('GET by VotingEvent', () => {
     it('should return voting records filtered by voting event', async () => {
       // Create another voting record for the same voting event
-      await VotingRecordService.createVotingRecord({
+      const votingRecord = await VotingRecordService.createVotingRecord({
         votingEventId: testVotingEventId,
         userId: testUserId,
         result: 'NO'
       });
 
-      const response = await VotingRecordController.getVotingRecordsByVotingEvent({
-        votingEventId: testVotingEventId
-      });
+      const response = await VotingRecordController.getVotingRecordsByVotingEvent(
+        {
+          votingEventId: testVotingEventId
+        }
+      );
 
       expect(response).toBeDefined();
       const responseData = await response.json();
@@ -220,12 +236,15 @@ describe('VotingRecordController', () => {
       responseData.forEach((record: any) => {
         expect(record.votingEventId).toBe(testVotingEventId);
       });
+      await VotingRecordService.deleteVotingRecord(votingRecord.votingRecordId);
     });
 
     it('should return empty array for non-existent voting event', async () => {
-      const response = await VotingRecordController.getVotingRecordsByVotingEvent({
-        votingEventId: 'non-existent-voting-event-id'
-      });
+      const response = await VotingRecordController.getVotingRecordsByVotingEvent(
+        {
+          votingEventId: 'non-existent-voting-event-id'
+        }
+      );
 
       expect(response).toBeDefined();
       const responseData = await response.json();
@@ -247,7 +266,9 @@ describe('VotingRecordController', () => {
         json: async () => createData
       } as Request;
 
-      const response = await VotingRecordController.createVotingRecord(mockRequest);
+      const response = await VotingRecordController.createVotingRecord(
+        mockRequest
+      );
 
       expect(response.status).toBe(201);
       const responseData = await response.json();
@@ -256,6 +277,7 @@ describe('VotingRecordController', () => {
       expect(responseData.userId).toBe(testUserId);
       expect(responseData.votingRecordId).toBeDefined();
       expect(responseData.updatedBy).toBe('test-user');
+      await VotingRecordService.deleteVotingRecord(responseData.votingRecordId);
     });
 
     it('should reject missing required fields', async () => {
@@ -268,7 +290,9 @@ describe('VotingRecordController', () => {
         json: async () => createData
       } as Request;
 
-      const response = await VotingRecordController.createVotingRecord(mockRequest);
+      const response = await VotingRecordController.createVotingRecord(
+        mockRequest
+      );
 
       expect(response.status).toBe(400);
       const responseData = await response.json();
@@ -286,7 +310,9 @@ describe('VotingRecordController', () => {
         json: async () => createData
       } as Request;
 
-      const response = await VotingRecordController.createVotingRecord(mockRequest);
+      const response = await VotingRecordController.createVotingRecord(
+        mockRequest
+      );
 
       expect(response.status).toBe(400);
       const responseData = await response.json();
@@ -305,11 +331,14 @@ describe('VotingRecordController', () => {
         json: async () => createData
       } as Request;
 
-      const response = await VotingRecordController.createVotingRecord(mockRequest);
+      const response = await VotingRecordController.createVotingRecord(
+        mockRequest
+      );
 
       expect(response.status).toBe(201);
       const responseData = await response.json();
       expect(responseData.updatedBy).toBeNull();
+      await VotingRecordService.deleteVotingRecord(responseData.votingRecordId);
     });
   });
 });
@@ -318,14 +347,15 @@ describe('GET /api/voting-record', () => {
   let routeTestMeetingId: string;
   let routeTestVotingEventId: string;
   let routeTestUserId: string;
+  let routeTestVotingRecordId: string;
+  let routeRoleId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create test role
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' }
     });
+    routeRoleId = role.roleId;
 
     // Create test user
     const user = await prisma.user.create({
@@ -366,16 +396,20 @@ describe('GET /api/voting-record', () => {
     routeTestVotingEventId = votingEvent.votingEventId;
 
     // Create test voting record
-    await VotingRecordService.createVotingRecord({
+    const votingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: routeTestVotingEventId,
       userId: routeTestUserId,
       result: 'YES'
     });
+    routeTestVotingRecordId = votingRecord.votingRecordId;
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await VotingRecordService.deleteVotingRecord(routeTestVotingRecordId);
+    await VotingService.deleteVotingEvent(routeTestVotingEventId);
+    await MeetingService.deleteMeeting(routeTestMeetingId);
+    await UsersService.deleteUser(routeTestUserId);
+    await UsersService.deleteRole(routeRoleId);
   });
 
   it('should fetch all voting records successfully', async () => {
@@ -395,15 +429,16 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
   let routeTestVotingEventId: string;
   let routeTestVotingEvent2Id: string;
   let routeTestUserId: string;
+  let routeTestVotingRecordId: string;
+  let routeTestVotingRecord2Id: string;
+  let routeTestRoleId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create test role
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' }
     });
-
+    routeTestRoleId = role.roleId;
     // Create test user
     const user = await prisma.user.create({
       data: {
@@ -452,27 +487,38 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
     routeTestVotingEvent2Id = votingEvent2.votingEventId;
 
     // Create voting records for specific voting events
-    await VotingRecordService.createVotingRecord({
+    const votingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: routeTestVotingEventId,
       userId: routeTestUserId,
       result: 'YES'
     });
+    routeTestVotingRecordId = votingRecord.votingRecordId;
 
-    await VotingRecordService.createVotingRecord({
+    const votingRecord2 = await VotingRecordService.createVotingRecord({
       votingEventId: routeTestVotingEventId,
       userId: routeTestUserId,
       result: 'NO'
     });
+    routeTestVotingRecord2Id = votingRecord2.votingRecordId;
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await VotingRecordService.deleteVotingRecord(routeTestVotingRecordId);
+    await VotingRecordService.deleteVotingRecord(routeTestVotingRecord2Id);
+    await VotingService.deleteVotingEvent(routeTestVotingEventId);
+    await VotingService.deleteVotingEvent(routeTestVotingEvent2Id);
+    await MeetingService.deleteMeeting(routeTestMeetingId);
+    await UsersService.deleteUser(routeTestUserId);
+    await UsersService.deleteRole(routeTestRoleId);
   });
 
   it('should fetch voting records by voting event successfully', async () => {
-    const { GET } = await import('../../app/api/voting-record/by-voting-event/[votingEventId]/route');
-    const req = new Request(`http://localhost/api/voting-record/by-voting-event/${routeTestVotingEventId}`);
+    const { GET } = await import(
+      '../../app/api/voting-record/by-voting-event/[votingEventId]/route'
+    );
+    const req = new Request(
+      `http://localhost/api/voting-record/by-voting-event/${routeTestVotingEventId}`
+    );
 
     const params = Promise.resolve({ votingEventId: routeTestVotingEventId });
     const response = await GET(req, { params });
@@ -487,8 +533,12 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
   });
 
   it('should return empty array for non-existent voting event', async () => {
-    const { GET } = await import('../../app/api/voting-record/by-voting-event/[votingEventId]/route');
-    const req = new Request('http://localhost/api/voting-record/by-voting-event/non-existent-id');
+    const { GET } = await import(
+      '../../app/api/voting-record/by-voting-event/[votingEventId]/route'
+    );
+    const req = new Request(
+      'http://localhost/api/voting-record/by-voting-event/non-existent-id'
+    );
 
     const params = Promise.resolve({ votingEventId: 'non-existent-id' });
     const response = await GET(req, { params });
@@ -504,14 +554,14 @@ describe('POST /api/voting-record', () => {
   let routeTestMeetingId: string;
   let routeTestVotingEventId: string;
   let routeTestUserId: string;
+  let routeTestRoleId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Create test role
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' }
     });
+    routeTestRoleId = role.roleId;
 
     // Create test user
     const user = await prisma.user.create({
@@ -553,8 +603,25 @@ describe('POST /api/voting-record', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await prisma.votingRecord.deleteMany({
+      where: { votingEventId: routeTestVotingEventId }
+    });
+
+    await prisma.votingEvent.deleteMany({
+      where: { votingEventId: routeTestVotingEventId }
+    });
+
+    await prisma.meeting.deleteMany({
+      where: { meetingId: routeTestMeetingId }
+    });
+
+    await prisma.user.deleteMany({
+      where: { userId: routeTestUserId }
+    });
+
+    await prisma.role.deleteMany({
+      where: { roleId: routeTestRoleId }
+    });
   });
 
   it('should create a new voting record successfully', async () => {
@@ -569,7 +636,7 @@ describe('POST /api/voting-record', () => {
     const req = new Request('http://localhost/api/voting-record', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const response = await POST(req);
@@ -594,7 +661,7 @@ describe('POST /api/voting-record', () => {
     const req = new Request('http://localhost/api/voting-record', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const response = await POST(req);
