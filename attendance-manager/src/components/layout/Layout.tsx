@@ -17,6 +17,9 @@ const Layout: React.FC = () => {
   const handleProfileClick = () => {
     setActiveTab('profile');
   };
+  const handleLogoClick = () => {
+    setActiveTab('dashboard');
+  };
 
   // Render 404 page if user is not authenticated
   // if (!user) {
@@ -126,7 +129,7 @@ const Layout: React.FC = () => {
       <LoginPage />
     ) : (
     <div className='min-h-screen bg-gray-50 flex flex-col'>
-      <Header onProfileClick={handleProfileClick} />
+      <Header onProfileClick={handleProfileClick} onLogoClick={handleLogoClick}/>
       <div className='flex flex-1'>
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <main className='flex-1'>{renderContent()}</main>
