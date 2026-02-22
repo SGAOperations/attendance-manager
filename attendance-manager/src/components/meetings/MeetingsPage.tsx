@@ -17,6 +17,7 @@ import MeetingHistoryPanel from './MeetingHistoryPanel';
 import CreateMeetingModal from './CreateMeetingModal';
 import EditMeetingModal from './EditMeetingModal';
 import CreateRequestModal from './CreateRequestModal';
+import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
 
 const MeetingsPage: React.FC = () => {
   const { user } = useAuth();
@@ -493,6 +494,13 @@ const MeetingsPage: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Voting controls for admins */}
+      {isAdmin && (
+        <VotingAdminPanel
+          meetings={meetings}
+        />
+      )}
 
       {/* Create Meeting Modal */}
       {showCreateMeetingModal && (
