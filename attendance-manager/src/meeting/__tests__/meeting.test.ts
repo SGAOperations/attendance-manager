@@ -2,20 +2,10 @@ import { MeetingService } from '../meeting.service';
 import { MeetingController } from '../meeting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingType } from '../../generated/prisma';
-import { cleanupTestData } from '../../utils/test-helpers';
 
 jest.setTimeout(20000);
 
 describe('MeetingServices', () => {
-  afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
-  });
-
-  beforeAll(async () => {
-    await cleanupTestData();
-  });
-
   it('should create a new meeting', async () => {
     const newMeeting = await MeetingService.createMeeting(
       {
@@ -28,7 +18,6 @@ describe('MeetingServices', () => {
       },
       [] // Empty attendeeIds array
     );
-
     expect(newMeeting).toBeDefined();
     expect(newMeeting.name).toBe('test2');
     expect(newMeeting.meetingId).toBeDefined();

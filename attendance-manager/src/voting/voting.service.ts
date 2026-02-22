@@ -72,4 +72,10 @@ export const VotingService = {
       },
     });
   },
+
+  async deleteVotingEvent(votingEventId: string) {
+    return prisma.votingEvent.delete({
+      where: { votingEventId }
+    });
+  },
 };

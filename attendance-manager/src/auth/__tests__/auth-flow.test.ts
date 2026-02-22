@@ -1,14 +1,12 @@
 import { prisma } from '@/lib/prisma';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { UsersService } from '@/users/users.service';
-import { RoleType } from '@/generated/prisma';
-import { cleanupTestData } from '@/utils/test-helpers';
 
 jest.setTimeout(20000);
 
 // Mock Supabase for integration tests
 jest.mock('@/lib/supabase-server', () => ({
-  createServerSupabaseClient: jest.fn(),
+  createServerSupabaseClient: jest.fn()
 }));
 
 // Mock UsersService for signup
@@ -18,8 +16,8 @@ jest.mock('@/users/users.service', () => {
     ...actual,
     UsersService: {
       ...actual.UsersService,
-      getRoleIdByRoleType: jest.fn(),
-    },
+      getRoleIdByRoleType: jest.fn()
+    }
   };
 });
 
@@ -32,12 +30,9 @@ describe('Auth Flow Integration Tests', () => {
   const mockSignOut = jest.fn();
 
   beforeAll(async () => {
-    // Clean up any existing test data first
-    await cleanupTestData();
-    
     // Create test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' },
+      data: { roleType: 'MEMBER' }
     });
     testRoleId = role.roleId;
 
@@ -47,17 +42,20 @@ describe('Auth Flow Integration Tests', () => {
         signUp: mockSignUp,
         signInWithPassword: mockSignIn,
         getSession: mockGetSession,
-        signOut: mockSignOut,
-      },
+        signOut: mockSignOut
+      }
     };
 
-    (createServerSupabaseClient as jest.Mock).mockResolvedValue(mockSupabaseClient);
-    (UsersService.getRoleIdByRoleType as jest.Mock).mockResolvedValue(testRoleId);
+    (createServerSupabaseClient as jest.Mock).mockResolvedValue(
+      mockSupabaseClient
+    );
+    (UsersService.getRoleIdByRoleType as jest.Mock).mockResolvedValue(
+      testRoleId
+    );
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    await UsersService.deleteRole(testRoleId);
   });
 
   beforeEach(() => {
@@ -70,7 +68,7 @@ describe('Auth Flow Integration Tests', () => {
       password: 'password123',
       firstName: 'Flow',
       lastName: 'Test',
-      nuid: '001234777',
+      nuid: '001234777'
     };
 
     const supabaseAuthId = 'test-flow-supabase-id-123';
@@ -81,10 +79,10 @@ describe('Auth Flow Integration Tests', () => {
         data: {
           user: {
             id: supabaseAuthId,
-            email: testUser.email,
-          },
+            email: testUser.email
+          }
         },
-        error: null,
+        error: null
       });
 
       const signupModule = await import('../../app/api/auth/signup/route');
@@ -92,7 +90,7 @@ describe('Auth Flow Integration Tests', () => {
       const signupReq = new Request('http://localhost/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(testUser),
+        body: JSON.stringify(testUser)
       });
 
       const signupResponse = await signupPOST(signupReq);
@@ -106,7 +104,7 @@ describe('Auth Flow Integration Tests', () => {
       // Verify user was created in database
       const createdUser = await prisma.user.findUnique({
         where: { supabaseAuthId },
-        include: { role: true },
+        include: { role: true }
       });
       expect(createdUser).toBeDefined();
       expect(createdUser?.email).toBe(testUser.email);
@@ -116,20 +114,20 @@ describe('Auth Flow Integration Tests', () => {
         data: {
           user: {
             id: supabaseAuthId,
-            email: testUser.email,
+            email: testUser.email
           },
           session: {
             access_token: 'mock-access-token',
-            refresh_token: 'mock-refresh-token',
-          },
+            refresh_token: 'mock-refresh-token'
+          }
         },
-        error: null,
+        error: null
       });
 
       // Simulate login by calling Supabase signInWithPassword
       const loginResult = await mockSupabaseClient.auth.signInWithPassword({
         email: testUser.email,
-        password: testUser.password,
+        password: testUser.password
       });
 
       expect(loginResult.data.user).toBeDefined();
@@ -137,14 +135,17 @@ describe('Auth Flow Integration Tests', () => {
       expect(loginResult.error).toBeNull();
 
       // Step 3: Fetch user profile by supabaseAuthId (simulate AuthContext.loadUserProfile)
-      const getUserModule = await import('../../app/api/users/by-supabase-id/[supabaseAuthId]/route');
-      const getUserGET = getUserModule.GET;
-      const getUserReq = new Request(`http://localhost/api/users/by-supabase-id/${supabaseAuthId}`);
-      
-      const getUserResponse = await getUserGET(
-        getUserReq,
-        { params: Promise.resolve({ supabaseAuthId }) }
+      const getUserModule = await import(
+        '../../app/api/users/by-supabase-id/[supabaseAuthId]/route'
       );
+      const getUserGET = getUserModule.GET;
+      const getUserReq = new Request(
+        `http://localhost/api/users/by-supabase-id/${supabaseAuthId}`
+      );
+
+      const getUserResponse = await getUserGET(getUserReq, {
+        params: Promise.resolve({ supabaseAuthId })
+      });
       const userProfile = await getUserResponse.json();
 
       expect(getUserResponse.status).toBe(200);
@@ -159,12 +160,12 @@ describe('Auth Flow Integration Tests', () => {
           session: {
             user: {
               id: supabaseAuthId,
-              email: testUser.email,
+              email: testUser.email
             },
-            access_token: 'mock-access-token',
-          },
+            access_token: 'mock-access-token'
+          }
         },
-        error: null,
+        error: null
       });
 
       const sessionResult = await mockSupabaseClient.auth.getSession();
@@ -174,18 +175,18 @@ describe('Auth Flow Integration Tests', () => {
       // Step 5: Verify authenticated user can be retrieved
       const apiAuthModule = await import('../../utils/api-auth');
       const getAuthenticatedUser = apiAuthModule.getAuthenticatedUser;
-      
+
       // Mock getSession for getAuthenticatedUser
       mockGetSession.mockResolvedValueOnce({
         data: {
           session: {
             user: {
               id: supabaseAuthId,
-              email: testUser.email,
-            },
-          },
+              email: testUser.email
+            }
+          }
         },
-        error: null,
+        error: null
       });
 
       const authenticatedUser = await getAuthenticatedUser();
@@ -199,7 +200,9 @@ describe('Auth Flow Integration Tests', () => {
       let roleId = testRoleId;
       const roleExists = await prisma.role.findUnique({ where: { roleId } });
       if (!roleExists) {
-        const newRole = await prisma.role.create({ data: { roleType: 'MEMBER' } });
+        const newRole = await prisma.role.create({
+          data: { roleType: 'MEMBER' }
+        });
         roleId = newRole.roleId;
       }
 
@@ -212,13 +215,13 @@ describe('Auth Flow Integration Tests', () => {
           firstName: 'Logout',
           lastName: 'Test',
           roleId: roleId,
-          password: null,
-        },
+          password: null
+        }
       });
 
       // Mock sign out
       mockSignOut.mockResolvedValueOnce({
-        error: null,
+        error: null
       });
 
       // Simulate logout
@@ -228,7 +231,7 @@ describe('Auth Flow Integration Tests', () => {
       // Verify session is cleared (simulate AuthContext behavior)
       mockGetSession.mockResolvedValueOnce({
         data: { session: null },
-        error: null,
+        error: null
       });
 
       const sessionAfterLogout = await mockSupabaseClient.auth.getSession();
@@ -243,7 +246,7 @@ describe('Auth Flow Integration Tests', () => {
     it('should handle signup failure gracefully', async () => {
       mockSignUp.mockResolvedValueOnce({
         data: { user: null },
-        error: { message: 'Email already exists' },
+        error: { message: 'Email already exists' }
       });
 
       const signupModule = await import('../../app/api/auth/signup/route');
@@ -256,8 +259,8 @@ describe('Auth Flow Integration Tests', () => {
           password: 'password123',
           firstName: 'Test',
           lastName: 'User',
-          nuid: '001234555',
-        }),
+          nuid: '001234555'
+        })
       });
 
       const signupResponse = await signupPOST(signupReq);
@@ -270,12 +273,12 @@ describe('Auth Flow Integration Tests', () => {
     it('should handle login failure gracefully', async () => {
       mockSignIn.mockResolvedValueOnce({
         data: { user: null, session: null },
-        error: { message: 'Invalid email or password' },
+        error: { message: 'Invalid email or password' }
       });
 
       const loginResult = await mockSupabaseClient.auth.signInWithPassword({
         email: 'wrong@example.com',
-        password: 'wrongpassword',
+        password: 'wrongpassword'
       });
 
       expect(loginResult.error).toBeDefined();
@@ -286,7 +289,7 @@ describe('Auth Flow Integration Tests', () => {
     it('should handle session expiration', async () => {
       mockGetSession.mockResolvedValueOnce({
         data: { session: null },
-        error: { message: 'Session expired' },
+        error: { message: 'Session expired' }
       });
 
       const sessionResult = await mockSupabaseClient.auth.getSession();
@@ -303,11 +306,11 @@ describe('Auth Flow Integration Tests', () => {
           session: {
             user: {
               id: 'non-existent-supabase-id',
-              email: 'notindb@example.com',
-            },
-          },
+              email: 'notindb@example.com'
+            }
+          }
         },
-        error: null,
+        error: null
       });
 
       const apiAuthModule = await import('../../utils/api-auth');
@@ -322,15 +325,29 @@ describe('Auth Flow Integration Tests', () => {
       let roleId = testRoleId;
       const roleExists = await prisma.role.findUnique({ where: { roleId } });
       if (!roleExists) {
-        const newRole = await prisma.role.create({ data: { roleType: 'MEMBER' } });
+        const newRole = await prisma.role.create({
+          data: { roleType: 'MEMBER' }
+        });
         roleId = newRole.roleId;
       }
       (UsersService.getRoleIdByRoleType as jest.Mock).mockResolvedValue(roleId);
 
       const users = [
-        { email: 'concurrent1@example.com', nuid: '001234111', supabaseId: 'concurrent-1' },
-        { email: 'concurrent2@example.com', nuid: '001234222', supabaseId: 'concurrent-2' },
-        { email: 'concurrent3@example.com', nuid: '001234333', supabaseId: 'concurrent-3' },
+        {
+          email: 'concurrent1@example.com',
+          nuid: '001234111',
+          supabaseId: 'concurrent-1'
+        },
+        {
+          email: 'concurrent2@example.com',
+          nuid: '001234222',
+          supabaseId: 'concurrent-2'
+        },
+        {
+          email: 'concurrent3@example.com',
+          nuid: '001234333',
+          supabaseId: 'concurrent-3'
+        }
       ];
 
       const signupModule = await import('../../app/api/auth/signup/route');
@@ -341,10 +358,10 @@ describe('Auth Flow Integration Tests', () => {
           data: {
             user: {
               id: user.supabaseId,
-              email: user.email,
-            },
+              email: user.email
+            }
           },
-          error: null,
+          error: null
         });
 
         return signupPOST(
@@ -356,14 +373,14 @@ describe('Auth Flow Integration Tests', () => {
               password: 'password123',
               firstName: 'Concurrent',
               lastName: `User${index + 1}`,
-              nuid: user.nuid,
-            }),
+              nuid: user.nuid
+            })
           })
         );
       });
 
       const responses = await Promise.all(signupPromises);
-      
+
       for (const response of responses) {
         expect(response.status).toBe(201);
         const data = await response.json();
@@ -373,10 +390,9 @@ describe('Auth Flow Integration Tests', () => {
       // Cleanup
       await prisma.user.deleteMany({
         where: {
-          supabaseAuthId: { in: users.map(u => u.supabaseId) },
-        },
+          supabaseAuthId: { in: users.map(u => u.supabaseId) }
+        }
       });
     });
   });
 });
-
