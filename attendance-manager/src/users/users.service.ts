@@ -104,6 +104,15 @@ export const UsersService = {
     return prisma.role.findMany();
   },
 
+  async deleteRole(roleId: string) {
+    await prisma.user.deleteMany({
+  where: { roleId },
+});
+    return prisma.role.delete({
+      where: { roleId }
+    });
+  },
+  
   async getRolesByRoleId(roleId: string) {
     return prisma.role.findUnique({
       where: { roleId: roleId }

@@ -1,8 +1,12 @@
 name: CI/CD Pipeline
-
 on:
   push:
   pull_request:
+
+# Push and PR never run at once, second run queues until the first finishes.
+concurrency:
+  group: ci-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
   build-and-test:
@@ -58,3 +62,7 @@ jobs:
       - name: Test Auth Flow
         working-directory: attendance-manager
         run: npm run test -- src/auth/__tests__/auth-flow.test.ts
+
+      - name: Test Voting
+        working-directory: attendance-manager
+        run: npm run test -- src/voting/__tests__/voting.test.ts

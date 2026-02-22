@@ -1,7 +1,11 @@
 import { AttendanceController } from '../attendance.controller';
 import { prisma } from '../../lib/prisma';
-import { cleanupTestData } from '../../utils/test-helpers';
 import dotenv from 'dotenv';
+import { UsersService } from '@/users/users.service';
+import { MeetingService } from '@/meeting/meeting.service';
+import { AttendanceService } from '../attendance.service';
+import { RequestService } from '@/request/request.service';
+
 dotenv.config();
 jest.setTimeout(20000);
 
@@ -13,13 +17,12 @@ describe('AttendanceController', () => {
   let testAttendanceId: string;
   let testMeeting3Id: string;
   let testUser3Id: string;
+  let roleId: string;
 
   beforeAll(async () => {
-    await cleanupTestData();
-
     // Test role
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
-
+    roleId = role.roleId;
     // Test user
     const user = await prisma.user.create({
       data: {
@@ -132,8 +135,23 @@ describe('AttendanceController', () => {
   });
 
   afterAll(async () => {
-    await cleanupTestData();
-    await prisma.$disconnect();
+    const requests = await prisma.request.findMany({
+      where: { attendanceId: testAttendanceId }
+    });
+    for (const req of requests) {
+      await RequestService.deleteRequest(req.requestId);
+    }
+    await AttendanceService.deleteAttendance(testAttendanceId);
+
+    await MeetingService.deleteMeeting(testMeetingId);
+    await MeetingService.deleteMeeting(testMeeting2Id);
+    await MeetingService.deleteMeeting(testMeeting3Id);
+
+    await UsersService.deleteUser(testUserId);
+    await UsersService.deleteUser(testUser2Id);
+    await UsersService.deleteUser(testUser3Id);
+
+    await UsersService.deleteRole(roleId);
   });
 
   it('should get attendance by userId', async () => {
@@ -188,6 +206,7 @@ describe('AttendanceController', () => {
     );
     expect(attendance2).toBeDefined();
     expect(attendance2.length).toBe(2);
+    await AttendanceService.deleteAttendance(newAttendance.attendanceId);
   });
 
   it('should update attendance status', async () => {
@@ -241,7 +260,6 @@ describe('AttendanceController', () => {
         status: 'PRESENT'
       }
     });
-
     const request = await prisma.request.create({
       data: {
         attendanceId: attendance.attendanceId,
@@ -253,6 +271,8 @@ describe('AttendanceController', () => {
     await expect(
       AttendanceController.updateAttendanceStatus(request.requestId, 'INVALID')
     ).rejects.toThrow('Invalid attendance status');
+    await RequestService.deleteRequest(request.requestId);
+    await AttendanceService.deleteAttendance(attendance.attendanceId);
   });
 
   it('should update attendance status given a valid requestId', async () => {
@@ -286,6 +306,8 @@ describe('AttendanceController', () => {
     });
 
     expect(updated?.status).toBe('EXCUSED_ABSENCE');
+    await RequestService.deleteRequest(request.requestId);
+    await AttendanceService.deleteAttendance(attendance.attendanceId);
   });
 });
 
@@ -298,11 +320,21 @@ describe('getRemainingUnexcusedAbsences', () => {
   let regularMeeting4Id: string;
   let fullBodyMeeting1Id: string;
   let fullBodyMeeting2Id: string;
+  let roleId: string;
+  let testRequest1Id: string;
+  let testRequest2Id: string;
+  let testRequest3Id: string;
+  let testRequest4Id: string;
+  let testRequest5Id: string;
+  let testRequest6Id: string;
+  let testRequest7Id: string;
+  let testRequest8Id: string;
+  let testRequest9Id: string;
 
   beforeAll(async () => {
     // Create a new user for these tests
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
-
+    roleId = role.roleId;
     const user4 = await prisma.user.create({
       data: {
         nuid: '001234572',
@@ -405,6 +437,28 @@ describe('getRemainingUnexcusedAbsences', () => {
     });
     fullBodyMeeting2Id = fullBody2.meetingId;
   });
+  afterAll(async () => {
+    await AttendanceService.deleteAttendance(testRequest1Id);
+    await AttendanceService.deleteAttendance(testRequest2Id);
+    await AttendanceService.deleteAttendance(testRequest3Id);
+    await AttendanceService.deleteAttendance(testRequest4Id);
+    await AttendanceService.deleteAttendance(testRequest5Id);
+    await AttendanceService.deleteAttendance(testRequest6Id);
+    await AttendanceService.deleteAttendance(testRequest7Id);
+    await AttendanceService.deleteAttendance(testRequest8Id);
+    await AttendanceService.deleteAttendance(testRequest9Id);
+    await MeetingService.deleteMeeting(regularMeeting1Id);
+    await MeetingService.deleteMeeting(regularMeeting2Id);
+    await MeetingService.deleteMeeting(regularMeeting3Id);
+    await MeetingService.deleteMeeting(regularMeeting4Id);
+    await MeetingService.deleteMeeting(fullBodyMeeting1Id);
+    await MeetingService.deleteMeeting(fullBodyMeeting2Id);
+
+    await UsersService.deleteUser(testUser4Id);
+    await UsersService.deleteUser(testUser5Id);
+
+    await UsersService.deleteRole(roleId);
+  });
 
   it('should return full allowance when user has no unexcused absences', async () => {
     const result = await AttendanceController.getRemainingUnexcusedAbsences(
@@ -422,21 +476,23 @@ describe('getRemainingUnexcusedAbsences', () => {
 
   it('should correctly count remaining regular meeting unexcused absences', async () => {
     // Create 2 unexcused absences for regular meetings
-    await prisma.attendance.create({
+    const atten1 = await prisma.attendance.create({
       data: {
         userId: testUser4Id,
         meetingId: regularMeeting1Id,
         status: 'UNEXCUSED_ABSENCE'
       }
     });
+    testRequest1Id = atten1.attendanceId;
 
-    await prisma.attendance.create({
+    const atten2 = await prisma.attendance.create({
       data: {
         userId: testUser4Id,
         meetingId: regularMeeting2Id,
         status: 'UNEXCUSED_ABSENCE'
       }
     });
+    testRequest2Id = atten2.attendanceId;
 
     const result = await AttendanceController.getRemainingUnexcusedAbsences(
       testUser4Id
@@ -451,14 +507,14 @@ describe('getRemainingUnexcusedAbsences', () => {
 
   it('should correctly count remaining full-body meeting unexcused absences', async () => {
     // Create 1 unexcused absence for full-body meeting
-    await prisma.attendance.create({
+    const atten1 = await prisma.attendance.create({
       data: {
         userId: testUser4Id,
         meetingId: fullBodyMeeting1Id,
         status: 'UNEXCUSED_ABSENCE'
       }
     });
-
+    testRequest3Id = atten1.attendanceId;
     const result = await AttendanceController.getRemainingUnexcusedAbsences(
       testUser4Id
     );
@@ -473,13 +529,14 @@ describe('getRemainingUnexcusedAbsences', () => {
 
   it('should show 0 remaining when user reaches max unexcused absences', async () => {
     // Add one more regular unexcused absence to reach max (3)
-    await prisma.attendance.create({
+    const atten1 = await prisma.attendance.create({
       data: {
         userId: testUser4Id,
         meetingId: regularMeeting3Id,
         status: 'UNEXCUSED_ABSENCE'
       }
     });
+    testRequest4Id = atten1.attendanceId;
 
     const result = await AttendanceController.getRemainingUnexcusedAbsences(
       testUser4Id
@@ -494,22 +551,24 @@ describe('getRemainingUnexcusedAbsences', () => {
 
   it('should not return negative remaining when exceeding limits', async () => {
     // Add one more regular unexcused absence to exceed limit©
-    await prisma.attendance.create({
+    const atten1 = await prisma.attendance.create({
       data: {
         userId: testUser4Id,
         meetingId: regularMeeting4Id,
         status: 'UNEXCUSED_ABSENCE'
       }
     });
+    testRequest5Id = atten1.attendanceId;
 
     // Add one more full-body unexcused absence to exceed limit
-    await prisma.attendance.create({
+    const atten2 = await prisma.attendance.create({
       data: {
         userId: testUser4Id,
         meetingId: fullBodyMeeting2Id,
         status: 'UNEXCUSED_ABSENCE'
       }
     });
+    testRequest6Id = atten2.attendanceId;
 
     const result = await AttendanceController.getRemainingUnexcusedAbsences(
       testUser4Id
@@ -525,30 +584,33 @@ describe('getRemainingUnexcusedAbsences', () => {
 
   it('should only count UNEXCUSED_ABSENCE status, not EXCUSED_ABSENCE or PRESENT', async () => {
     // Create excused absences and present records (should not count)
-    await prisma.attendance.create({
+    const atten1 = await prisma.attendance.create({
       data: {
         userId: testUser5Id,
         meetingId: regularMeeting1Id,
         status: 'EXCUSED_ABSENCE'
       }
     });
+    testRequest7Id = atten1.attendanceId;
 
-    await prisma.attendance.create({
+    const atten2 = await prisma.attendance.create({
       data: {
         userId: testUser5Id,
         meetingId: regularMeeting2Id,
         status: 'PRESENT'
       }
     });
+    testRequest8Id = atten2.attendanceId;
 
     // Create one unexcused absence (should count)
-    await prisma.attendance.create({
+    const atten3 = await prisma.attendance.create({
       data: {
         userId: testUser5Id,
         meetingId: regularMeeting3Id,
         status: 'UNEXCUSED_ABSENCE'
       }
     });
+    testRequest9Id = atten3.attendanceId;
 
     const result = await AttendanceController.getRemainingUnexcusedAbsences(
       testUser5Id
