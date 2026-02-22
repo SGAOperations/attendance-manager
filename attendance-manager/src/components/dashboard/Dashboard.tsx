@@ -171,16 +171,16 @@ const Dashboard: React.FC = () => {
     return meetingsByDate[dateString] || [];
   };
 
-  // Get meetings within the next 5 days
+  // Get meetings within the next 3 weeks
   const getUpcomingMeetings = () => {
     const today = new Date();
-    const fiveDaysFromNow = new Date();
-    fiveDaysFromNow.setDate(today.getDate() + 5);
+    const threeWeeksFromNow = new Date();
+    threeWeeksFromNow.setDate(today.getDate() + 21);
 
     return meetings
       .filter((meeting: Meeting) => {
         const meetingDate = new Date(meeting.date);
-        return meetingDate >= today && meetingDate <= fiveDaysFromNow;
+        return meetingDate >= today && meetingDate <= threeWeeksFromNow;
       })
       .sort(
         (a: Meeting, b: Meeting) =>
@@ -266,7 +266,7 @@ const Dashboard: React.FC = () => {
         <p className='text-gray-600'>
           {selectedDate
             ? `Meetings for ${selectedDate.toLocaleDateString()}`
-            : 'Upcoming meetings (next 5 days)'}
+            : 'Upcoming meetings (next 3 weeks)'}
         </p>
       </div>
 
@@ -383,7 +383,7 @@ const Dashboard: React.FC = () => {
                 onClick={() => setSelectedDate(null)}
                 className='text-sm text-[#C8102E] hover:text-[#A8102E] font-medium'
               >
-                Show upcoming meetings (next 5 days)
+                Show upcoming meetings (next 3 weeks)
               </button>
             </div>
           )}
@@ -428,7 +428,7 @@ const Dashboard: React.FC = () => {
                 <p className='text-gray-400 text-sm'>
                   {selectedDate
                     ? `for ${selectedDate.toLocaleDateString()}`
-                    : 'in the next 5 days'}
+                    : 'in the next 3 weeks'}
                 </p>
               </div>
             ) : (
