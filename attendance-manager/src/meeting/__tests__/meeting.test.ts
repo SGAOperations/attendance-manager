@@ -2,6 +2,8 @@ import { MeetingService } from '../meeting.service';
 import { MeetingController } from '../meeting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingType } from '../../generated/prisma';
+import { UsersService } from '@/users/users.service';
+import { AttendanceService } from '@/attendance/attendance.service';
 
 jest.setTimeout(20000);
 
@@ -331,5 +333,146 @@ describe('MeetingController', () => {
     expect(responseData.type).toBe(MeetingType.REGULAR);
 
     await MeetingService.deleteMeeting(testMeeting.meetingId);
+  });
+  it('should return users associated with a meeting and exclude users not associated', async () => {
+    const newMeeting = await MeetingService.createMeeting(
+      {
+        name: 'test2',
+        startTime: '8:12:56 PM',
+        date: '7/30/2025',
+        endTime: '8:13:15 PM',
+        notes: 'notes',
+        type: MeetingType.REGULAR
+      },
+      [] // Empty attendeeIds array
+    );
+    const testMeetingId = newMeeting.meetingId;
+    const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
+    let testUserId: string;
+    let testUser2Id: string;
+    const user = await prisma.user.create({
+      data: {
+        userId: 'test-attendance-user-1',
+        supabaseAuthId: 'test-supabase-auth-id-1',
+        nuid: '001234569',
+        email: 'testuser@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        roleId: role.roleId,
+        password: null
+      }
+    });
+    testUserId = user.userId;
+
+    const user2 = await prisma.user.create({
+      data: {
+        userId: 'test-attendance-user-2',
+        supabaseAuthId: 'test-supabase-auth-id-2',
+        nuid: '001234570',
+        email: 'testuser2@example.com',
+        firstName: 'Test2',
+        lastName: 'User2',
+        roleId: role.roleId,
+        password: null
+      }
+    });
+    const attendance = await prisma.attendance.create({
+      data: {
+        userId: testUserId,
+        meetingId: testMeetingId,
+        status: 'EXCUSED_ABSENCE',
+        request: {}
+      }
+    });
+    const response = await MeetingController.getUsers({
+      meetingId: testMeetingId
+    });
+    const responseData = await response.json();
+    expect(responseData).toHaveLength(1);
+    expect(responseData[0].userId).toBe(testUserId);
+    await AttendanceService.deleteAttendance(attendance.attendanceId);
+
+    // Delete users
+    await UsersService.deleteUser(user.userId);
+    await UsersService.deleteUser(user2.userId);
+
+    // Delete meeting last
+    await MeetingService.deleteMeeting(newMeeting.meetingId);
+  });
+  it('should return users associated with a meeting', async () => {
+    const newMeeting = await MeetingService.createMeeting(
+      {
+        name: 'test2',
+        startTime: '8:12:56 PM',
+        date: '7/30/2025',
+        endTime: '8:13:15 PM',
+        notes: 'notes',
+        type: MeetingType.REGULAR
+      },
+      [] // Empty attendeeIds array
+    );
+    const testMeetingId = newMeeting.meetingId;
+    const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
+    let testUserId: string;
+    let testUser2Id: string;
+    const user = await prisma.user.create({
+      data: {
+        userId: 'test-attendance-user-1',
+        supabaseAuthId: 'test-supabase-auth-id-1',
+        nuid: '001234569',
+        email: 'testuser@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        roleId: role.roleId,
+        password: null
+      }
+    });
+    testUserId = user.userId;
+
+    const user2 = await prisma.user.create({
+      data: {
+        userId: 'test-attendance-user-2',
+        supabaseAuthId: 'test-supabase-auth-id-2',
+        nuid: '001234570',
+        email: 'testuser2@example.com',
+        firstName: 'Test2',
+        lastName: 'User2',
+        roleId: role.roleId,
+        password: null
+      }
+    });
+    testUser2Id = user2.userId;
+    const attendance = await prisma.attendance.create({
+      data: {
+        userId: testUserId,
+        meetingId: testMeetingId,
+        status: 'EXCUSED_ABSENCE',
+        request: {}
+      }
+    });
+    const attendance2 = await prisma.attendance.create({
+      data: {
+        userId: testUser2Id,
+        meetingId: testMeetingId,
+        status: 'EXCUSED_ABSENCE',
+        request: {}
+      }
+    });
+    const response = await MeetingController.getUsers({
+      meetingId: testMeetingId
+    });
+    const responseData = await response.json();
+    expect(responseData).toHaveLength(2);
+    expect(responseData[0].userId).toBe(testUserId);
+    expect(responseData[1].userId).toBe(testUser2Id);
+    await AttendanceService.deleteAttendance(attendance.attendanceId);
+    await AttendanceService.deleteAttendance(attendance2?.attendanceId);
+
+    // Delete users
+    await UsersService.deleteUser(user.userId);
+    await UsersService.deleteUser(user2.userId);
+
+    // Delete meeting last
+    await MeetingService.deleteMeeting(newMeeting.meetingId);
   });
 });
