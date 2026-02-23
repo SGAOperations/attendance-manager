@@ -136,6 +136,7 @@ describe('RequestController', () => {
     await MeetingService.deleteMeeting(testMeetingId);
     await UsersService.deleteUser(secondTestUserId);
     await UsersService.deleteUser(testUserId);
+    await UsersService.deleteRole(testRoleId);
   });
 
   it('should get a request by requestId', async () => {
