@@ -398,6 +398,8 @@ describe('MeetingController', () => {
 
     // Delete meeting last
     await MeetingService.deleteMeeting(newMeeting.meetingId);
+
+    await UsersService.deleteRole(role.roleId);
   });
   it('should return users associated with a meeting', async () => {
     const newMeeting = await MeetingService.createMeeting(
@@ -474,5 +476,6 @@ describe('MeetingController', () => {
 
     // Delete meeting last
     await MeetingService.deleteMeeting(newMeeting.meetingId);
+    await UsersService.deleteRole(role.roleId);
   });
 });

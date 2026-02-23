@@ -199,8 +199,9 @@ describe('Auth Flow Integration Tests', () => {
       // Ensure role exists (it should from beforeAll, but double-check)
       let roleId = testRoleId;
       const roleExists = await prisma.role.findUnique({ where: { roleId } });
+      let newRole;
       if (!roleExists) {
-        const newRole = await prisma.role.create({
+        newRole = await prisma.role.create({
           data: { roleType: 'MEMBER' }
         });
         roleId = newRole.roleId;
@@ -239,6 +240,9 @@ describe('Auth Flow Integration Tests', () => {
 
       // Cleanup
       await prisma.user.delete({ where: { userId: user.userId } });
+      if (newRole) {
+        await UsersService.deleteRole(newRole.roleId); 
+      }
     });
   });
 
@@ -324,8 +328,9 @@ describe('Auth Flow Integration Tests', () => {
       // Ensure role exists for concurrent signups
       let roleId = testRoleId;
       const roleExists = await prisma.role.findUnique({ where: { roleId } });
+      let newRole;
       if (!roleExists) {
-        const newRole = await prisma.role.create({
+        newRole = await prisma.role.create({
           data: { roleType: 'MEMBER' }
         });
         roleId = newRole.roleId;
@@ -393,6 +398,9 @@ describe('Auth Flow Integration Tests', () => {
           supabaseAuthId: { in: users.map(u => u.supabaseId) }
         }
       });
+      if (newRole) {
+        await UsersService.deleteRole(newRole.roleId);
+      }
     });
   });
 });
