@@ -333,6 +333,7 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
     expect(data.role.roleId).toBe(eboardRole.roleId);
     expect(data.role.roleType).toBe('EBOARD');
     await UsersService.deleteUser(eboardUser.userId);
+    await UsersService.deleteRole(eboardRole.roleId);
   });
 });
 
