@@ -1,15 +1,50 @@
 import React, { useEffect, useState } from 'react';
-import { MeetingApiData } from '@/types';
+import { MeetingApiData, VotingEventApiData, VotingRecordApiData } from '@/types';
 import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
+import VotingResultsPanel from '@/components/voting/VotingResultsPanel';
+
+type VotingEventWithRelations = VotingEventApiData & {
+  meeting?: {
+    name: string;
+    date: string;
+  };
+  votingRecords?: VotingRecordApiData[];
+};
 
 const VotingPage: React.FC = () => {
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
+  const [events, setEvents] = useState<VotingEventWithRelations[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/meeting')
-      .then(res => res.json())
-      .then((data: MeetingApiData[]) => setMeetings(data))
-      .catch(err => console.error('Failed to fetch meetings:', err));
+    const load = async () => {
+      try {
+        const [meetingsRes, eventsRes] = await Promise.all([
+          fetch('/api/meeting'),
+          fetch('/api/voting-event')
+        ]);
+
+        if (meetingsRes.ok) {
+          const meetingsData: MeetingApiData[] = await meetingsRes.json();
+          setMeetings(meetingsData);
+        } else {
+          console.error('Failed to fetch meetings');
+        }
+
+        if (eventsRes.ok) {
+          const eventsData: VotingEventWithRelations[] = await eventsRes.json();
+          setEvents(eventsData);
+        } else {
+          console.error('Failed to fetch voting events');
+        }
+      } catch (err) {
+        console.error('Failed to load voting data:', err);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    load();
   }, []);
 
   return (
@@ -22,6 +57,7 @@ const VotingPage: React.FC = () => {
         </p>
       </div>
       <VotingAdminPanel meetings={meetings} />
+      <VotingResultsPanel events={events} loading={eventsLoading} />
     </div>
   );
 };

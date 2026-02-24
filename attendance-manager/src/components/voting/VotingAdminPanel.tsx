@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { MeetingApiData, VotingEventApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveVotingEvent } from '@/hooks/useActiveVotingEvent';
 
 interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
@@ -20,6 +21,14 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   const [currentEvent, setCurrentEvent] = useState<VotingEventApiData | null>(
     null
   );
+  const {
+    activeEvent,
+    loading: activeEventLoading,
+    refresh: refreshActiveEvent
+  } = useActiveVotingEvent();
+
+  const effectiveCurrentEvent = currentEvent ?? activeEvent ?? null;
+  const hasActiveEvent = !!(effectiveCurrentEvent && !effectiveCurrentEvent.deletedAt);
 
   const meetingsForDropdown = useMemo(() => {
     const today = new Date();
@@ -40,6 +49,10 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (hasActiveEvent) {
+      setError('There is already an active voting event. Please end it before starting a new one.');
+      return;
+    }
     if (!meetingId || !name.trim()) {
       setError('Please select a meeting and enter a vote name.');
       return;
@@ -82,13 +95,13 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   };
 
   const handleEnd = async () => {
-    if (!currentEvent) return;
+    if (!effectiveCurrentEvent) return;
 
     setSubmitting(true);
     setError(null);
 
     try {
-      const res = await fetch(`/api/voting-event/${currentEvent.votingEventId}`, {
+      const res = await fetch(`/api/voting-event/${effectiveCurrentEvent.votingEventId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -106,6 +119,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
 
       const updated: VotingEventApiData = await res.json();
       setCurrentEvent(updated);
+      await refreshActiveEvent();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
@@ -176,21 +190,29 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
         <div className='flex items-center justify-between pt-2'>
           <button
             type='submit'
-            disabled={submitting}
+            disabled={submitting || hasActiveEvent}
             className='px-4 py-2 bg-[#C8102E] text-white rounded-lg text-sm font-medium hover:bg-[#A8102E] disabled:opacity-60 disabled:cursor-not-allowed'
           >
             {submitting ? 'Starting…' : 'Create & Start Voting Event'}
           </button>
 
-          {currentEvent && !currentEvent.deletedAt && (
-            <button
-              type='button'
-              onClick={handleEnd}
-              disabled={submitting}
-              className='px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-60 disabled:cursor-not-allowed'
-            >
-              End Current Voting Event
-            </button>
+          {hasActiveEvent && (
+            <div className='flex items-center space-x-3'>
+              <p className='text-xs text-gray-600'>
+                Active vote:{' '}
+                <span className='font-medium'>
+                  {effectiveCurrentEvent?.name ?? 'In progress'}
+                </span>
+              </p>
+              <button
+                type='button'
+                onClick={handleEnd}
+                disabled={submitting}
+                className='px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-60 disabled:cursor-not-allowed'
+              >
+                End Current Voting Event
+              </button>
+            </div>
           )}
         </div>
       </form>

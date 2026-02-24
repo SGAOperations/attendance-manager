@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import { VotingEventApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -22,6 +23,10 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
   if (!user || hasVoted) {
     return null;
   }
+
+  const handleDismiss = () => {
+    setHasVoted(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,10 +71,20 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4'>
-        <h2 className='text-xl font-semibold text-gray-900 mb-2'>
-          Active Vote
-        </h2>
+      <div className='bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4 relative'>
+        <div className='flex items-start justify-between mb-2'>
+          <h2 className='text-xl font-semibold text-gray-900'>
+            Active Vote
+          </h2>
+          <button
+            type='button'
+            onClick={handleDismiss}
+            className='ml-4 inline-flex items-center justify-center rounded-full p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C8102E]'
+            aria-label='Dismiss vote'
+          >
+            <X className='h-4 w-4' />
+          </button>
+        </div>
         <p className='text-sm text-gray-600 mb-4'>
           {event.name || 'A new voting event is in progress.'}
         </p>
