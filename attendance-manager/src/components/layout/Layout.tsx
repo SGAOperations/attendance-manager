@@ -3,6 +3,7 @@ import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import Dashboard from '@/components/dashboard/Dashboard';
 import MeetingsPage from '@/components/meetings/MeetingsPage';
+import VotingPage from '@/components/voting/VotingPage';
 import AttendancePage from '@/components/attendance/AttendancePage';
 import ProfilePage from '@/components/profile/ProfilePage';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +13,7 @@ import ActiveVotingModal from '@/components/voting/ActiveVotingModal';
 
 const Layout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'meetings' | 'attendance' | 'profile'
+    'dashboard' | 'meetings' | 'voting' | 'attendance' | 'profile'
   >('dashboard');
   const { user } = useAuth();
   const isAdmin = user?.role === 'EBOARD';
@@ -77,6 +78,8 @@ const Layout: React.FC = () => {
         return <Dashboard />;
       case 'meetings':
         return <MeetingsPage />;
+      case 'voting':
+        return <VotingPage />;
       case 'attendance':
         // Check if user is admin
         if (isAdmin) {
