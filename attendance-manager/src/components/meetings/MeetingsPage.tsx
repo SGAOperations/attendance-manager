@@ -261,8 +261,7 @@ const MeetingsPage: React.FC = () => {
     );
   }).length;
 
-  const upcomingMeetings = meetings.filter(m => new Date(m.date) > today)
-    .length;
+
 
   // Filter meetings based on active tab
   const filteredMeetings = meetings.filter(m => {
@@ -471,7 +470,7 @@ const MeetingsPage: React.FC = () => {
         <MeetingStatisticsPanel
           attendedMeetings={attendedMeetings}
           missedMeetings={missedMeetings}
-          upcomingMeetings={upcomingMeetings}
+          upcomingMeetings={upcomingMeetingsList.length}
           isAdmin={isAdmin}
           setShowCreateMeetingModal={setShowCreateMeetingModal}
         />
