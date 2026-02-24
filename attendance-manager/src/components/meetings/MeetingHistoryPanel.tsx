@@ -128,14 +128,14 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
             </tr>
           </thead>
           <tbody>
-            {meetings.length === 0 ? (
+            {visibleMeetings.length === 0 ? (
               <tr>
                 <td colSpan={5} className='text-center py-8 text-gray-500'>
                   No meetings found
                 </td>
               </tr>
             ) : (
-              meetings.map(meeting => (
+              visibleMeetings.map(meeting => (
                 <tr
                   key={meeting.meetingId}
                   className='border-b border-gray-100 hover:bg-gray-50'
