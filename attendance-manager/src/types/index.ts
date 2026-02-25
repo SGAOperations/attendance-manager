@@ -133,3 +133,25 @@ export interface RequestForm {
   };
   explanation: string;
 }
+
+// Voting
+
+export interface VotingEventApiData {
+  votingEventId: string;
+  meetingId: string;
+  name: string;
+  voteType: string;
+  createdAt: string;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
+}
+
+export interface VotingRecordApiData {
+  votingRecordId: string;
+  votingEventId: string;
+  userId: string;
+  result: string;
+  createdAt: string;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
+}
