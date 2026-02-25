@@ -113,6 +113,7 @@ const LoginPage: React.FC = () => {
         alert(
           `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`
         );
+        handleModeChange(true);
       } catch (error) {
         console.error('Login error:', error);
         setError('Invalid email or password');
