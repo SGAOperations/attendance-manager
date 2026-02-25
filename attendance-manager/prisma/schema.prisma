@@ -28,6 +28,7 @@ model User {
   role       Role         @relation(fields: [roleId], references: [roleId])
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @default(now()) @updatedAt
+  deletedAt      DateTime?
 }
 
 model Meeting {

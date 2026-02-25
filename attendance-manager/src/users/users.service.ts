@@ -90,14 +90,11 @@ export const UsersService = {
   },
 
   async deleteUser(userId: string) {
-    // Delete attendance records first to avoid foreign key constraint
-    await prisma.attendance.deleteMany({
-      where: { userId },
-    });
-    
-    return prisma.user.delete({
-      where: { userId }
-    });
+    // Soft delete attendance records: updates prisma deletedAt field instead of fully deleting
+    return prisma.user.update({
+    where: { userId },
+    data: { deletedAt: new Date() },
+  });
   },
 
   async getRoles() {

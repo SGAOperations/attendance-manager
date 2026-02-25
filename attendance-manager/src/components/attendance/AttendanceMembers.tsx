@@ -4,12 +4,14 @@ interface AttendanceMembersProps {
   eboardMembers: UserApiData[];
   regularMembers: UserApiData[];
   loading ?: boolean;
+  onDeleteMember: (userId: string) => void;
 }
 
 const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
   eboardMembers,
   regularMembers,
-  loading = false
+  loading = false,
+  onDeleteMember
 }) => {
 
   // Loading screen
@@ -48,6 +50,12 @@ const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
                 </p>
                 <p className='text-xs text-gray-500'>{member.email}</p>
               </div>
+              <button
+                onClick={() => onDeleteMember(member.userId)}
+                className='text-red-400 hover:text-red-600 text-xs font-medium'
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
@@ -73,6 +81,12 @@ const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
                 </p>
                 <p className='text-xs text-gray-500'>{member.email}</p>
               </div>
+              <button
+                onClick={() => onDeleteMember(member.userId)}
+                className='text-red-400 hover:text-red-600 text-xs font-medium'
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
