@@ -113,6 +113,7 @@ const LoginPage: React.FC = () => {
         alert(
           `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`
         );
+        setIsLoginMode(true);
         resetForms();
       } catch (error) {
         console.error('Login error:', error);
