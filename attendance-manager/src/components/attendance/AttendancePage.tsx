@@ -83,6 +83,8 @@ const AttendancePage: React.FC = () => {
         setUsers(allUsers);
       } catch (err) {
         console.error('Error loading meetings:', err);
+      } finally {
+        setIsLoadingMembers(false);
       }
     };
 
