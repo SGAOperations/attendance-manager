@@ -62,6 +62,9 @@ To run Prettier
 npx prettier . --write
 ```
 
+## Docker
+Ensure [Docker](https://www.docker.com/products/docker-desktop/) is downloaded and running
+
 ## Meet the Team
 
 ```
