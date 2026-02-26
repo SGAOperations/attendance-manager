@@ -81,6 +81,11 @@ NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="What was outputted in your Authentication Keys/Publishable"
 ```
 
+Next, start the application
+```
+npm run dev
+```
+
 Finally, run:
 ```
 npx prisma migrate deploy
