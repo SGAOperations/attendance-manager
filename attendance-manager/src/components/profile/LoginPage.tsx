@@ -114,6 +114,7 @@ const LoginPage: React.FC = () => {
           `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`
         );
         setIsLoginMode(true);
+        resetForms();
       } catch (error) {
         console.error('Login error:', error);
         setError('Invalid email or password');
