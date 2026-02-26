@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import AttedanceMeetingSelect from './AttendanceMeetingSelect';
+import AttendanceMeetingSelect from './AttendanceMeetingSelect';
 
 import {
   MeetingApiData,
@@ -9,10 +9,10 @@ import {
   RequestApiData
 } from '@/types';
 import AttendanceMeetingEdit from './AttendanceMeetingEdit';
-import AttedanceMeetingUserList from './AttendanceMeetingUserList';
-import AttedanceMeetingCheckIn from './AttendanceMeetingCheckIn';
+import AttendanceMeetingUserList from './AttendanceMeetingUserList';
+import AttendanceMeetingCheckIn from './AttendanceMeetingCheckIn';
 import AttendanceHistory from './AttendanceHistory';
-import AttedanceMembers from './AttendanceMembers';
+import AttendanceMembers from './AttendanceMembers';
 
 import { meetingAPI } from '@/utils/attendance_utils';
 import AttendancePageRequestsModal from './AttendancePageRequestsModal';
@@ -38,6 +38,10 @@ const AttendancePage: React.FC = () => {
   const [attendanceRecord, setAttendanceRecord] = useState<
     Record<string, AttendanceApiData[]>
   >({});
+  
+  // Sets loading
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(true);
 
   // New state for Attendance Check flow
   const [showAttendanceCheck, setShowAttendanceCheck] = useState(false);
@@ -100,6 +104,9 @@ const AttendancePage: React.FC = () => {
         }));
       } catch (error) {
         console.error('Error fetching attendance users:', error);
+      } finally {
+        // sets loading to false
+        setIsLoadingMembers(false);
       }
     };
 
@@ -135,6 +142,9 @@ const AttendancePage: React.FC = () => {
         }));
       }
       setMeetingsWithAttendance(updatedMeetings);
+
+      // sets loading to false
+      setIsLoadingHistory(false);
     };
 
     updateMeetingsWithAttendance();
@@ -387,9 +397,10 @@ const AttendancePage: React.FC = () => {
 
       {activeTab === 'members' ? (
         /* SGA Members Section */
-        <AttedanceMembers
+        <AttendanceMembers
           eboardMembers={eboardMembers}
           regularMembers={regularMembers}
+          loading={isLoadingMembers}
         />
       ) : (
         /* Attendance History Section */
@@ -398,6 +409,7 @@ const AttendancePage: React.FC = () => {
           attendanceRecord={attendanceRecord}
           isAdmin={isAdmin}
           openEditAttendanceModal={openEditAttendanceModal}
+          loading={isLoadingHistory}
         />
       )}
 
@@ -458,7 +470,7 @@ const AttendancePage: React.FC = () => {
           <div className='bg-white rounded-2xl p-6 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto'>
             {/* Step 1: Select Meeting */}
             {attendanceCheckStep === 'select-meeting' && (
-              <AttedanceMeetingSelect
+              <AttendanceMeetingSelect
                 meetingsWithAttendance={meetingsWithAttendance}
                 attendanceRecord={attendanceRecord}
                 handleMeetingSelection={handleMeetingSelection}
@@ -468,7 +480,7 @@ const AttendancePage: React.FC = () => {
 
             {/* Step 2: User List */}
             {attendanceCheckStep === 'user-list' && selectedMeetingForCheck && (
-              <AttedanceMeetingUserList
+              <AttendanceMeetingUserList
                 selectedMeetingForCheck={selectedMeetingForCheck}
                 isLoadingAttendance={isLoadingAttendance}
                 attendanceUsers={attendanceUsers}
@@ -480,7 +492,7 @@ const AttendancePage: React.FC = () => {
 
             {/* Step 3: Check-In (NUID Entry) */}
             {attendanceCheckStep === 'check-in' && selectedMeetingForCheck && (
-              <AttedanceMeetingCheckIn
+              <AttendanceMeetingCheckIn
                 selectedMeetingForCheck={selectedMeetingForCheck}
                 nuidInput={nuidInput}
                 setNuidInput={setNuidInput}

@@ -5,14 +5,31 @@ interface AttendanceHistoryProps {
   attendanceRecord: Record<string, AttendanceApiData[]>;
   isAdmin: boolean;
   openEditAttendanceModal: (meeting: MeetingApiData) => void;
+  loading ?: boolean;
 }
 
 const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({
   meetingsWithAttendance,
   attendanceRecord,
   isAdmin,
-  openEditAttendanceModal
+  openEditAttendanceModal,
+  loading = false
 }) => {
+  
+  // Loading screen
+  if (loading) {
+    return (
+      <div className='flex-1 p-6 bg-gray-50'>
+        <div className='flex items-center justify-center h-64'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-[#C8102E] mx-auto mb-4'></div>
+            <p className='text-gray-600'>{"Loading attendance.."}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='bg-white rounded-2xl shadow-lg border border-gray-100'>
       <div className='p-6'>

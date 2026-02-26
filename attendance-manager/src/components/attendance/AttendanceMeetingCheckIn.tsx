@@ -12,7 +12,7 @@ interface AttendanceMeetingCheckInProps {
   ) => void;
 }
 
-const AttedanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
+const AttendanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
   selectedMeetingForCheck,
   nuidInput,
   setNuidInput,
@@ -109,4 +109,4 @@ const AttedanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
     </>
   );
 };
-export default AttedanceMeetingCheckIn;
+export default AttendanceMeetingCheckIn;
