@@ -13,7 +13,7 @@ interface AttendanceMeetingSelectProps {
   editAttendance?: boolean;
 }
 
-const AttedanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
+const AttendanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
   meetingsWithAttendance,
   attendanceRecord,
   handleMeetingSelection,
@@ -127,4 +127,4 @@ const AttedanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
     </>
   );
 };
-export default AttedanceMeetingSelect;
+export default AttendanceMeetingSelect;
