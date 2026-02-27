@@ -11,7 +11,7 @@ interface AttendanceMeetingUserListProps {
   handleStartCheckIn: () => void;
 }
 
-const AttedanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
+const AttendanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
   selectedMeetingForCheck,
   isLoadingAttendance,
   attendanceUsers,
@@ -53,7 +53,7 @@ const AttedanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
             ) : (
               <div className='divide-y divide-gray-200'>
                 {[...attendanceUsers]
-                  .sort((a, b) => a.firstName.localeCompare(b.firstName))
+                  .sort((a, b) => a.lastName.localeCompare(b.firstName))
                   .map(user => {
                     const isPresent = attendanceRecord[
                       selectedMeetingForCheck.meetingId
@@ -126,4 +126,4 @@ const AttedanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
   );
 };
 
-export default AttedanceMeetingUserList;
+export default AttendanceMeetingUserList;

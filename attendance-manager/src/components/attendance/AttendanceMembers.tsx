@@ -3,12 +3,29 @@ import { UserApiData } from '@/types';
 interface AttendanceMembersProps {
   eboardMembers: UserApiData[];
   regularMembers: UserApiData[];
+  loading ?: boolean;
 }
 
-const AttedanceMembers: React.FC<AttendanceMembersProps> = ({
+const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
   eboardMembers,
-  regularMembers
+  regularMembers,
+  loading = false
 }) => {
+
+  // Loading screen
+  if (loading) {
+    return (
+      <div className='flex-1 p-6 bg-gray-50'>
+        <div className='flex items-center justify-center h-64'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-[#C8102E] mx-auto mb-4'></div>
+            <p className='text-gray-600'>Loading members...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
       {/* Eboard Members */}
@@ -64,4 +81,4 @@ const AttedanceMembers: React.FC<AttendanceMembersProps> = ({
   );
 };
 
-export default AttedanceMembers;
+export default AttendanceMembers;

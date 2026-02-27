@@ -20,6 +20,15 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
   handleEditMeeting,
   visibleMeetings
 }) => {
+  //helper function that formats meeting type from all caps to normal
+  const formatMeetingType = (type: string): string => {
+    if (type === 'FULL_BODY') {
+      return 'Full Body';
+    } else if (type === 'REGULAR') {
+      return 'Regular';
+    }
+    return type;
+  };
   const { user } = useAuth();
   const isEboard = user?.role === 'EBOARD';
 
@@ -70,7 +79,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
               <th className='text-left py-3 px-4 font-medium text-gray-900'>
                 <details className='inline-block'>
                   <summary className='list-none cursor-pointer hover:underline select-none'>
-                    Type&#9662;{typeFilter ? ` (${typeFilter})` : ''}
+                    Type&#9662;{typeFilter ? ` (${formatMeetingType(typeFilter)})` : ''}
                   </summary>
                   <div className='absolute z-10 mt-2 w-40 rounded-md border bg-white shadow'>
                     <button
@@ -97,7 +106,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                             typeFilter === t ? 'font-semibold' : ''
                           }`}
                           onClick={() => {
-                            setTypeFilter(t as 'FULL_BODY' | 'REGULAR');
+                            setTypeFilter(t as MeetingType);
                             (document.activeElement as HTMLElement | null)?.blur();
                           }}
                         >
@@ -119,14 +128,14 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
             </tr>
           </thead>
           <tbody>
-            {meetings.length === 0 ? (
+            {visibleMeetings.length === 0 ? (
               <tr>
                 <td colSpan={5} className='text-center py-8 text-gray-500'>
                   No meetings found
                 </td>
               </tr>
             ) : (
-              meetings.map(meeting => (
+              visibleMeetings.map(meeting => (
                 <tr
                   key={meeting.meetingId}
                   className='border-b border-gray-100 hover:bg-gray-50'
@@ -141,13 +150,14 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                     <div className='text-sm font-medium text-gray-900'>
                       {meeting.name}
                     </div>
+                    <div className='text-xs text-gray-500'>{formatMeetingType(meeting.type)}</div>
                   </td>
                   <td className='py-3 px-4'>
                     <div className='text-sm text-gray-600'>{meeting.notes}</div>
                   </td>
                   <td className='py-3 px-4'>
                     <div className='text-sm font-medium text-gray-900'>
-                      {meeting.type}
+                      {formatMeetingType(meeting.type)}
                     </div>
                   </td>
                   <td className='py-3 px-4 text-right'>

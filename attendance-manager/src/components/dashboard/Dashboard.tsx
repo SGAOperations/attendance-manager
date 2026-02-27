@@ -136,12 +136,26 @@ const Dashboard: React.FC = () => {
     const startingDay = firstDay.getDay();
 
     const days = [];
-    for (let i = 0; i < startingDay; i++) {
-      days.push(null);
+
+    // Adds days from previous month
+    const prevMonthLastDate = new Date(year, month, 0).getDate();
+
+    for (let i = startingDay - 1; i >= 0; i--) {
+      days.push(new Date(year, month - 1, prevMonthLastDate - i));
     }
+    
+    // Add days in current month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
     }
+
+    // Add head of next month until total is in 7-days format
+    let nextDay = 1;
+    
+    while (days.length % 7 !== 0) {
+      days.push(new Date(year, month + 1, nextDay++));
+    }
+
     return days;
   };
 
@@ -171,16 +185,16 @@ const Dashboard: React.FC = () => {
     return meetingsByDate[dateString] || [];
   };
 
-  // Get meetings within the next 5 days
+  // Get meetings within the next 3 weeks
   const getUpcomingMeetings = () => {
     const today = new Date();
-    const fiveDaysFromNow = new Date();
-    fiveDaysFromNow.setDate(today.getDate() + 5);
+    const threeWeeksFromNow = new Date();
+    threeWeeksFromNow.setDate(today.getDate() + 21);
 
     return meetings
       .filter((meeting: Meeting) => {
         const meetingDate = new Date(meeting.date);
-        return meetingDate >= today && meetingDate <= fiveDaysFromNow;
+        return meetingDate >= today && meetingDate <= threeWeeksFromNow;
       })
       .sort(
         (a: Meeting, b: Meeting) =>
@@ -266,7 +280,7 @@ const Dashboard: React.FC = () => {
         <p className='text-gray-600'>
           {selectedDate
             ? `Meetings for ${selectedDate.toLocaleDateString()}`
-            : 'Upcoming meetings (next 5 days)'}
+            : 'Upcoming meetings (next 3 weeks)'}
         </p>
       </div>
 
@@ -348,32 +362,39 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className='grid grid-cols-7 gap-1'>
-            {days.map((day, index) => (
-              <div
-                key={index}
-                className={`aspect-square p-1 ${!day ? 'bg-gray-50' : ''}`}
-              >
-                {day && (
+            {days.map((day, index) => {
+              // gets days in current month
+              const inCurrentMonth = day.getMonth() === currentDate.getMonth();
+              return (
+                <div key={index} className='aspect-square p-1'>
                   <button
-                    onClick={() => setSelectedDate(day)}
+                    onClick={() => {
+                      if (!inCurrentMonth) {
+                        // navigate the calendar to the clicked day's month
+                        setCurrentDate(new Date(day.getFullYear(), day.getMonth(), 1));
+                      }
+                      setSelectedDate(day);
+                    }}
                     className={`w-full h-full flex flex-col items-center justify-center text-sm rounded-xl transition-all duration-200 ${
-                      isToday(day)
-                        ? 'bg-[#C8102E] text-white shadow-lg'
-                        : isSelected(day)
-                        ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E] border-2 border-[#C8102E]'
-                        : hasMeeting(day)
-                        ? 'bg-[#A4804A] bg-opacity-10 text-[#A4804A] hover:bg-[#A4804A] hover:bg-opacity-20'
-                        : 'hover:bg-gray-100'
+                      inCurrentMonth
+                        ? isToday(day)
+                          ? 'bg-[#C8102E] text-white shadow-lg'
+                          : isSelected(day)
+                          ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E] border-2 border-[#C8102E]'
+                          : hasMeeting(day)
+                          ? 'bg-[#A4804A] bg-opacity-10 text-[#A4804A] hover:bg-[#A4804A] hover:bg-opacity-20'
+                          : 'hover:bg-gray-100'
+                        : 'text-gray-400 bg-gray-50'
                     }`}
                   >
                     <span className='font-medium'>{day.getDate()}</span>
-                    {hasMeeting(day) && (
+                    {inCurrentMonth && hasMeeting(day) && (
                       <div className='w-2 h-2 bg-[#A4804A] rounded-full mt-1'></div>
                     )}
                   </button>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
 
           {/* Clear Selection Button */}
@@ -383,7 +404,7 @@ const Dashboard: React.FC = () => {
                 onClick={() => setSelectedDate(null)}
                 className='text-sm text-[#C8102E] hover:text-[#A8102E] font-medium'
               >
-                Show upcoming meetings (next 5 days)
+                Show upcoming meetings (next 3 weeks)
               </button>
             </div>
           )}
@@ -428,7 +449,7 @@ const Dashboard: React.FC = () => {
                 <p className='text-gray-400 text-sm'>
                   {selectedDate
                     ? `for ${selectedDate.toLocaleDateString()}`
-                    : 'in the next 5 days'}
+                    : 'in the next 3 weeks'}
                 </p>
               </div>
             ) : (

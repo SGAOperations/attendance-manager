@@ -15,7 +15,7 @@ interface AttendanceMeetingSelectProps {
   setSelectedMeeting: (meeting: MeetingApiData | null) => void;
 }
 
-const AttedanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
+const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
   attendanceUsers,
   attendanceRecord,
   selectedMeeting,
@@ -158,4 +158,4 @@ const AttedanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
   );
 };
 
-export default AttedanceMeetingEdit;
+export default AttendanceMeetingEdit;

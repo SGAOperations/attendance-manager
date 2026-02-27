@@ -1,5 +1,4 @@
 import { UsersController } from '@/users/users.controller';
-import { NextResponse } from 'next/server';
 
 /**
  * @swagger

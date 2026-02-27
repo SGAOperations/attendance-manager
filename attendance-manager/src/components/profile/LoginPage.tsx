@@ -89,7 +89,7 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        const { confirmPassword, ...safeCredentials } = signupCredentials;
+        const { confirmPassword: _confirmPassword, ...safeCredentials } = signupCredentials;
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: {
@@ -113,6 +113,8 @@ const LoginPage: React.FC = () => {
         alert(
           `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`
         );
+        setIsLoginMode(true);
+        resetForms();
       } catch (error) {
         console.error('Login error:', error);
         setError('Invalid email or password');

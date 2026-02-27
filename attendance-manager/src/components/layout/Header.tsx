@@ -1,12 +1,26 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 interface HeaderProps {
   onProfileClick: () => void;
+  onLogoClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
+const Header: React.FC<HeaderProps> = ({ onProfileClick, onLogoClick }) => {
   const { user } = useAuth();
+
+/* Maps enum value to appropriate plain text */
+const rolePlainText = (role?: string) => {
+  switch (role) {
+    case 'EBOARD':
+      return 'E-Board';
+    case 'MEMBER':
+      return 'Member';
+    default:
+      return role;
+  }
+};
 
   return (
     <header className='bg-white shadow-lg border-b border-gray-200 w-full'>
@@ -14,11 +28,13 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
         <div className='flex justify-between items-center h-16'>
           {/* Left side - SGA (always on far left) */}
           <div className="flex flex-row items-end flex-shrink-0">
-            <div className='text-2xl font-bold text-[#C8102E] tracking-wider'>
+            <Link href='homepage' onClick={onLogoClick}>
+              <div className='text-2xl font-bold text-[#C8102E] tracking-wider'>
               SGA
             </div>
+            </Link>
             <div style={{paddingLeft: '8px'}} >
-              Version 2.0.4
+              Version 2.1.0
             </div>
           </div>
 
@@ -30,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick }) => {
                   {user?.name}
                 </p>
                 <p className='text-xs text-gray-500 capitalize'>
-                  {user?.role} Account
+                  {rolePlainText(user?.role)} Account
                 </p>
               </div>
               <div className='relative'>

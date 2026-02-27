@@ -11,7 +11,7 @@ const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
   missedMeetings,
   upcomingMeetings,
   isAdmin,
-  setShowCreateMeetingModal
+  setShowCreateMeetingModal,
 }) => {
   return (
     <div className='lg:col-span-1'>
@@ -82,7 +82,7 @@ const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
 
       {/* Create Meeting Button - Only for Admins */}
       {isAdmin && (
-        <div className='mt-6'>
+        <div className='mt-6 space-y-3'>
           <button
             onClick={() => setShowCreateMeetingModal(true)}
             className='w-full px-4 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl'
