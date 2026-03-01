@@ -1,5 +1,5 @@
 import { MeetingController } from '@/meeting/meeting.controller';
-import { AttendanceController } from "@/attendance/attendance.controller";
+import { AttendanceController } from '@/attendance/attendance.controller';
 /**
  * @swagger
  * /api/users:
