@@ -56,7 +56,7 @@ const MeetingsPage: React.FC = () => {
     explanation: ''
   });
   const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // ← ADDED
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); 
 
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
