@@ -125,6 +125,7 @@ const MeetingsPage: React.FC = () => {
 
       await fetch(`/api/meeting/${editingMeeting.meetingId}/users`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userIds: selectedUserIds })
       });
 
