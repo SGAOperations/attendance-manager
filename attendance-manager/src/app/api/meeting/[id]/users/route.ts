@@ -1,4 +1,5 @@
 import { MeetingController } from '@/meeting/meeting.controller';
+import { AttendanceController } from "@/attendance/attendance.controller";
 /**
  * @swagger
  * /api/users:
@@ -14,4 +15,15 @@ export async function GET(
 ) {
   const { id } = await params;
   return MeetingController.getUsers({ meetingId: id });
+}
+
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const body = await request.json();
+  return AttendanceController.updateMeetingAttendees(id, body.userIds);
+  
 }

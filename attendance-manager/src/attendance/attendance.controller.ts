@@ -67,6 +67,16 @@ export const AttendanceController = {
     });
   },
 
+  async updateMeetingAttendees(meetingId: string, userIds: string[]) {
+    if (!meetingId || typeof meetingId !== 'string') {
+      throw new Error('Invalid or missing meetingId');
+    }
+    if (!Array.isArray(userIds)) {
+      throw new Error('Invalid userIds');
+    }
+    return AttendanceService.updateMeetingAttendees(meetingId, userIds);
+  },
+
   async updateAttendance(attendanceId: string, data: any) {
     if (!attendanceId || typeof attendanceId !== 'string') {
       throw new Error('Invalid or missing attendanceId');

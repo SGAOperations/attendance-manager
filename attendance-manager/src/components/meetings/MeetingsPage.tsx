@@ -56,6 +56,7 @@ const MeetingsPage: React.FC = () => {
     explanation: ''
   });
   const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // ← ADDED
 
   // Check if user is admin (EBOARD)
   const isAdmin = user?.role === 'EBOARD';
@@ -78,6 +79,15 @@ const MeetingsPage: React.FC = () => {
   useEffect(() => {
     fetchMeetings();
   }, []);
+
+  useEffect(() => {
+    if (!editingMeeting?.meetingId) return;
+    fetch(`/api/meeting/${editingMeeting.meetingId}/users`)
+      .then(response => response.json())
+      .then(json => setSelectedUserIds(json.map((d: any) => d.userId)))
+      .catch(console.error);
+    console.log('updated to '+selectedUserIds.length);
+  }, [editingMeeting?.meetingId, showEditMeetingModal]);
 
   const handleEditMeeting = (meeting: MeetingApiData) => {
     setEditingMeeting(meeting);
@@ -113,8 +123,10 @@ const MeetingsPage: React.FC = () => {
         return;
       }
 
-      const updatedMeeting = await response.json();
-      console.log('Meeting updated:', updatedMeeting);
+      await fetch(`/api/meeting/${editingMeeting.meetingId}/users`, {
+        method: 'PUT',
+        body: JSON.stringify({ userIds: selectedUserIds })
+      });
 
       // Refresh meetings list
       fetchMeetings();
@@ -507,6 +519,8 @@ const MeetingsPage: React.FC = () => {
       {/* Edit Meeting Modal */}
       {showEditMeetingModal && editingMeeting && (
         <EditMeetingModal
+          selectedUserIds={selectedUserIds}        
+          setSelectedUserIds={setSelectedUserIds}  
           editMeeting={editMeeting}
           handleUpdateMeeting={handleUpdateMeeting}
           setEditMeeting={setEditMeeting}
