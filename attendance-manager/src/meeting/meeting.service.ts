@@ -37,11 +37,17 @@ export const MeetingService = {
   },
 
   async getUsersByMeetingId(meetingId: string) {
-    const attendance = await prisma.attendance.findMany({
-      where: { meetingId },
-      include: { user: true },
+    const attendance = await prisma.user.findMany({
+      include: {
+        attendance: true,
+      },
+      where: {
+        attendance: {
+          some: { meetingId }
+        }
+      }
     });
-    return attendance.map(a => a.user);
+    return attendance;
   },
 
   async createMeeting(
