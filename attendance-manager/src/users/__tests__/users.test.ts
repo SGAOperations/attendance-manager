@@ -137,8 +137,8 @@ describe('UsersController.validateNuid', () => {
 
     // Create a test user for validation
     const user = await UsersService.createUser({
-      userId: 'test-user-id-1',
-      supabaseAuthId: 'test-supabase-auth-id-1',
+      userId: 'test-user-id-validate-1',
+      supabaseAuthId: 'test-supabase-auth-id-validate-1',
       nuid: '001234567',
       email: 'jdoe@northeastern.edu',
       firstName: 'John',
