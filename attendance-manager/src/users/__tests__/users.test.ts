@@ -46,6 +46,11 @@ describe('UsersService', () => {
   });
 
   afterAll(async () => {
+    await prisma.user.deleteMany({
+      where: {
+        nuid: { in: ['001234567', '001234568', '001234570', '001234571'] }
+      }
+    });
     await UsersService.deleteRole(testRoleId);
   });
 
@@ -145,7 +150,7 @@ describe('UsersController.validateNuid', () => {
   });
 
   afterAll(async () => {
-    await UsersService.deleteUser(testUserId);
+    await prisma.user.delete({ where: { userId: testUserId } });
     await UsersService.deleteRole(testRoleId);
   });
 
@@ -186,7 +191,7 @@ describe('UsersController.validateNuid', () => {
 
   it('should reject invalid NUID format', async () => {
     const response = await UsersController.validateNuid({
-      nuid: '123', // too short
+      nuid: '123',
       firstName: 'John',
       lastName: 'Doe'
     });
@@ -213,7 +218,7 @@ describe('UsersController.validateNuid', () => {
   it('should reject mismatched name', async () => {
     const response = await UsersController.validateNuid({
       nuid: '001234567',
-      firstName: 'Jane', // wrong name
+      firstName: 'Jane',
       lastName: 'Smith'
     });
 
@@ -253,7 +258,7 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
   });
 
   afterAll(async () => {
-    await UsersService.deleteUser(routeTestUserId);
+    await prisma.user.delete({ where: { userId: routeTestUserId } });
     await UsersService.deleteRole(routeTestRoleId);
   });
 
@@ -332,8 +337,9 @@ describe('GET /api/users/by-supabase-id/[supabaseAuthId]', () => {
     expect(data.role).toBeDefined();
     expect(data.role.roleId).toBe(eboardRole.roleId);
     expect(data.role.roleType).toBe('EBOARD');
-    await UsersService.deleteUser(eboardUser.userId);
-    await UsersService.deleteRole(eboardRole.roleId);
+
+    await prisma.user.delete({ where: { userId: eboardUser.userId } });
+    await prisma.role.delete({ where: { roleId: eboardRole.roleId } });
   });
 });
 
@@ -354,6 +360,13 @@ describe('POST /api/auth/signup', () => {
   });
 
   afterAll(async () => {
+    await prisma.user.deleteMany({
+      where: {
+        supabaseAuthId: {
+          in: ['test-supabase-auth-id-123', 'test-supabase-auth-id-456']
+        }
+      }
+    });
     await UsersService.deleteRole(signupTestRoleId);
   });
 
