@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma';
 export const UsersService = {
   async getAllUsers() {
     return prisma.user.findMany({
+      where: { deletedAt: null },
       include: { role: true, attendance: true }
     });
   },
@@ -15,32 +16,36 @@ export const UsersService = {
   },
 
   async getUserByNUID(nuid: string) {
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { nuid },
       include: { role: true }
     });
+    return user?.deletedAt ? null : user;
   },
 
   async getUserById(userId: string) {
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { userId },
       include: { role: true, attendance: true }
     });
+    return user?.deletedAt ? null : user;
   },
 
   async getUserByEmail(userEmail: string) {
     console.log(userEmail);
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email: userEmail },
       include: { role: true }
     });
+    return user?.deletedAt ? null : user;
   },
 
   async getUserByNuid(nuid: string) {
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { nuid },
       include: { role: true }
     });
+    return user?.deletedAt ? null : user;
   },
 
   async createUser(data: {
@@ -92,9 +97,9 @@ export const UsersService = {
   async deleteUser(userId: string) {
     // Soft delete attendance records: updates prisma deletedAt field instead of fully deleting
     return prisma.user.update({
-    where: { userId },
-    data: { deletedAt: new Date() },
-  });
+      where: { userId },
+      data: { deletedAt: new Date() },
+    });
   },
 
   async getRoles() {
@@ -103,8 +108,8 @@ export const UsersService = {
 
   async deleteRole(roleId: string) {
     await prisma.user.deleteMany({
-  where: { roleId },
-});
+      where: { roleId },
+    });
     return prisma.role.delete({
       where: { roleId }
     });
@@ -119,6 +124,7 @@ export const UsersService = {
   async getUsersByRole(roleId: string) {
     return prisma.user.findMany({
       where: {
+        deletedAt: null,
         role: {
           roleType: roleId as RoleType
         }
@@ -130,9 +136,10 @@ export const UsersService = {
   },
 
   async getUserBySupabaseId(supabaseAuthId: string) {
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { supabaseAuthId },
       include: { role: true }
     });
+    return user?.deletedAt ? null : user;
   }
 };
