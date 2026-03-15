@@ -384,9 +384,8 @@ describe('MeetingController', () => {
     await prisma.user.delete({ where: { userId: user2.userId } });
     await prisma.role.delete({ where: { roleId: role.roleId } });
     await MeetingService.deleteMeeting(newMeeting.meetingId);
-
-    await UsersService.deleteRole(role.roleId);
   });
+
   it('should return users associated with a meeting', async () => {
     const newMeeting = await MeetingService.createMeeting(
       {
@@ -455,6 +454,5 @@ describe('MeetingController', () => {
     await prisma.user.delete({ where: { userId: user2.userId } });
     await prisma.role.delete({ where: { roleId: role.roleId } });
     await MeetingService.deleteMeeting(newMeeting.meetingId);
-    await UsersService.deleteRole(role.roleId);
   });
 });
