@@ -11,7 +11,7 @@ export const UsersService = {
 
   async getAllRoles() {
     return prisma.role.findMany({
-      include: {}
+      include: {} 
     });
   },
 
