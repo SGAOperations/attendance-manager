@@ -42,8 +42,7 @@ describe('API Auth Utilities', () => {
   });
 
   afterAll(async () => {
-    // Clean up test data
-    await UsersService.deleteUser(testUserId);
+    await prisma.user.delete({ where: { userId: testUserId } });
     await UsersService.deleteRole(testRoleId);
   });
 
@@ -225,5 +224,25 @@ describe('API Auth Utilities', () => {
       expect(errorResponse.status).toBe(401);
     });
   });
-});
 
+  // ensuring that soft delete worked
+  describe('UsersService.deleteUser', () => {
+    it('should soft delete a user by setting deletedAt', async () => {
+      await UsersService.deleteUser(testUserId);
+      const user = await prisma.user.findUnique({
+        where: { userId: testUserId },
+      });
+
+      expect(user).toBeDefined();
+      expect(user?.deletedAt).not.toBeNull();
+      expect(user?.deletedAt).toBeInstanceOf(Date);
+    });
+
+    it('should not return soft deleted user from getAllUsers', async () => {
+      const users = await UsersService.getAllUsers();
+      const deletedUser = users.find(u => u.userId === testUserId);
+
+      expect(deletedUser).toBeUndefined();
+    });
+  });
+});

@@ -79,7 +79,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
               <th className='text-left py-3 px-4 font-medium text-gray-900'>
                 <details className='inline-block'>
                   <summary className='list-none cursor-pointer hover:underline select-none'>
-                    Type&#9662;{typeFilter ? ` (${typeFilter})` : ''}
+                    Type&#9662;{typeFilter ? ` (${formatMeetingType(typeFilter)})` : ''}
                   </summary>
                   <div className='absolute z-10 mt-2 w-40 rounded-md border bg-white shadow'>
                     <button
@@ -106,7 +106,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                             typeFilter === t ? 'font-semibold' : ''
                           }`}
                           onClick={() => {
-                            setTypeFilter(t as 'FULL_BODY' | 'REGULAR');
+                            setTypeFilter(t as MeetingType);
                             (document.activeElement as HTMLElement | null)?.blur();
                           }}
                         >
@@ -157,7 +157,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                   </td>
                   <td className='py-3 px-4'>
                     <div className='text-sm font-medium text-gray-900'>
-                      {meeting.type}
+                      {formatMeetingType(meeting.type)}
                     </div>
                   </td>
                   <td className='py-3 px-4 text-right'>

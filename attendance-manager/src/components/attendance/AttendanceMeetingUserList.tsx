@@ -11,7 +11,7 @@ interface AttendanceMeetingUserListProps {
   handleStartCheckIn: () => void;
 }
 
-const AttedanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
+const AttendanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
   selectedMeetingForCheck,
   isLoadingAttendance,
   attendanceUsers,
@@ -126,4 +126,4 @@ const AttedanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
   );
 };
 
-export default AttedanceMeetingUserList;
+export default AttendanceMeetingUserList;
