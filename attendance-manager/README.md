@@ -58,6 +58,44 @@ Followed by:
 npx prisma generate
 ```
 
+## Running the Database Locally
+
+First, ensure that Docker is running. Easiest way to do this is with the Docker Desktop App
+
+Next, run the commands:
+
+1. 
+```
+npx prisma generate
+```
+2. 
+```
+npx supabase start
+```
+
+Next, update your .env file with
+```
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+DIRECT_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="What was outputted in your Authentication Keys/Publishable"
+```
+
+Next, start the application
+```
+npm run dev
+```
+
+Finally, run:
+```
+npx prisma migrate deploy
+```
+
+Optionally, to confirm the db is up, run and ensure it works with
+```
+run npx prisma studio
+```
+
 ## Migrations with Prisma
 
 Migrations are helpful as they can be used to ensure safe updates to our database.
