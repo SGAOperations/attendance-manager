@@ -253,6 +253,12 @@ const AttendancePage: React.FC = () => {
     setNuidInput('');
   };
 
+  // Function to soft delete a member
+  const handleDeleteMember = async (userId: string) => {
+    await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+    setUsers(prev => prev.filter(u => u.userId !== userId));
+  };
+
   // Function to toggle attendance status in edit modal
   const toggleAttendanceStatus = async (
     attendanceId: string,
@@ -403,6 +409,7 @@ const AttendancePage: React.FC = () => {
           eboardMembers={eboardMembers}
           regularMembers={regularMembers}
           loading={isLoadingMembers}
+          onDeleteMember={handleDeleteMember}
         />
       ) : (
         /* Attendance History Section */
