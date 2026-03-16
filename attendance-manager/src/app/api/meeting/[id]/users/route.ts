@@ -22,7 +22,7 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id } = params;  // Promise isn't necessary
   const body = await request.json();
   return AttendanceController.updateMeetingAttendees(id, body.userIds);
   
