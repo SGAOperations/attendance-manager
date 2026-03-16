@@ -24,6 +24,11 @@ export async function PUT(
 ) {
   const { id } = params;  // Promise isn't necessary
   const body = await request.json();
-  return AttendanceController.updateMeetingAttendees(id, body.userIds);
+  const result = await AttendanceController.updateMeetingAttendees(
+    id,
+    body.userIds
+  );
+  // return JSON with the payload (e.g. count)
+  return NextResponse.json(result);         // type: Response
   
 }
