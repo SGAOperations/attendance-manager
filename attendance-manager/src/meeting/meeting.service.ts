@@ -106,6 +106,7 @@ export const MeetingService = {
   },
 
   async deleteMeeting(meetingId: string) {
+    await prisma.votingEvent.deleteMany({ where: { meetingId }});
     // Delete attendance records first to avoid foreign key constraint
     await prisma.attendance.deleteMany({
       where: { meetingId },

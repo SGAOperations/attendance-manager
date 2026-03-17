@@ -16,7 +16,6 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
   activeTab,
   typeFilter,
   setTypeFilter,
-  meetings,
   handleEditMeeting,
   visibleMeetings
 }) => {
