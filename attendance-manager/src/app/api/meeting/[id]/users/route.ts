@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import { MeetingController } from '@/meeting/meeting.controller';
 import { AttendanceController } from '@/attendance/attendance.controller';
 /**
