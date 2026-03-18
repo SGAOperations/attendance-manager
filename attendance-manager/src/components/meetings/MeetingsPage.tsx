@@ -435,6 +435,47 @@ const MeetingsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteMeeting = async () => {
+    if (!editingMeeting) return;
+
+    if (!confirm('Are you sure you want to delete this meeting?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/meeting/${editingMeeting.meetingId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(
+          `Failed to delete meeting: ${errorData.error || 'Unknown error'}`
+        );
+        return;
+      }
+
+      alert('Meeting deleted successfully!');
+      // Refresh meetings list
+      fetchMeetings();
+
+      // Close modal and reset
+      setShowEditMeetingModal(false);
+      setEditingMeeting(null);
+      setEditMeeting({
+        name: '',
+        date: '',
+        startTime: '',
+        endTime: '',
+        notes: '',
+        type: 'REGULAR'
+      });
+    } catch (error) {
+      console.error('Error deleting meeting:', error);
+      alert('Failed to delete meeting. Please try again.');
+    }
+  };
+
   // visibleMeetings are meetings post-type-filter
   const visibleMeetings = typeFilter
     ? filteredMeetings.filter(m => m.type === typeFilter)
@@ -524,6 +565,7 @@ const MeetingsPage: React.FC = () => {
           setSelectedUserIds={setSelectedUserIds}  
           editMeeting={editMeeting}
           handleUpdateMeeting={handleUpdateMeeting}
+          handleDeleteMeeting={handleDeleteMeeting}
           setEditMeeting={setEditMeeting}
           setShowEditMeetingModal={setShowEditMeetingModal}
           setEditingMeeting={setEditingMeeting}

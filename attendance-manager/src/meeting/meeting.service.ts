@@ -15,6 +15,10 @@ function groupBy<T, K extends string | number | symbol>(
 export const MeetingService = {
   async getAllMeeting() {
     return await prisma.meeting.findMany({
+      // dont get soft deleted meetings
+      where: {
+        deletedAt: null
+      },
       include: { 
         attendance: {
           include: {
@@ -97,8 +101,10 @@ export const MeetingService = {
       notes: string;
       date: string;
       type: MeetingType;
+      updatedAt: string;
     }>
   ) {
+    updates.updatedAt = new Date().toISOString();
     return prisma.meeting.update({
       where: { meetingId },
       data: updates,
@@ -114,6 +120,13 @@ export const MeetingService = {
     
     return prisma.meeting.delete({
       where: { meetingId },
+    });
+  },
+
+  async softDeleteMeeting(meetingId: string) {
+    return prisma.meeting.update({
+      where: { meetingId },
+      data: { deletedAt: new Date().toISOString() },
     });
   }
 };
