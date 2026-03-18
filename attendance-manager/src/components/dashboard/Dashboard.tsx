@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
 
   const handleViewModal = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
-    setShowViewModal(true)
+    setShowViewModal(true);
   };
 
   const hasMeeting = (date: Date) => {
