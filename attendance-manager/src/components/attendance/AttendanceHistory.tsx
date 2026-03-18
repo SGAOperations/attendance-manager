@@ -5,7 +5,7 @@ interface AttendanceHistoryProps {
   attendanceRecord: Record<string, AttendanceApiData[]>;
   isAdmin: boolean;
   openEditAttendanceModal: (meeting: MeetingApiData) => void;
-  loading ?: boolean;
+  loading?: boolean;
 }
 
 const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({
@@ -15,7 +15,6 @@ const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({
   openEditAttendanceModal,
   loading = false
 }) => {
-  
   // Loading screen
   if (loading) {
     return (
