@@ -10,6 +10,7 @@ interface Meeting {
   endTime: string;
   date: string;
   notes: string;
+  type: 'FULL_BODY' | 'REGULAR';
 }
 
 // API service functions with endpoints
