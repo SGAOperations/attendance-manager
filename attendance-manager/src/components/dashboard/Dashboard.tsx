@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../profile/LoginPage';
 import { User } from '@/types';
+import ViewMeetingModal from './ViewMeetingModal';
 
 interface Meeting {
   meetingId: string;
@@ -9,6 +10,7 @@ interface Meeting {
   endTime: string;
   date: string;
   notes: string;
+  type: 'FULL_BODY' | 'REGULAR';
 }
 
 // API service functions with endpoints
@@ -94,6 +96,8 @@ const Dashboard: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [meetingsByDate, setMeetingsByDate] = useState<
     Record<string, Meeting[]>
   >({});
@@ -173,6 +177,11 @@ const Dashboard: React.FC = () => {
 
   const isSelected = (date: Date) => {
     return selectedDate && date.toDateString() === selectedDate.toDateString();
+  };
+
+  const handleViewModal = (meeting: Meeting) => {
+    setSelectedMeeting(meeting);
+    setShowViewModal(true);
   };
 
   const hasMeeting = (date: Date) => {
@@ -466,7 +475,6 @@ const Dashboard: React.FC = () => {
                       Meeting
                     </span>
                   </div>
-                  <p className='text-gray-600 mb-3 text-sm'>{meeting.notes}</p>
                   <div className='flex items-center space-x-4 text-sm text-gray-500 mb-3'>
                     <div className='flex items-center space-x-1'>
                       <svg
@@ -505,24 +513,10 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center space-x-1'>
-                      <svg
-                        className='w-4 h-4 text-gray-400'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                        />
-                      </svg>
-                      <span className='text-xs text-gray-500'>
-                        Meeting details
-                      </span>
                     </div>
-                    <button className='text-[#C8102E] hover:text-[#A8102E] text-sm font-medium'>
+                    <button 
+                      onClick={() => handleViewModal(meeting)} 
+                      className='text-[#C8102E] hover:text-[#A8102E] text-sm font-medium'>
                       View Details
                     </button>
                   </div>
@@ -532,7 +526,14 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+     {showViewModal && selectedMeeting && (
+      <ViewMeetingModal
+        meeting={selectedMeeting}
+        setShowViewMeetingModal={setShowViewModal}
+      />
+    )}
+
+  </div>
   );
 };
 
