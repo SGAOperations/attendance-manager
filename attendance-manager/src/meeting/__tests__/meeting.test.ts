@@ -18,7 +18,7 @@ describe('MeetingServices', () => {
         notes: 'notes',
         type: MeetingType.REGULAR
       },
-      [] // Empty attendeeIds array
+      []
     );
     expect(newMeeting).toBeDefined();
     expect(newMeeting.name).toBe('test2');
@@ -82,7 +82,6 @@ describe('MeetingController', () => {
   });
 
   it('should update a meeting via controller', async () => {
-    // Create a test meeting
     const testMeeting = await MeetingService.createMeeting(
       {
         name: 'Controller Test Meeting',
@@ -95,7 +94,6 @@ describe('MeetingController', () => {
       []
     );
 
-    // Create a mock request with update data
     const updateData = {
       name: 'Updated Meeting Name',
       startTime: '14:00',
@@ -126,7 +124,6 @@ describe('MeetingController', () => {
   });
 
   it('should reject invalid meeting type via controller', async () => {
-    // Create a test meeting
     const testMeeting = await MeetingService.createMeeting(
       {
         name: 'Invalid Type Test',
@@ -139,7 +136,6 @@ describe('MeetingController', () => {
       []
     );
 
-    // Create mock request with invalid type
     const updateData = {
       type: 'INVALID_TYPE'
     };
@@ -172,7 +168,6 @@ describe('MeetingController', () => {
       []
     );
 
-    // Update only the name
     const updateData = {
       name: 'Partially Updated Name'
     };
@@ -188,7 +183,6 @@ describe('MeetingController', () => {
     expect(response).toBeDefined();
     const responseData = await response.json();
     expect(responseData.name).toBe('Partially Updated Name');
-    // Other fields should remain unchanged
     expect(responseData.startTime).toBe('10:00');
     expect(responseData.notes).toBe('Original notes');
 
@@ -204,7 +198,6 @@ describe('MeetingController', () => {
       json: async () => updateData
     } as Request;
 
-    // throw an error for non-existent meetingId
     await expect(
       MeetingController.updateMeeting(mockRequest, {
         meetingId: 'non-existent-id-12345'
@@ -261,7 +254,6 @@ describe('MeetingController', () => {
       }
     } as unknown) as Request;
 
-    // Should throw error when parsing fails
     await expect(
       MeetingController.updateMeeting(mockRequest, {
         meetingId: testMeeting.meetingId
@@ -344,12 +336,10 @@ describe('MeetingController', () => {
         notes: 'notes',
         type: MeetingType.REGULAR
       },
-      [] // Empty attendeeIds array
+      []
     );
     const testMeetingId = newMeeting.meetingId;
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
-    let testUserId: string;
-    let testUser2Id: string;
     const user = await prisma.user.create({
       data: {
         userId: 'test-attendance-user-1',
@@ -362,7 +352,6 @@ describe('MeetingController', () => {
         password: null
       }
     });
-    testUserId = user.userId;
 
     const user2 = await prisma.user.create({
       data: {
@@ -378,7 +367,7 @@ describe('MeetingController', () => {
     });
     const attendance = await prisma.attendance.create({
       data: {
-        userId: testUserId,
+        userId: user.userId,
         meetingId: testMeetingId,
         status: 'EXCUSED_ABSENCE',
         request: {}
@@ -389,18 +378,14 @@ describe('MeetingController', () => {
     });
     const responseData = await response.json();
     expect(responseData).toHaveLength(1);
-    expect(responseData[0].userId).toBe(testUserId);
+    expect(responseData[0].userId).toBe(user.userId);
     await AttendanceService.deleteAttendance(attendance.attendanceId);
-
-    // Delete users
-    await UsersService.deleteUser(user.userId);
-    await UsersService.deleteUser(user2.userId);
-
-    // Delete meeting last
+    await prisma.user.delete({ where: { userId: user.userId } });
+    await prisma.user.delete({ where: { userId: user2.userId } });
+    await prisma.role.delete({ where: { roleId: role.roleId } });
     await MeetingService.deleteMeeting(newMeeting.meetingId);
-
-    await UsersService.deleteRole(role.roleId);
   });
+
   it('should return users associated with a meeting', async () => {
     const newMeeting = await MeetingService.createMeeting(
       {
@@ -411,12 +396,10 @@ describe('MeetingController', () => {
         notes: 'notes',
         type: MeetingType.REGULAR
       },
-      [] // Empty attendeeIds array
+      []
     );
     const testMeetingId = newMeeting.meetingId;
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
-    let testUserId: string;
-    let testUser2Id: string;
     const user = await prisma.user.create({
       data: {
         userId: 'test-attendance-user-1',
@@ -429,7 +412,6 @@ describe('MeetingController', () => {
         password: null
       }
     });
-    testUserId = user.userId;
 
     const user2 = await prisma.user.create({
       data: {
@@ -443,10 +425,9 @@ describe('MeetingController', () => {
         password: null
       }
     });
-    testUser2Id = user2.userId;
     const attendance = await prisma.attendance.create({
       data: {
-        userId: testUserId,
+        userId: user.userId,
         meetingId: testMeetingId,
         status: 'EXCUSED_ABSENCE',
         request: {}
@@ -454,7 +435,7 @@ describe('MeetingController', () => {
     });
     const attendance2 = await prisma.attendance.create({
       data: {
-        userId: testUser2Id,
+        userId: user2.userId,
         meetingId: testMeetingId,
         status: 'EXCUSED_ABSENCE',
         request: {}
@@ -465,17 +446,13 @@ describe('MeetingController', () => {
     });
     const responseData = await response.json();
     expect(responseData).toHaveLength(2);
-    expect(responseData[0].userId).toBe(testUserId);
-    expect(responseData[1].userId).toBe(testUser2Id);
+    expect(responseData[0].userId).toBe(user.userId);
+    expect(responseData[1].userId).toBe(user2.userId);
     await AttendanceService.deleteAttendance(attendance.attendanceId);
     await AttendanceService.deleteAttendance(attendance2?.attendanceId);
-
-    // Delete users
-    await UsersService.deleteUser(user.userId);
-    await UsersService.deleteUser(user2.userId);
-
-    // Delete meeting last
+    await prisma.user.delete({ where: { userId: user.userId } });
+    await prisma.user.delete({ where: { userId: user2.userId } });
+    await prisma.role.delete({ where: { roleId: role.roleId } });
     await MeetingService.deleteMeeting(newMeeting.meetingId);
-    await UsersService.deleteRole(role.roleId);
   });
 });

@@ -16,6 +16,8 @@ import AttendanceMembers from './AttendanceMembers';
 
 import { meetingAPI } from '@/utils/attendance_utils';
 import AttendancePageRequestsModal from './AttendancePageRequestsModal';
+import DeleteUserModal from './DeleteUserModal';
+import { ClipboardList, NotebookPen } from 'lucide-react';
 
 const AttendancePage: React.FC = () => {
   const { user } = useAuth();
@@ -26,6 +28,8 @@ const AttendancePage: React.FC = () => {
     MeetingApiData[]
   >([]);
   const [users, setUsers] = useState<UserApiData[]>([]);
+
+  const [deleteUser, setDeleteUser] = useState<UserApiData | null>(null);
 
   // New state for attendance marking and editing
   const [showEditAttendanceModal, setShowEditAttendanceModal] = useState(false);
@@ -38,7 +42,7 @@ const AttendancePage: React.FC = () => {
   const [attendanceRecord, setAttendanceRecord] = useState<
     Record<string, AttendanceApiData[]>
   >({});
-  
+
   // Sets loading
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isLoadingMembers, setIsLoadingMembers] = useState(true);
@@ -253,6 +257,12 @@ const AttendancePage: React.FC = () => {
     setNuidInput('');
   };
 
+  // Function to soft delete a member
+  const handleDeleteMember = async (userId: string) => {
+    await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+    setUsers(prev => prev.filter(u => u.userId !== userId));
+  };
+
   // Function to toggle attendance status in edit modal
   const toggleAttendanceStatus = async (
     attendanceId: string,
@@ -339,9 +349,10 @@ const AttendancePage: React.FC = () => {
           <div className='flex flex-col space-y-3'>
             <button
               onClick={() => setShowAttendanceCheck(true)}
-              className='px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl'
+              className='flex items-center gap-2 px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium shadow-lg hover:shadow-xl'
             >
-              📋 Attendance Check
+              <ClipboardList />
+              Attendance Check
             </button>
             <button
               onClick={async () => {
@@ -363,9 +374,10 @@ const AttendancePage: React.FC = () => {
                   setRequests([]);
                 }
               }}
-              className='px-6 py-3 bg-[#A4804A] text-white rounded-xl hover:bg-[#8A6D3F] transition-colors font-medium shadow-lg hover:shadow-xl'
+              className='flex items-center gap-2 px-6 py-3 bg-[#A4804A] text-white rounded-xl hover:bg-[#8A6D3F] transition-colors font-medium shadow-lg hover:shadow-xl'
             >
-              📝 View Requests
+              <NotebookPen />
+              View Requests
             </button>
           </div>
         )}
@@ -403,6 +415,7 @@ const AttendancePage: React.FC = () => {
           eboardMembers={eboardMembers}
           regularMembers={regularMembers}
           loading={isLoadingMembers}
+          setDeleteUser={setDeleteUser}
         />
       ) : (
         /* Attendance History Section */
@@ -532,6 +545,14 @@ const AttendancePage: React.FC = () => {
           setDeclinedRequestIds={setDeclinedRequestIds}
           setShowRequestsModal={setShowRequestsModal}
           setRequests={setRequests}
+        />
+      )}
+
+      {deleteUser && (
+        <DeleteUserModal
+          deleteUser={deleteUser}
+          onDeleteUser={handleDeleteMember}
+          setDeleteUser={setDeleteUser}
         />
       )}
     </div>

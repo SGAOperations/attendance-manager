@@ -43,6 +43,21 @@ export const AttendanceService = {
     });
   },
 
+  // Update attendees for meeting
+  async updateMeetingAttendees(meetingId: string, userIds: string[]) {
+    await prisma.attendance.deleteMany({
+      where: { meetingId }
+    });
+
+    return prisma.attendance.createMany({
+      data: userIds.map(userId => ({
+        userId,
+        meetingId,
+        status: AttendanceStatus.PENDING 
+      }))
+    });
+  },
+
   // Create an attendance record
   async createAttendance(data: {
     userId: string;

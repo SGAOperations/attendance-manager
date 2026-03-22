@@ -3,15 +3,16 @@ import { UserApiData } from '@/types';
 interface AttendanceMembersProps {
   eboardMembers: UserApiData[];
   regularMembers: UserApiData[];
-  loading ?: boolean;
+  loading?: boolean;
+  setDeleteUser: (userId: UserApiData | null) => void;
 }
 
 const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
   eboardMembers,
   regularMembers,
-  loading = false
+  loading = false,
+  setDeleteUser
 }) => {
-
   // Loading screen
   if (loading) {
     return (
@@ -48,6 +49,12 @@ const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
                 </p>
                 <p className='text-xs text-gray-500'>{member.email}</p>
               </div>
+              <button
+                onClick={() => setDeleteUser(member)}
+                className='text-red-400 hover:text-red-600 text-xs font-medium'
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
@@ -73,6 +80,12 @@ const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
                 </p>
                 <p className='text-xs text-gray-500'>{member.email}</p>
               </div>
+              <button
+                onClick={() => setDeleteUser(member)}
+                className='text-red-400 hover:text-red-600 text-xs font-medium'
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
