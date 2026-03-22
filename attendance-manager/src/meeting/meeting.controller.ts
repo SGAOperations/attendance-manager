@@ -94,11 +94,11 @@ export const MeetingController = {
   },
 
   async deleteMeeting(params: { meetingId: string }) {
-    // await MeetingService.deleteMeeting(params.meetingId);
     await MeetingService.softDeleteMeeting(params.meetingId);
+
     return NextResponse.json(
       { message: 'Meeting soft deleted successfully' },
-      { status: 204 }
+      { status: 200 }
     );
   }
 };

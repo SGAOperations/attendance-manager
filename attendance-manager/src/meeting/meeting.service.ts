@@ -30,13 +30,15 @@ export const MeetingService = {
   },
 
   async getAllMeetingByDate() {
-    const meetings = await prisma.meeting.findMany();
+    const meetings = await prisma.meeting.findMany({where: {
+      deletedAt: null
+    }});
     return groupBy(meetings, (meeting) => meeting.date);
   },
 
   async getMeetingById(meetingId: string) {
     return prisma.meeting.findUnique({
-      where: { meetingId },
+      where: { meetingId,  deletedAt: null},
     });
   },
 
