@@ -1,0 +1,1165 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Documentation",
+    "version": "1.0.0",
+    "description": "This is the OpenAPI specification for your project."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AttendanceParams": {
+        "type": "object",
+        "properties": {
+          "attendanceId": {
+            "type": "string",
+            "description": "Attendance Id"
+          }
+        },
+        "required": [
+          "attendanceId"
+        ]
+      },
+      "AttendanceResponse": {
+        "type": "object",
+        "properties": {
+          "attendanceId": {
+            "type": "string",
+            "description": "Attendance Id"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User Id"
+          },
+          "meetingId": {
+            "type": "string",
+            "description": "Meeting Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PRESENT",
+              "UNEXCUSED_ABSENCE",
+              "EXCUSED_ABSENCE",
+              "PENDING"
+            ],
+            "description": "Status"
+          }
+        },
+        "required": [
+          "attendanceId",
+          "userId",
+          "meetingId",
+          "status"
+        ]
+      },
+      "PostAttendanceParams": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "User Id"
+          },
+          "meetingId": {
+            "type": "string",
+            "description": "Meeting Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PRESENT",
+              "UNEXCUSED_ABSENCE",
+              "EXCUSED_ABSENCE",
+              "PENDING"
+            ],
+            "description": "Status"
+          }
+        },
+        "required": [
+          "userId",
+          "meetingId",
+          "status"
+        ]
+      }
+    },
+    "responses": {
+      "400": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid request parameters"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "400"
+                }
+              }
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Authentication required"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "401"
+                }
+              }
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Access denied"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "403"
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Not Found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Resource not found"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "404"
+                }
+              }
+            }
+          }
+        }
+      },
+      "409": {
+        "description": "Conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Resource already exists"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "409"
+                }
+              }
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "An unexpected error occurred"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "500"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/{slug}": {
+      "get": {
+        "operationId": "get-{slug}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "{slug}"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/attendance": {
+      "post": {
+        "operationId": "post-attendance",
+        "summary": "Posts an Attendance",
+        "description": "Creates a new Attendance Record with params",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string",
+              "description": "User Id"
+            },
+            "required": true,
+            "description": "User Id",
+            "example": "123"
+          },
+          {
+            "in": "path",
+            "name": "meetingId",
+            "schema": {
+              "type": "string",
+              "description": "Meeting Id"
+            },
+            "required": true,
+            "description": "Meeting Id",
+            "example": "123"
+          },
+          {
+            "in": "path",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PRESENT",
+                "UNEXCUSED_ABSENCE",
+                "EXCUSED_ABSENCE",
+                "PENDING"
+              ],
+              "description": "Status"
+            },
+            "required": true,
+            "description": "Status",
+            "example": "example"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/attendance/{attendanceId}": {
+      "patch": {
+        "operationId": "patch-attendance-{attendanceId}",
+        "summary": "Updates an Attendance",
+        "description": "Updates an Attendance Record by attendanceId",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attendanceId",
+            "schema": {
+              "type": "string",
+              "description": "Attendance Id"
+            },
+            "required": true,
+            "description": "Attendance Id",
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-attendance-{attendanceId}",
+        "summary": "Deletes an Attendance",
+        "description": "Deletes an Attendance Record by attendanceId",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attendanceId",
+            "schema": {
+              "type": "string",
+              "description": "Attendance Id"
+            },
+            "required": true,
+            "description": "Attendance Id",
+            "example": "123"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/attendance/status": {
+      "put": {
+        "operationId": "put-attendance-status",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/attendance/{attendanceId}/requests": {
+      "post": {
+        "operationId": "post-attendance-{attendanceId}-requests",
+        "summary": "POST create new request for a specific attendance",
+        "description": "",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/attendance/meeting/{meetingId}": {
+      "get": {
+        "operationId": "get-attendance-meeting-{meetingId}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/attendance/user/{userId}": {
+      "get": {
+        "operationId": "get-attendance-user-{userId}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/attendance/user/{userId}/remaining-absences": {
+      "get": {
+        "operationId": "get-attendance-user-{userId}-remaining-absences",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/attendance/user/requests/{userId}": {
+      "get": {
+        "operationId": "get-attendance-user-requests-{userId}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Attendance"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "operationId": "post-auth-signup",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/meeting": {
+      "get": {
+        "operationId": "get-meeting",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Meeting"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-meeting",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Meeting"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/meeting/{id}": {
+      "get": {
+        "operationId": "get-meeting-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Meeting"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-meeting-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Meeting"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-meeting-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Meeting"
+        ],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/meeting/by-date": {
+      "get": {
+        "operationId": "get-meeting-by-date",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Meeting"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/meeting/{id}/users": {
+      "get": {
+        "operationId": "get-meeting-{id}-users",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Meeting"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-meeting-{id}-users",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Meeting"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/requests": {
+      "get": {
+        "operationId": "get-requests",
+        "summary": "GET all requests (for admins)",
+        "description": "",
+        "tags": [
+          "Requests"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-requests",
+        "summary": "POST create new request",
+        "description": "",
+        "tags": [
+          "Requests"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/requests/{id}": {
+      "get": {
+        "operationId": "get-requests-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Requests"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-requests-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Requests"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-requests-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Requests"
+        ],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "get-users",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-users",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "get-users-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-users-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-users-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/attendance_update": {
+      "put": {
+        "operationId": "put-users-attendance_update",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/only-name": {
+      "get": {
+        "operationId": "get-users-only-name",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/role": {
+      "post": {
+        "operationId": "post-users-role",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get-users-role",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/validate-nuid": {
+      "get": {
+        "operationId": "get-users-validate-nuid",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/by-supabase-id/{supabaseAuthId}": {
+      "get": {
+        "operationId": "get-users-by-supabase-id-{supabaseAuthId}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/get-user-by-email/{email}": {
+      "get": {
+        "operationId": "get-users-get-user-by-email-{email}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/get-user-by-nuid/{nuid}": {
+      "get": {
+        "operationId": "get-users-get-user-by-nuid-{nuid}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/users/role/roleId": {
+      "delete": {
+        "operationId": "delete-users-role-roleId",
+        "summary": "DELETE /api/user/role/:roleId",
+        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/voting-event": {
+      "get": {
+        "operationId": "get-voting-event",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Voting-event"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-voting-event",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Voting-event"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/voting-event/{id}": {
+      "get": {
+        "operationId": "get-voting-event-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Voting-event"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-voting-event-{id}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Voting-event"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/voting-event/by-type/{voteType}": {
+      "get": {
+        "operationId": "get-voting-event-by-type-{voteType}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Voting-event"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/voting-record": {
+      "get": {
+        "operationId": "get-voting-record",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Voting-record"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-voting-record",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Voting-record"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/voting-record/by-voting-event/{votingEventId}": {
+      "get": {
+        "operationId": "get-voting-record-by-voting-event-{votingEventId}",
+        "summary": "",
+        "description": "",
+        "tags": [
+          "Voting-record"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    }
+  }
+}

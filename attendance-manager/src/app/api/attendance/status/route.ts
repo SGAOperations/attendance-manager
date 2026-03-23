@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AttendanceController } from '../../../../attendance/attendance.controller';
 
+/**
+ * Updates an Attendance Status based on request
+ * @description Updates an Attendance Record's Status by attendanceId
+ * @pathParams AttendanceRequestParams
+ * @response AttendanceResponse
+ * @openapi
+ */
 export async function PUT(req: NextRequest) {
   try {
     const { requestId, status } = await req.json();

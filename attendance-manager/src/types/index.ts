@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export interface User {
   id: string;
   email: string;
@@ -155,3 +157,26 @@ export interface VotingRecordApiData {
   updatedAt?: string | null;
   deletedAt?: string | null;
 }
+
+// Swagger Docs Types
+export const AttendanceParams = z.object({
+  attendanceId: z.string().describe('Attendance Id'),
+});
+
+export const AttendanceResponse = z.object({
+  attendanceId: z.string().describe('Attendance Id'),
+  userId: z.string().describe('User Id'),
+  meetingId: z.string().describe('Meeting Id'),
+  status: z.enum(['PRESENT', 'UNEXCUSED_ABSENCE', 'EXCUSED_ABSENCE', 'PENDING']).describe('Status')
+});
+
+export const PostAttendanceParams = z.object({
+  userId: z.string().describe('User Id'),
+  meetingId: z.string().describe('Meeting Id'),
+  status: z.enum(['PRESENT', 'UNEXCUSED_ABSENCE', 'EXCUSED_ABSENCE', 'PENDING']).describe('Status')
+});
+
+export const AttendanceRequestParams = z.object({
+  requestId: z.string().describe('Request Id'),
+  status: z.enum(['PRESENT', 'UNEXCUSED_ABSENCE', 'EXCUSED_ABSENCE', 'PENDING']).describe('Status')
+});
