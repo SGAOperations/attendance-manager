@@ -19,7 +19,7 @@ const AbsencesBanner: React.FC<AbsencesBannerProps> = ({
     <div className={`mb-6 rounded-lg border-2 p-4 ${bannerColor}`}>
       <div className='flex items-start'>
         <div className='flex-shrink-0'>
-          <Info className='w-6 h-6 text-gray-600'/>
+          <Info className='w-6 h-6 text-gray-600' />
         </div>
         <div className='ml-3 flex-1'>
           <h3 className='text-sm font-semibold text-gray-900 mb-2'>

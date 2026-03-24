@@ -59,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick, onLogoClick }) => {
                     </span>
                   </div>
                   <div className='hidden sm:block'>
-                    <UserRound className='w-4 h-4 text-gray-600'/>
+                    <UserRound className='w-4 h-4 text-gray-600' />
                   </div>
                 </button>
               </div>

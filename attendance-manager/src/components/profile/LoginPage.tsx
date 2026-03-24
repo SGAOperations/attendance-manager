@@ -2,7 +2,14 @@
 import React, { createContext, useState } from 'react';
 import { User, LoginCredentials } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { AtSign, CircleAlert, CircleCheck, LoaderCircle, LockKeyhole, UserRound } from 'lucide-react';
+import {
+  AtSign,
+  CircleAlert,
+  CircleCheck,
+  LoaderCircle,
+  LockKeyhole,
+  UserRound,
+} from 'lucide-react';
 
 const defaultUser: User = {
   id: '',
@@ -210,7 +217,7 @@ const LoginPage: React.FC = () => {
                     </label>
                     <div className='relative'>
                       <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                      <UserRound className='h-5 w-5 text-gray-400'/>
+                        <UserRound className='h-5 w-5 text-gray-400' />
                       </div>
                       <input
                         id='firstName'
@@ -234,7 +241,7 @@ const LoginPage: React.FC = () => {
                     </label>
                     <div className='relative'>
                       <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                        <UserRound className='h-5 w-5 text-gray-400'/>
+                        <UserRound className='h-5 w-5 text-gray-400' />
                       </div>
                       <input
                         id='lastName'
@@ -262,7 +269,7 @@ const LoginPage: React.FC = () => {
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <AtSign className='h-5 w-5 text-gray-400'/>
+                    <AtSign className='h-5 w-5 text-gray-400' />
                   </div>
                   <input
                     id='email'
@@ -290,7 +297,7 @@ const LoginPage: React.FC = () => {
                   </label>
                   <div className='relative'>
                     <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <CircleCheck className='h-5 w-5 text-gray-400'/>
+                      <CircleCheck className='h-5 w-5 text-gray-400' />
                     </div>
                     <input
                       id='nuid'
@@ -317,7 +324,7 @@ const LoginPage: React.FC = () => {
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <LockKeyhole className='h-5 w-5 text-gray-400'/>
+                    <LockKeyhole className='h-5 w-5 text-gray-400' />
                   </div>
                   <input
                     id='password'
@@ -352,7 +359,7 @@ const LoginPage: React.FC = () => {
                   </label>
                   <div className='relative'>
                     <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <CircleCheck className='h-5 w-5 text-gray-400'/>
+                      <CircleCheck className='h-5 w-5 text-gray-400' />
                     </div>
                     <input
                       id='confirmPassword'
@@ -373,7 +380,7 @@ const LoginPage: React.FC = () => {
                 <div className='bg-red-900 border border-red-700 rounded-xl p-4'>
                   <div className='flex'>
                     <div className='flex-shrink-0'>
-                      <CircleAlert className='h-5 w-5 text-red-400'/>
+                      <CircleAlert className='h-5 w-5 text-red-400' />
                     </div>
                     <div className='ml-3'>
                       <p className='text-sm text-red-200'>{error}</p>
@@ -390,7 +397,7 @@ const LoginPage: React.FC = () => {
                 >
                   {isLoading ? (
                     <div className='flex items-center'>
-                      <LoaderCircle className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                      <LoaderCircle className='animate-spin -ml-1 mr-3 h-5 w-5 text-white' />
                       {isLoginMode ? 'Signing in...' : 'Creating account...'}
                     </div>
                   ) : isLoginMode ? (

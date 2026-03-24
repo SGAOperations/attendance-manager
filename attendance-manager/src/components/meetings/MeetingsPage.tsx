@@ -25,7 +25,7 @@ const normalizeDate = (dateStr: string) => {
     return `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
   }
 
-  // Already in MM/DD/YYYY format 
+  // Already in MM/DD/YYYY format
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
     return dateStr;
   }
@@ -72,7 +72,7 @@ const MeetingsPage: React.FC = () => {
     type: 'REGULAR' as 'FULL_BODY' | 'REGULAR',
   });
   const [deleteMeeting, setDeleteMeeting] = useState<MeetingApiData | null>(
-    null
+    null,
   );
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
   const [showCreateRequestModal, setShowCreateRequestModal] = useState(false);
@@ -468,16 +468,16 @@ const MeetingsPage: React.FC = () => {
 
   const handleDeleteMeeting = async () => {
     if (!deleteMeeting) return;
-    
+
     try {
       const response = await fetch(`/api/meeting/${deleteMeeting.meetingId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         alert(
-          `Failed to delete meeting: ${errorData.error || 'Unknown error'}`
+          `Failed to delete meeting: ${errorData.error || 'Unknown error'}`,
         );
         return;
       }
@@ -489,9 +489,7 @@ const MeetingsPage: React.FC = () => {
       // Close modal and reset
       setShowDeleteMeetingModal(false);
       setDeleteMeeting(null);
-
-    } catch (error) {
-      console.error('Error deleting meeting:', error);
+    } catch {
       alert('Failed to delete meeting. Please try again.');
     }
   };

@@ -57,11 +57,11 @@ const AttendanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
                     </p>
                     <div className='flex items-center space-x-4 mt-2'>
                       <div className='flex items-center space-x-1 text-xs text-gray-500'>
-                        <Calendar className='w-4 h-4'/>
+                        <Calendar className='w-4 h-4' />
                         <span>{meeting.date}</span>
                       </div>
                       <div className='flex items-center space-x-1 text-xs text-gray-500'>
-                        <Clock className='w-4 h-4'/>
+                        <Clock className='w-4 h-4' />
                         <span>
                           {meeting.startTime} - {meeting.endTime}
                         </span>

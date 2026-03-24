@@ -2,7 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../profile/LoginPage';
 import { User } from '@/types';
 import ViewMeetingModal from './ViewMeetingModal';
-import { AlertCircle, Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import {
+  AlertCircle,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+} from 'lucide-react';
 
 interface Meeting {
   meetingId: string;
@@ -237,7 +243,7 @@ const Dashboard: React.FC = () => {
       <div className='flex-1 p-6 bg-gray-50'>
         <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
           <div className='flex items-center'>
-            <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
+            <AlertCircle className='w-5 h-5 text-red-400 mr-2' />
             <p className='text-red-800'>Error: {error}</p>
           </div>
           <button
@@ -281,7 +287,7 @@ const Dashboard: React.FC = () => {
                 }
                 className='p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors'
               >
-              <ChevronLeft className="w-5 h-5"/>
+                <ChevronLeft className='w-5 h-5' />
               </button>
               <button
                 onClick={() =>
@@ -294,7 +300,7 @@ const Dashboard: React.FC = () => {
                 }
                 className='p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors'
               >
-              <ChevronRight className='w-5 h-5'/>
+                <ChevronRight className='w-5 h-5' />
               </button>
             </div>
           </div>
@@ -385,7 +391,7 @@ const Dashboard: React.FC = () => {
             {displayMeetings.length === 0 ? (
               <div className='text-center py-12'>
                 <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-                <Calendar className='w-8 h-8 text-gray-400'/>
+                  <Calendar className='w-8 h-8 text-gray-400' />
                 </div>
                 <p className='text-gray-500 text-lg font-medium'>
                   {selectedDate
@@ -414,11 +420,11 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className='flex items-center space-x-4 text-sm text-gray-500 mb-3'>
                     <div className='flex items-center space-x-1'>
-                      <Calendar className='w-4 h-4'/>
+                      <Calendar className='w-4 h-4' />
                       <span>{formatMeetingDate(meeting.date)}</span>
                     </div>
                     <div className='flex items-center space-x-1'>
-                      <Clock className='w-4 h-4'/>                        
+                      <Clock className='w-4 h-4' />
                       <span>
                         {meeting.startTime} - {meeting.endTime}
                       </span>

@@ -216,7 +216,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             <div className='border border-gray-300 rounded-xl overflow-hidden'>
               {/* Search bar */}
               <div className='flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 bg-gray-50'>
-                <Search className='w-4 h-4 text-gray-400 flex-shrink-0'/>
+                <Search className='w-4 h-4 text-gray-400 flex-shrink-0' />
                 <input
                   type='text'
                   value={search}
@@ -230,7 +230,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                     onClick={() => setSearch('')}
                     className='text-gray-400 hover:text-gray-600 transition-colors duration-150'
                   >
-                    <X className='w-3.5 h-3.5'/>
+                    <X className='w-3.5 h-3.5' />
                   </button>
                 )}
               </div>
@@ -281,7 +281,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                           }`}
                         >
                           {isSelected && (
-                          <Check className='w-3 h-3 text-white'/>
+                            <Check className='w-3 h-3 text-white' />
                           )}
                         </div>
                       </div>

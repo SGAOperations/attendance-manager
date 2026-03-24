@@ -178,19 +178,19 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                   <td className='py-3 px-4 text-center'>
                     {isEboard && (
                       <div className='flex items-center gap-2'>
-                      <button
-                        onClick={() => handleEditMeeting(meeting)}
-                        className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteMeeting(meeting)}
-                        className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
-                      >
-                        Delete
-                      </button>
-                        </div>
+                        <button
+                          onClick={() => handleEditMeeting(meeting)}
+                          className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMeeting(meeting)}
+                          className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
+                        >
+                          Delete
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -204,7 +204,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
       {visibleMeetings.length === 0 && (
         <div className='text-center py-12'>
           <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-            <Calendar className='w-8 h-8 text-gray-400'/>
+            <Calendar className='w-8 h-8 text-gray-400' />
           </div>
           <p className='text-gray-500 text-lg font-medium'>
             No {activeTab === 'past' ? 'past' : 'upcoming'} meetings

@@ -86,7 +86,7 @@ const AttendanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
                         </div>
                         {isPresent && (
                           <div className='flex-shrink-0'>
-                            <CircleCheck className='w-6 h-6 text-green-600'/>
+                            <CircleCheck className='w-6 h-6 text-green-600' />
                           </div>
                         )}
                       </div>
