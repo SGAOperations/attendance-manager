@@ -4,7 +4,7 @@ import { AttendanceController } from '../../../attendance/attendance.controller'
 /**
  * Posts an Attendance
  * @description Creates a new Attendance Record with params
- * @pathParams PostAttendanceParams
+ * @body PostAttendanceParams
  * @response AttendanceResponse
  * @openapi
  */

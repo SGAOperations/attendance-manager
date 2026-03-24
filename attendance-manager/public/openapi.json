@@ -20,6 +20,86 @@
       }
     },
     "schemas": {
+      "CreateAttendanceRequestParams": {
+        "type": "object",
+        "properties": {
+          "attendanceId": {
+            "type": "string",
+            "description": "Attendance Id"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for the request"
+          },
+          "attendanceMode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendanceMode"
+              }
+            ],
+            "description": "Attendance Mode, online or in-person"
+          },
+          "TimeAdjustment": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TimeAdjustment"
+              }
+            ],
+            "description": "Time Adjustment, arriving late or leaving early"
+          }
+        },
+        "required": [
+          "attendanceId",
+          "reason",
+          "attendanceMode",
+          "TimeAdjustment"
+        ]
+      },
+      "CreateAttendanceRequestResponse": {
+        "type": "object",
+        "properties": {
+          "attendanceId": {
+            "type": "string",
+            "description": "Attendance Id"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "Request Id"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for the request"
+          },
+          "attendanceMode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendanceMode"
+              }
+            ],
+            "description": "Attendance Mode, online or in-person"
+          },
+          "TimeAdjustment": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TimeAdjustment"
+              }
+            ],
+            "description": "Time Adjustment, arriving late or leaving early"
+          },
+          "isLate": {
+            "type": "boolean",
+            "description": "Is Late"
+          }
+        },
+        "required": [
+          "attendanceId",
+          "requestId",
+          "reason",
+          "attendanceMode",
+          "TimeAdjustment",
+          "isLate"
+        ]
+      },
       "AttendanceParams": {
         "type": "object",
         "properties": {
@@ -48,14 +128,12 @@
             "description": "Meeting Id"
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "PRESENT",
-              "UNEXCUSED_ABSENCE",
-              "EXCUSED_ABSENCE",
-              "PENDING"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendanceStatus"
+              }
             ],
-            "description": "Status"
+            "description": "Status of the attendance"
           }
         },
         "required": [
@@ -64,6 +142,25 @@
           "meetingId",
           "status"
         ]
+      },
+      "GetAttendanceMeetingParams": {
+        "type": "object",
+        "properties": {
+          "meetingId": {
+            "type": "string",
+            "description": "Meeting Id"
+          }
+        },
+        "required": [
+          "meetingId"
+        ]
+      },
+      "GetMeetingAttendanceResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AttendanceSchema"
+        },
+        "description": "Array of attendance records for a specific meeting"
       },
       "PostAttendanceParams": {
         "type": "object",
@@ -77,20 +174,370 @@
             "description": "Meeting Id"
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "PRESENT",
-              "UNEXCUSED_ABSENCE",
-              "EXCUSED_ABSENCE",
-              "PENDING"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendanceStatus"
+              }
             ],
-            "description": "Status"
+            "description": "Status of the attendance"
           }
         },
         "required": [
           "userId",
           "meetingId",
           "status"
+        ]
+      },
+      "UpdateAttendanceRequestParams": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "description": "Request Id"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendanceStatus"
+              }
+            ],
+            "description": "Status of the attendance"
+          }
+        },
+        "required": [
+          "requestId",
+          "status"
+        ]
+      },
+      "GetUserAttendanceParams": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "User Id"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "GetRemainingAbscencesResponse": {
+        "type": "object",
+        "properties": {
+          "regular": {
+            "type": "object",
+            "properties": {
+              "used": {
+                "type": "number",
+                "description": "Number of regular absences used"
+              },
+              "allowed": {
+                "type": "number",
+                "description": "Number of regular absences allowed"
+              },
+              "remaining": {
+                "type": "number",
+                "description": "Number of regular absences remaining"
+              }
+            },
+            "required": [
+              "used",
+              "allowed",
+              "remaining"
+            ]
+          },
+          "fullBody": {
+            "type": "object",
+            "properties": {
+              "used": {
+                "type": "number",
+                "description": "Number of full body absences used"
+              },
+              "allowed": {
+                "type": "number",
+                "description": "Number of full body absences allowed"
+              },
+              "remaining": {
+                "type": "number",
+                "description": "Number of full body absences remaining"
+              }
+            },
+            "required": [
+              "used",
+              "allowed",
+              "remaining"
+            ]
+          }
+        },
+        "required": [
+          "regular",
+          "fullBody"
+        ]
+      },
+      "GetUserMeetingParams": {},
+      "GetUserAttendanceResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AttendanceSchema"
+        },
+        "description": "Array of attendance records for a specific user"
+      },
+      "GetUserRequestsResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "attendanceId": {
+              "type": "string",
+              "description": "Attendance ID"
+            },
+            "requestId": {
+              "type": "string",
+              "description": "Request ID"
+            },
+            "reason": {
+              "type": "string",
+              "description": "Reason for request"
+            },
+            "attendanceMode": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/AttendanceMode"
+                }
+              ],
+              "description": "Attendance mode: online or in-person"
+            },
+            "isLate": {
+              "type": "boolean",
+              "description": "Whether the user was late"
+            },
+            "timeAdjustment": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/TimeAdjustment"
+                }
+              ],
+              "description": "Time adjustment, if any"
+            },
+            "attendance": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/AttendanceSchema"
+                }
+              ],
+              "description": "Attendance"
+            }
+          },
+          "required": [
+            "attendanceId",
+            "requestId",
+            "reason",
+            "attendanceMode",
+            "isLate",
+            "timeAdjustment",
+            "attendance"
+          ]
+        },
+        "description": "Array of requests for a specified user"
+      },
+      "AttendanceStatus": {
+        "type": "string",
+        "enum": [
+          "PRESENT",
+          "UNEXCUSED_ABSENCE",
+          "EXCUSED_ABSENCE",
+          "PENDING"
+        ]
+      },
+      "AttendanceMode": {
+        "type": "string",
+        "enum": [
+          "ONLINE",
+          "IN_PERSON"
+        ]
+      },
+      "TimeAdjustment": {
+        "type": "string",
+        "enum": [
+          "ARRIVING_LATE",
+          "LEAVING_EARLY"
+        ]
+      },
+      "MeetingTypeEnum": {
+        "type": "string",
+        "enum": [
+          "REGULAR",
+          "FULL_BODY"
+        ]
+      },
+      "RoleSchema": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "description": "Role ID"
+          },
+          "roleType": {
+            "type": "string",
+            "description": "Role Type"
+          }
+        },
+        "required": [
+          "roleId",
+          "roleType"
+        ]
+      },
+      "UserSchema": {
+        "type": "string"
+      },
+      "RequestSchema": {
+        "type": "string"
+      },
+      "AttendanceSchema": {
+        "type": "object",
+        "properties": {
+          "attendanceId": {
+            "type": "string",
+            "description": "Attendance ID"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "meetingId": {
+            "type": "string",
+            "description": "Meeting ID"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendanceStatus"
+              }
+            ],
+            "description": "Attendance status"
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserSchema"
+              }
+            ],
+            "description": "User information"
+          },
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestSchema"
+              }
+            ],
+            "description": "Optional attendance request"
+          }
+        },
+        "required": [
+          "attendanceId",
+          "userId",
+          "meetingId",
+          "status",
+          "user",
+          "request"
+        ]
+      },
+      "MeetingSchema": {
+        "type": "object",
+        "properties": {
+          "meetingId": {
+            "type": "string",
+            "description": "Meeting ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Meeting Name"
+          },
+          "date": {
+            "type": "string",
+            "description": "Meeting Date"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "Meeting Start Time"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "Meeting End Time"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MeetingTypeEnum"
+              }
+            ],
+            "description": "Meeting Type"
+          },
+          "attendance": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttendanceSchema"
+            },
+            "description": "Attendances"
+          }
+        },
+        "required": [
+          "meetingId",
+          "name",
+          "date",
+          "startTime",
+          "endTime",
+          "type",
+          "attendance"
+        ]
+      },
+      "AttendanceType": {
+        "type": "object",
+        "properties": {
+          "attendanceId": {
+            "type": "string",
+            "description": "Attendance ID"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "meetingId": {
+            "type": "string",
+            "description": "Meeting ID"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendanceStatus"
+              }
+            ],
+            "description": "Attendance status"
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserSchema"
+              }
+            ],
+            "description": "User information"
+          },
+          "request": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestSchema"
+              }
+            ],
+            "description": "Optional attendance request"
+          }
+        },
+        "required": [
+          "attendanceId",
+          "userId",
+          "meetingId",
+          "status",
+          "user",
+          "request"
         ]
       }
     },
@@ -245,47 +692,16 @@
         "tags": [
           "Attendance"
         ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "userId",
-            "schema": {
-              "type": "string",
-              "description": "User Id"
-            },
-            "required": true,
-            "description": "User Id",
-            "example": "123"
-          },
-          {
-            "in": "path",
-            "name": "meetingId",
-            "schema": {
-              "type": "string",
-              "description": "Meeting Id"
-            },
-            "required": true,
-            "description": "Meeting Id",
-            "example": "123"
-          },
-          {
-            "in": "path",
-            "name": "status",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "PRESENT",
-                "UNEXCUSED_ABSENCE",
-                "EXCUSED_ABSENCE",
-                "PENDING"
-              ],
-              "description": "Status"
-            },
-            "required": true,
-            "description": "Status",
-            "example": "example"
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostAttendanceParams"
+              }
+            }
           }
-        ],
+        },
         "responses": {
           "201": {
             "description": "Successful response",
@@ -314,19 +730,16 @@
         "tags": [
           "Attendance"
         ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "attendanceId",
-            "schema": {
-              "type": "string",
-              "description": "Attendance Id"
-            },
-            "required": true,
-            "description": "Attendance Id",
-            "example": "123"
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendanceParams"
+              }
+            }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "Successful response",
@@ -353,19 +766,7 @@
         "tags": [
           "Attendance"
         ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "attendanceId",
-            "schema": {
-              "type": "string",
-              "description": "Attendance Id"
-            },
-            "required": true,
-            "description": "Attendance Id",
-            "example": "123"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "204": {
             "description": "No Content"
@@ -382,13 +783,32 @@
     "/attendance/status": {
       "put": {
         "operationId": "put-attendance-status",
-        "summary": "",
-        "description": "",
+        "summary": "Updates an Attendance Status based on request",
+        "description": "Updates an Attendance Record's Status by attendanceId",
         "tags": [
           "Attendance"
         ],
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAttendanceRequestParams"
+              }
+            }
+          }
+        },
         "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceResponse"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -401,13 +821,32 @@
     "/attendance/{attendanceId}/requests": {
       "post": {
         "operationId": "post-attendance-{attendanceId}-requests",
-        "summary": "POST create new request for a specific attendance",
-        "description": "",
+        "summary": "Create a new Request",
+        "description": "Creates a new Request for specific attendanceId",
         "tags": [
           "Attendance"
         ],
         "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAttendanceRequestParams"
+              }
+            }
+          }
+        },
         "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAttendanceRequestResponse"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -420,13 +859,23 @@
     "/attendance/meeting/{meetingId}": {
       "get": {
         "operationId": "get-attendance-meeting-{meetingId}",
-        "summary": "",
-        "description": "",
+        "summary": "Get Meeting Attendance",
+        "description": "Gets all attendances associated with a meeting",
         "tags": [
           "Attendance"
         ],
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMeetingAttendanceResponse"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -439,13 +888,23 @@
     "/attendance/user/{userId}": {
       "get": {
         "operationId": "get-attendance-user-{userId}",
-        "summary": "",
-        "description": "",
+        "summary": "Get User Attendance",
+        "description": "Gets all attendances associated with a user",
         "tags": [
           "Attendance"
         ],
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserAttendanceResponse"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -458,13 +917,23 @@
     "/attendance/user/{userId}/remaining-absences": {
       "get": {
         "operationId": "get-attendance-user-{userId}-remaining-absences",
-        "summary": "",
-        "description": "",
+        "summary": "Get Remaining Abscences",
+        "description": "Gets remaining abscences for a user",
         "tags": [
           "Attendance"
         ],
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRemainingAbscencesResponse"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -477,13 +946,23 @@
     "/attendance/user/requests/{userId}": {
       "get": {
         "operationId": "get-attendance-user-requests-{userId}",
-        "summary": "",
-        "description": "",
+        "summary": "Get User Requests",
+        "description": "Gets requests associated with a user",
         "tags": [
           "Attendance"
         ],
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserRequestsResponse"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/400"
           },

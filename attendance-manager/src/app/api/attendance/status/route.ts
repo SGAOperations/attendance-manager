@@ -4,7 +4,7 @@ import { AttendanceController } from '../../../../attendance/attendance.controll
 /**
  * Updates an Attendance Status based on request
  * @description Updates an Attendance Record's Status by attendanceId
- * @pathParams AttendanceRequestParams
+ * @body UpdateAttendanceRequestParams
  * @response AttendanceResponse
  * @openapi
  */

@@ -4,7 +4,7 @@ import { AttendanceController } from '../../../../attendance/attendance.controll
 /**
  * Updates an Attendance
  * @description Updates an Attendance Record by attendanceId
- * @pathParams AttendanceParams
+ * @body AttendanceParams
  * @response AttendanceResponse
  * @openapi
  */
@@ -31,7 +31,7 @@ export async function PATCH(
 /**
  * Deletes an Attendance
  * @description Deletes an Attendance Record by attendanceId
- * @pathParams AttendanceParams
+ * @body AttendanceParams
  * @openapi
  */
 export async function DELETE(
