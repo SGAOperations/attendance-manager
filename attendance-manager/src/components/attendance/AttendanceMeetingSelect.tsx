@@ -1,5 +1,7 @@
 import { Calendar, Clock } from 'lucide-react';
 
+import React from 'react';
+
 interface AttendanceMeetingSelectProps {
   meetingsWithAttendance: {
     meetingId: string;
@@ -10,6 +12,7 @@ interface AttendanceMeetingSelectProps {
     endTime: string;
   }[];
   attendanceRecord: Record<string, { status: string }[]>;
+
   handleMeetingSelection: (meeting: any) => void;
   closeAttendanceCheck: () => void;
   editAttendance?: boolean;
@@ -20,7 +23,7 @@ const AttendanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
   attendanceRecord,
   handleMeetingSelection,
   closeAttendanceCheck,
-  editAttendance = false
+  editAttendance = false,
 }) => {
   return (
     <>
@@ -38,7 +41,7 @@ const AttendanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
           </p>
         ) : (
           <div className='divide-y divide-gray-200'>
-            {meetingsWithAttendance.map(meeting => (
+            {meetingsWithAttendance.map((meeting) => (
               <button
                 key={meeting.meetingId}
                 onClick={() => handleMeetingSelection(meeting)}
@@ -68,7 +71,7 @@ const AttendanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
                   <div className='text-right ml-4'>
                     <div className='text-sm font-medium text-gray-900'>
                       {attendanceRecord[meeting.meetingId]?.filter(
-                        record => record.status === 'PRESENT'
+                        (record) => record.status === 'PRESENT',
                       ).length ?? 0}{' '}
                       / {attendanceRecord[meeting.meetingId]?.length ?? 0}{' '}
                       present
@@ -76,10 +79,10 @@ const AttendanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
                     <div className='text-xs text-[#C8102E] font-medium'>
                       {Math.floor(
                         ((attendanceRecord[meeting.meetingId]?.filter(
-                          record => record.status === 'PRESENT'
+                          (record) => record.status === 'PRESENT',
                         ).length ?? 0) /
                           (attendanceRecord[meeting.meetingId]?.length ?? 1)) *
-                          10000
+                          10000,
                       ) / 100}
                       %
                     </div>

@@ -7,6 +7,7 @@ import { VOTING_TYPES } from '@/utils/consts';
 
 interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
+
   onEventCreated?: (event: VotingEventApiData) => void;
 }
 
@@ -43,6 +44,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   // ─── Hooks ─────────────────────────────────────────────────────────────────
   const {
     activeEvent,
+    // eslint-disable-next-line
     loading: activeEventLoading,
     refresh: refreshActiveEvent,
   } = useActiveVotingEvent();

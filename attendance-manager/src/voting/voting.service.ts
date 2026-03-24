@@ -188,7 +188,7 @@ export const VotingService = {
     return withNames.map(e => formatVotingEventForApi(e)!);
   },
 
-  async getVotingEventById(votingEventId: string) {
+  getVotingEventById: async (votingEventId: string) => {
     const event = await prisma.votingEvent.findUnique({
       where: { votingEventId },
       include: {
@@ -248,7 +248,7 @@ export const VotingService = {
       options: string[];
       updatedBy: string;
       deletedAt: Date | null;
-    }>
+    }>,
   ) {
     return await prisma.votingEvent.update({
       where: { votingEventId },
@@ -265,7 +265,7 @@ export const VotingService = {
 
   async deleteVotingEvent(votingEventId: string) {
     return prisma.votingEvent.delete({
-      where: { votingEventId }
+      where: { votingEventId },
     });
   },
 };

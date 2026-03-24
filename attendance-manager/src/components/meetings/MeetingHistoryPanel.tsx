@@ -1,13 +1,16 @@
 import { MeetingApiData, MeetingType } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar } from 'lucide-react';
+import React from 'react';
 
 interface MeetingHistoryPanelProps {
   setActiveTab: (option: 'past' | 'upcoming') => void;
   activeTab: 'past' | 'upcoming';
   typeFilter: MeetingType | null;
+
   setTypeFilter: (type: MeetingType | null) => void;
   meetings: MeetingApiData[];
+
   handleEditMeeting: (meeting: MeetingApiData) => void;
   handleDeleteMeeting: (meeting: MeetingApiData) => void;
   visibleMeetings: MeetingApiData[];
@@ -20,7 +23,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
   setTypeFilter,
   handleEditMeeting,
   handleDeleteMeeting,
-  visibleMeetings
+  visibleMeetings,
 }) => {
   //helper function that formats meeting type from all caps to normal
   const formatMeetingType = (type: string): string => {
@@ -81,7 +84,8 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
               <th className='text-left py-3 px-4 font-medium text-gray-900'>
                 <details className='inline-block'>
                   <summary className='list-none cursor-pointer hover:underline select-none'>
-                    Type&#9662;{typeFilter ? ` (${formatMeetingType(typeFilter)})` : ''}
+                    Type&#9662;
+                    {typeFilter ? ` (${formatMeetingType(typeFilter)})` : ''}
                   </summary>
                   <div className='absolute z-10 mt-2 w-40 rounded-md border bg-white shadow'>
                     <button
@@ -96,7 +100,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                       All
                     </button>
                     <div className='border-t my-1' />
-                    {['FULL_BODY', 'REGULAR'].map(t => {
+                    {['FULL_BODY', 'REGULAR'].map((t) => {
                       const label =
                         t === 'FULL_BODY'
                           ? 'Full Body'
@@ -109,7 +113,9 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                           }`}
                           onClick={() => {
                             setTypeFilter(t as MeetingType);
-                            (document.activeElement as HTMLElement | null)?.blur();
+                            (
+                              document.activeElement as HTMLElement | null
+                            )?.blur();
                           }}
                         >
                           {label}
@@ -137,7 +143,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                 </td>
               </tr>
             ) : (
-              visibleMeetings.map(meeting => (
+              visibleMeetings.map((meeting) => (
                 <tr
                   key={meeting.meetingId}
                   className='border-b border-gray-100 hover:bg-gray-50'
@@ -152,7 +158,9 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                     <div className='text-sm font-medium text-gray-900'>
                       {meeting.name}
                     </div>
-                    <div className='text-xs text-gray-500'>{formatMeetingType(meeting.type)}</div>
+                    <div className='text-xs text-gray-500'>
+                      {formatMeetingType(meeting.type)}
+                    </div>
                   </td>
                   <td className='py-3 px-4'>
                     <div className='text-sm text-gray-600'>{meeting.notes}</div>

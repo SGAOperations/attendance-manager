@@ -8,7 +8,7 @@ const defaultUser: User = {
   id: '',
   email: '',
   name: '',
-  role: 'MEMBER'
+  role: 'MEMBER',
 };
 
 export const UserContext = createContext(defaultUser);
@@ -25,17 +25,17 @@ interface SignupCredentials {
 const LoginPage: React.FC = () => {
   // const router = useRouter();
   const { login, isLoading } = useAuth();
-  // const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line
   const [user, _setUser] = useState<User>({
     id: '',
     email: '',
     name: '',
-    role: 'MEMBER'
+    role: 'MEMBER',
   });
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
-    password: ''
+    password: '',
   });
   const [signupCredentials, setSignupCredentials] = useState<SignupCredentials>(
     {
@@ -44,8 +44,8 @@ const LoginPage: React.FC = () => {
       email: '',
       nuid: '',
       password: '',
-      confirmPassword: ''
-    }
+      confirmPassword: '',
+    },
   );
   const [error, setError] = useState<string>('');
 
@@ -61,7 +61,6 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        console.log('Logging in...');
         await login(credentials);
         // console.log('Logged in :)');
       } catch (error) {
@@ -90,6 +89,7 @@ const LoginPage: React.FC = () => {
       }
 
       try {
+        // eslint-disable-next-line
         const { confirmPassword: _confirmPassword, ...safeCredentials } = signupCredentials;
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
@@ -97,27 +97,24 @@ const LoginPage: React.FC = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            ...safeCredentials
+            ...safeCredentials,
             // roleId will default to MEMBER in signup route
           }),
         });
 
-        console.log('here', response);
         if (!response.ok) {
           const errorData = await response.json();
           setError(errorData.message || 'Signup failed. Please try again.');
           return;
         }
-
+        // eslint-disable-next-line
         const result = await response.json();
-        console.log('User created:', result);
         alert(
-          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`
+          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`,
         );
         setIsLoginMode(true);
         resetForms();
-      } catch (error) {
-        console.error('Login error:', error);
+      } catch {
         setError('Invalid email or password');
       }
     }
@@ -126,14 +123,14 @@ const LoginPage: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (isLoginMode) {
-      setCredentials(prev => ({
+      setCredentials((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     } else {
-      setSignupCredentials(prev => ({
+      setSignupCredentials((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -147,7 +144,7 @@ const LoginPage: React.FC = () => {
       email: '',
       nuid: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     });
   };
 
@@ -390,9 +387,6 @@ const LoginPage: React.FC = () => {
                   type='submit'
                   disabled={isLoading}
                   className='group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-[#C8102E] hover:bg-[#A8102E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C8102E] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl'
-                  onClick={() => {
-                    console.log('clicked');
-                  }}
                 >
                   {isLoading ? (
                     <div className='flex items-center'>

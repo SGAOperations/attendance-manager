@@ -1,5 +1,6 @@
 import { MeetingApiData, UserApiData, AttendanceApiData } from '@/types';
 import { CircleCheck } from 'lucide-react';
+import React from 'react';
 
 interface AttendanceMeetingUserListProps {
   selectedMeetingForCheck: MeetingApiData;
@@ -7,7 +8,7 @@ interface AttendanceMeetingUserListProps {
   attendanceUsers: UserApiData[];
   attendanceRecord: Record<string, AttendanceApiData[]>;
   setAttendanceCheckStep: (
-    step: 'select-meeting' | 'user-list' | 'check-in'
+    step: 'select-meeting' | 'user-list' | 'check-in',
   ) => void;
   handleStartCheckIn: () => void;
 }
@@ -18,7 +19,7 @@ const AttendanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
   attendanceUsers,
   attendanceRecord,
   setAttendanceCheckStep,
-  handleStartCheckIn
+  handleStartCheckIn,
 }) => {
   return (
     <>
@@ -55,13 +56,13 @@ const AttendanceMeetingUserList: React.FC<AttendanceMeetingUserListProps> = ({
               <div className='divide-y divide-gray-200'>
                 {[...attendanceUsers]
                   .sort((a, b) => a.lastName.localeCompare(b.firstName))
-                  .map(user => {
+                  .map((user) => {
                     const isPresent = attendanceRecord[
                       selectedMeetingForCheck.meetingId
                     ]?.some(
-                      record =>
+                      (record) =>
                         record.userId === user.userId &&
-                        record.status === 'PRESENT'
+                        record.status === 'PRESENT',
                     );
                     return (
                       <div

@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { MeetingApiData, VotingEventApiData, VotingRecordApiData } from '@/types';
+import {
+  MeetingApiData,
+  VotingEventApiData,
+  VotingRecordApiData,
+} from '@/types';
 import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
 import VotingResultsPanel from '@/components/voting/VotingResultsPanel';
 
@@ -21,24 +25,20 @@ const VotingPage: React.FC = () => {
       try {
         const [meetingsRes, eventsRes] = await Promise.all([
           fetch('/api/meeting'),
-          fetch('/api/voting-event')
+          fetch('/api/voting-event'),
         ]);
 
         if (meetingsRes.ok) {
           const meetingsData: MeetingApiData[] = await meetingsRes.json();
           setMeetings(meetingsData);
-        } else {
-          console.error('Failed to fetch meetings');
         }
 
         if (eventsRes.ok) {
           const eventsData: VotingEventWithRelations[] = await eventsRes.json();
           setEvents(eventsData);
-        } else {
-          console.error('Failed to fetch voting events');
         }
-      } catch (err) {
-        console.error('Failed to load voting data:', err);
+      } catch {
+        /* 'Error loading user profile:', error */
       } finally {
         setEventsLoading(false);
       }

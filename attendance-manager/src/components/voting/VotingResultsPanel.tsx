@@ -30,10 +30,10 @@ const formatResultLabel = (result: string) => {
 
 const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
   events,
-  loading
+  loading,
 }) => {
   const endedEvents = events
-    .filter(e => e.deletedAt)
+    .filter((e) => e.deletedAt)
     .sort((a, b) => {
       const aDate = a.deletedAt ?? a.createdAt;
       const bDate = b.deletedAt ?? b.createdAt;
@@ -52,9 +52,7 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
       {loading ? (
         <p className='text-sm text-gray-500'>Loading vote results…</p>
       ) : endedEvents.length === 0 ? (
-        <p className='text-sm text-gray-500'>
-          No completed voting events yet.
-        </p>
+        <p className='text-sm text-gray-500'>No completed voting events yet.</p>
       ) : (
         <div className='overflow-x-auto'>
           <table className='w-full text-sm'>
@@ -75,9 +73,9 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
               </tr>
             </thead>
             <tbody>
-              {endedEvents.map(event => {
+              {endedEvents.map((event) => {
                 const records =
-                  (event.votingRecords || []).filter(r => !r.deletedAt) || [];
+                  (event.votingRecords || []).filter((r) => !r.deletedAt) || [];
                 const counts =
                   event.voteType === 'SECRET_BALLOT' && event.resultCounts
                     ? event.resultCounts
@@ -86,11 +84,11 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                           acc[record.result] = (acc[record.result] || 0) + 1;
                           return acc;
                         },
-                        {}
+                        {},
                       );
                 const totalVotes = Object.values(counts).reduce(
                   (sum, n) => sum + n,
-                  0
+                  0,
                 );
 
                 return (
@@ -191,4 +189,3 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
 };
 
 export default VotingResultsPanel;
-

@@ -3,13 +3,17 @@ import { MeetingType } from '../generated/prisma';
 
 function groupBy<T, K extends string | number | symbol>(
   items: T[],
-  keyGetter: (item: T) => K
+
+  keyGetter: (item: T) => K,
 ): Record<K, T[]> {
-  return items.reduce((result, item) => {
-    const key = keyGetter(item);
-    (result[key] ||= []).push(item);
-    return result;
-  }, {} as Record<K, T[]>);
+  return items.reduce(
+    (result, item) => {
+      const key = keyGetter(item);
+      (result[key] ||= []).push(item);
+      return result;
+    },
+    {} as Record<K, T[]>,
+  );
 }
 
 export const MeetingService = {
@@ -17,15 +21,15 @@ export const MeetingService = {
     return await prisma.meeting.findMany({
       // dont get soft deleted meetings
       where: {
-        deletedAt: null
+        deletedAt: null,
       },
-      include: { 
+      include: {
         attendance: {
           include: {
-            user: true
-          }
-        } 
-      }
+            user: true,
+          },
+        },
+      },
     });
   },
 
@@ -49,9 +53,9 @@ export const MeetingService = {
       },
       where: {
         attendance: {
-          some: { meetingId }
-        }
-      }
+          some: { meetingId },
+        },
+      },
     });
     return attendance;
   },
@@ -65,10 +69,10 @@ export const MeetingService = {
       notes: string;
       type: MeetingType;
     },
-    attendeeIds: string[]
+    attendeeIds: string[],
   ) {
     // Create meeting - only pass meeting fields to Prisma
-    const meeting = await prisma.meeting.create({ 
+    const meeting = await prisma.meeting.create({
       data: {
         name: meetingData.name,
         startTime: meetingData.startTime,
@@ -76,20 +80,20 @@ export const MeetingService = {
         endTime: meetingData.endTime,
         notes: meetingData.notes,
         type: meetingData.type,
-      }
+      },
     });
-  
+
     // Create attendance records for all selected attendees
     if (attendeeIds.length > 0) {
       await prisma.attendance.createMany({
-        data: attendeeIds.map(userId => ({
+        data: attendeeIds.map((userId) => ({
           userId,
           meetingId: meeting.meetingId,
           status: 'UNEXCUSED_ABSENCE' as const,
         })),
       });
     }
-  
+
     return meeting;
   },
 
@@ -104,7 +108,7 @@ export const MeetingService = {
       date: string;
       type: MeetingType;
       updatedAt: string;
-    }>
+    }>,
   ) {
     updates.updatedAt = new Date().toISOString();
     return prisma.meeting.update({
@@ -114,12 +118,12 @@ export const MeetingService = {
   },
 
   async deleteMeeting(meetingId: string) {
-    await prisma.votingEvent.deleteMany({ where: { meetingId }});
+    await prisma.votingEvent.deleteMany({ where: { meetingId } });
     // Delete attendance records first to avoid foreign key constraint
     await prisma.attendance.deleteMany({
       where: { meetingId },
     });
-    
+
     return prisma.meeting.delete({
       where: { meetingId },
     });
@@ -130,5 +134,5 @@ export const MeetingService = {
       where: { meetingId },
       data: { deletedAt: new Date().toISOString() },
     });
-  }
+  },
 };

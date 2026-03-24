@@ -1,10 +1,13 @@
 import { CircleCheck, Clock, X } from 'lucide-react';
 
+import React from 'react';
+
 interface MeetingStatisticsPanelProps {
   attendedMeetings: number;
   missedMeetings: number;
   upcomingMeetings: number;
   isAdmin: boolean;
+
   setShowCreateMeetingModal: (show: boolean) => void;
 }
 

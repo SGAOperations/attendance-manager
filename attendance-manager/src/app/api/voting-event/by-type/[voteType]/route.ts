@@ -17,7 +17,7 @@ import { VotingController } from '@/voting/voting.controller';
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ voteType: string }> }
+  { params }: { params: Promise<{ voteType: string }> },
 ) {
   const { voteType } = await params;
   return VotingController.getVotingEventsByVoteType({ voteType });

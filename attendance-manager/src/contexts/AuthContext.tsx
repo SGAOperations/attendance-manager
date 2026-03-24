@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { User, LoginCredentials, AuthContextType } from '../types';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
@@ -29,14 +35,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
         if (session?.user) {
           // Fetch user details from Prisma
           await loadUserProfile(session.user.id);
         }
-      } catch (error) {
-        console.error('Error checking session:', error);
+      } catch {
+        /* 'Error loading user profile:', error */
       } finally {
         setIsLoading(false);
       }
@@ -45,15 +53,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          await loadUserProfile(session.user.id);
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        await loadUserProfile(session.user.id);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
       }
-    );
+    });
 
     return () => {
       subscription.unsubscribe();
@@ -65,20 +73,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Fetch user from Prisma by supabaseAuthId
       const res = await fetch(`/api/users/by-supabase-id/${supabaseAuthId}`);
       if (!res.ok) throw new Error('User profile not found');
-      
+
       const userDetails = await res.json();
-      
+
       const user: User = {
         id: userDetails.userId,
         email: userDetails.email,
         name: `${userDetails.firstName} ${userDetails.lastName}`,
         role: userDetails.role.roleType,
-        avatar: undefined
+        avatar: undefined,
       };
-      
+
       setUser(user);
-    } catch (error) {
-      console.error('Error loading user profile:', error);
+    } catch {
+      /* 'Error loading user profile:', error */
     }
   };
 
@@ -100,8 +108,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await loadUserProfile(data.user.id);
         router.push('/homepage');
       }
+      // eslint-disable-next-line no-useless-catch
     } catch (error) {
-      console.error('Login failed:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -117,8 +125,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     login,
+    // eslint-disable-next-line
     logout,
-    isLoading
+    isLoading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -8,7 +8,8 @@ export async function GET() {
     const requests = await RequestService.getAllRequests();
     return NextResponse.json(requests, { status: 200 });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch requests';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to fetch requests';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
@@ -16,14 +17,15 @@ export async function GET() {
 // POST create new request
 export async function POST(req: Request) {
   try {
-    const { attendanceId, reason, attendanceMode, timeAdjustment } = await req.json();
+    const { attendanceId, reason, attendanceMode, timeAdjustment } =
+      await req.json();
 
     if (!attendanceId || !reason || !attendanceMode) {
       return NextResponse.json(
-        { 
-        error: 'attendanceId, reason, and attendanceMode are required' 
-      },
-        { status: 400 }
+        {
+          error: 'attendanceId, reason, and attendanceMode are required',
+        },
+        { status: 400 },
       );
     }
 

@@ -1,14 +1,16 @@
 import { RequestApiData } from '@/types';
 import { Calendar, Clock, FileText } from 'lucide-react';
+import React from 'react';
 
 interface ViewRequestsModalProps {
   myRequests: RequestApiData[];
+
   setShowMyRequestsModal: (show: boolean) => void;
 }
 
 const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
   myRequests,
-  setShowMyRequestsModal
+  setShowMyRequestsModal,
 }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -31,7 +33,7 @@ const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
           </div>
         ) : (
           <div className='space-y-4'>
-            {myRequests.map(request => (
+            {myRequests.map((request) => (
               <div
                 key={request.requestId}
                 className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
@@ -48,7 +50,7 @@ const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
                           <Calendar className='w-4 h-4'/>
                           <span>
                             {new Date(
-                              request.attendance.meeting.date
+                              request.attendance.meeting.date,
                             ).toLocaleDateString()}
                           </span>
                         </div>
