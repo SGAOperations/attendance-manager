@@ -8,6 +8,7 @@ interface MeetingHistoryPanelProps {
   setTypeFilter: (type: MeetingType | null) => void;
   meetings: MeetingApiData[];
   handleEditMeeting: (meeting: MeetingApiData) => void;
+  handleDeleteMeeting: (meeting: MeetingApiData) => void;
   visibleMeetings: MeetingApiData[];
 }
 
@@ -17,6 +18,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
   typeFilter,
   setTypeFilter,
   handleEditMeeting,
+  handleDeleteMeeting,
   visibleMeetings
 }) => {
   //helper function that formats meeting type from all caps to normal
@@ -166,12 +168,20 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                   </td>
                   <td className='py-3 px-4 text-center'>
                     {isEboard && (
+                      <div className='flex items-center gap-2'>
                       <button
                         onClick={() => handleEditMeeting(meeting)}
                         className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
                       >
                         Edit
                       </button>
+                      <button
+                        onClick={() => handleDeleteMeeting(meeting)}
+                        className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
+                      >
+                        Delete
+                      </button>
+                        </div>
                     )}
                   </td>
                 </tr>

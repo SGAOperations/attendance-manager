@@ -25,12 +25,20 @@ interface EditMeetingModalProps {
   }) => void;
   setShowEditMeetingModal: (show: boolean) => void;
   setEditingMeeting: (editing: MeetingApiData | null) => void;
-  handleDeleteMeeting: () => void;
 }
 
 const formatDate = (dateStr: string) => {
-  const [month, day, year] = dateStr.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  if (dateStr.includes('/')) {
+    const [month, day, year] = dateStr.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  if (dateStr.includes('-')) {
+    const [year, month, day] = dateStr.split('-');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  throw new Error(`Unsupported date format: ${dateStr}`);
 };
 
 const formatTime = (timeStr: string) => {
@@ -46,7 +54,6 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   setSelectedUserIds,
   editMeeting,
   handleUpdateMeeting,
-  handleDeleteMeeting,
   setEditMeeting,
   setShowEditMeetingModal,
   setEditingMeeting
@@ -303,32 +310,6 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             </button>
           </div>
         </form>
-      </div>
-      {/* Delete Confirmation Modal */}
-      <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-        <div className='bg-white rounded-2xl p-6 w-full max-w-md mx-4'>
-          <h3 className='text-xl font-semibold text-gray-900 mb-4'>
-            Confirm Deletion
-          </h3>
-          <p className='text-gray-700 mb-6'>
-            Are you sure you want to delete this meeting? This action cannot be
-            undone.
-          </p>
-          <div className='flex space-x-4'>
-            <button
-              onClick={() => setShowEditMeetingModal(false)}
-              className='flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium'
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteMeeting}
-              className='flex-1 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium'
-            >
-              Delete Meeting
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

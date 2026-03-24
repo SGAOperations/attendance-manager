@@ -16,12 +16,14 @@ import MeetingHistoryPanel from './MeetingHistoryPanel';
 import CreateMeetingModal from './CreateMeetingModal';
 import EditMeetingModal from './EditMeetingModal';
 import CreateRequestModal from './CreateRequestModal';
+import DeleteMeetingModal from './DeleteMeetingModal';
 
 const MeetingsPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'past' | 'upcoming'>('past');
   const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
   const [showEditMeetingModal, setShowEditMeetingModal] = useState(false);
+  const [showDeleteMeetingModal, setShowDeleteMeetingModal] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<MeetingApiData | null>(
     null
   );
@@ -42,6 +44,9 @@ const MeetingsPage: React.FC = () => {
     notes: '',
     type: 'REGULAR' as 'FULL_BODY' | 'REGULAR'
   });
+  const [deleteMeeting, setDeleteMeeting] = useState<MeetingApiData | null>(
+    null
+  );
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
   const [showCreateRequestModal, setShowCreateRequestModal] = useState(false);
   const [showMyRequestsModal, setShowMyRequestsModal] = useState(false);
@@ -100,6 +105,11 @@ const MeetingsPage: React.FC = () => {
       type: meeting.type as 'FULL_BODY' | 'REGULAR'
     });
     setShowEditMeetingModal(true);
+  };
+
+  const handleSetDeleteMeeting = (meeting: MeetingApiData) => {
+    setDeleteMeeting(meeting);
+    setShowDeleteMeetingModal(true);
   };
 
   const handleUpdateMeeting = async (e: React.FormEvent) => {
@@ -436,14 +446,10 @@ const MeetingsPage: React.FC = () => {
   };
 
   const handleDeleteMeeting = async () => {
-    if (!editingMeeting) return;
-
-    if (!confirm('Are you sure you want to delete this meeting?')) {
-      return;
-    }
-
+    if (!deleteMeeting) return;
+    
     try {
-      const response = await fetch(`/api/meeting/${editingMeeting.meetingId}`, {
+      const response = await fetch(`/api/meeting/${deleteMeeting.meetingId}`, {
         method: 'DELETE'
       });
 
@@ -460,16 +466,9 @@ const MeetingsPage: React.FC = () => {
       fetchMeetings();
 
       // Close modal and reset
-      setShowEditMeetingModal(false);
-      setEditingMeeting(null);
-      setEditMeeting({
-        name: '',
-        date: '',
-        startTime: '',
-        endTime: '',
-        notes: '',
-        type: 'REGULAR'
-      });
+      setShowDeleteMeetingModal(false);
+      setDeleteMeeting(null);
+
     } catch (error) {
       console.error('Error deleting meeting:', error);
       alert('Failed to delete meeting. Please try again.');
@@ -538,6 +537,7 @@ const MeetingsPage: React.FC = () => {
             setTypeFilter={setTypeFilter}
             meetings={meetings}
             handleEditMeeting={handleEditMeeting}
+            handleDeleteMeeting={handleSetDeleteMeeting}
             visibleMeetings={visibleMeetings}
           />
         </div>
@@ -565,10 +565,18 @@ const MeetingsPage: React.FC = () => {
           setSelectedUserIds={setSelectedUserIds}  
           editMeeting={editMeeting}
           handleUpdateMeeting={handleUpdateMeeting}
-          handleDeleteMeeting={handleDeleteMeeting}
           setEditMeeting={setEditMeeting}
           setShowEditMeetingModal={setShowEditMeetingModal}
           setEditingMeeting={setEditingMeeting}
+        />
+      )}
+
+      {/* Delete Meeting Modal */}
+      {showDeleteMeetingModal && deleteMeeting && (
+        <DeleteMeetingModal
+          handleDeleteMeeting={handleDeleteMeeting}
+          setShowDeleteMeetingModal={setShowDeleteMeetingModal}
+          deleteMeeting={deleteMeeting}
         />
       )}
 
