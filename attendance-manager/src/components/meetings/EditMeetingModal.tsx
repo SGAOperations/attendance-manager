@@ -25,6 +25,7 @@ interface EditMeetingModalProps {
   }) => void;
   setShowEditMeetingModal: (show: boolean) => void;
   setEditingMeeting: (editing: MeetingApiData | null) => void;
+  handleDeleteMeeting: () => void;
 }
 
 const formatDate = (dateStr: string) => {
