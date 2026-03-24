@@ -129,3 +129,12 @@ Start by going into a specific directory, such as `src/components`, just so you 
 ```bash
 npx prettier "**/*.{js,jsx,ts,tsx,json,css,md}" --write
 ```
+
+### Swagger Docs
+You can view all of our REST endpoints by simply going to [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+
+To generate new Swagger Docs, run
+
+```bash
+npx next-openapi-gen generate  
+```
