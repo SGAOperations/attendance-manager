@@ -41,6 +41,8 @@ model Meeting {
   type       MeetingType
   attendance Attendance[]
   votingEvents VotingEvent[]
+  deletedAt      DateTime?
+  updatedAt      DateTime?
 }
 
 model Attendance {
