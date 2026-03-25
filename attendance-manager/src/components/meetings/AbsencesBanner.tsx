@@ -1,4 +1,5 @@
 import { RemainingAbsences } from '@/types';
+import { Info } from 'lucide-react';
 
 interface AbsencesBannerProps {
   bannerColor:
@@ -17,19 +18,7 @@ const AbsencesBanner: React.FC<AbsencesBannerProps> = ({
     <div className={`mb-6 rounded-lg border-2 p-4 ${bannerColor}`}>
       <div className='flex items-start'>
         <div className='flex-shrink-0'>
-          <svg
-            className='w-6 h-6 text-gray-600'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
-          >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-            />
-          </svg>
+          <Info className='w-6 h-6 text-gray-600'/>
         </div>
         <div className='ml-3 flex-1'>
           <h3 className='text-sm font-semibold text-gray-900 mb-2'>

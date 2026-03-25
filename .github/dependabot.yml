@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/attendance-manager/attendance-manager"
+    schedule:
+      interval: "weekly"

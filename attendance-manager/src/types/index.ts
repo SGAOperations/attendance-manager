@@ -133,6 +133,8 @@ export interface VotingEventApiData {
   meetingId: string;
   name: string;
   voteType: string;
+  notes?: string | null;
+  options: string[];
   createdAt: string;
   updatedAt?: string | null;
   deletedAt?: string | null;
