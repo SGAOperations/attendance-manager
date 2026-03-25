@@ -41,12 +41,26 @@ export const VotingController = {
         { status: 400 }
       );
     }
+    if (body.notes !== undefined && body.notes !== null && typeof body.notes !== 'string') {
+      return NextResponse.json(
+        { error: 'notes must be a string when provided' },
+        { status: 400 }
+      );
+    }
+    if (body.options !== undefined && (!Array.isArray(body.options) || body.options.some((option: unknown) => typeof option !== 'string'))) {
+      return NextResponse.json(
+        { error: 'options must be an array of strings when provided' },
+        { status: 400 }
+      );
+    }
 
     try {
       const newVotingEvent = await VotingService.createVotingEvent({
         meetingId: body.meetingId,
         name: body.name,
         voteType: body.voteType,
+        notes: body.notes,
+        options: body.options,
         updatedBy: body.updatedBy,
       });
       return NextResponse.json(newVotingEvent, { status: 201 });
@@ -62,7 +76,7 @@ export const VotingController = {
     const updates = await request.json();
 
     // Validate that at least one field is being updated
-    const allowedFields = ['meetingId', 'name', 'voteType', 'updatedBy', 'deletedAt'];
+    const allowedFields = ['meetingId', 'name', 'voteType', 'notes', 'options', 'updatedBy', 'deletedAt'];
     const updateKeys = Object.keys(updates);
     const hasValidUpdate = updateKeys.some(key => allowedFields.includes(key));
 
@@ -89,6 +103,18 @@ export const VotingController = {
     if (updates.voteType && typeof updates.voteType !== 'string') {
       return NextResponse.json(
         { error: 'voteType must be a string' },
+        { status: 400 }
+      );
+    }
+    if (updates.notes !== undefined && updates.notes !== null && typeof updates.notes !== 'string') {
+      return NextResponse.json(
+        { error: 'notes must be a string or null' },
+        { status: 400 }
+      );
+    }
+    if (updates.options !== undefined && (!Array.isArray(updates.options) || updates.options.some((option: unknown) => typeof option !== 'string'))) {
+      return NextResponse.json(
+        { error: 'options must be an array of strings' },
         { status: 400 }
       );
     }
