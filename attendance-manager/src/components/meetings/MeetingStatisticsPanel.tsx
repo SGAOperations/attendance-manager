@@ -1,4 +1,4 @@
-import { CircleCheck, Clock, X } from "lucide-react";
+import { CircleCheck, Clock, X } from 'lucide-react';
 
 interface MeetingStatisticsPanelProps {
   attendedMeetings: number;
