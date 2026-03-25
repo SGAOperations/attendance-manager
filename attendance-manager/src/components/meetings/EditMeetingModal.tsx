@@ -1,4 +1,5 @@
 import { MeetingApiData } from '@/types';
+import { Check, Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface EditMeetingModalProps {
@@ -201,9 +202,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             <div className='border border-gray-300 rounded-xl overflow-hidden'>
               {/* Search bar */}
               <div className='flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 bg-gray-50'>
-                <svg className='w-4 h-4 text-gray-400 flex-shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z' />
-                </svg>
+                <Search className='w-4 h-4 text-gray-400 flex-shrink-0'/>
                 <input
                   type='text'
                   value={search}
@@ -217,9 +216,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                     onClick={() => setSearch('')}
                     className='text-gray-400 hover:text-gray-600 transition-colors duration-150'
                   >
-                    <svg className='w-3.5 h-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M6 18L18 6M6 6l12 12' />
-                    </svg>
+                    <X className='w-3.5 h-3.5'/>
                   </button>
                 )}
               </div>
@@ -255,14 +252,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                           isSelected ? 'bg-[#C8102E] border-[#C8102E] scale-110' : 'border-gray-300 scale-100'
                         }`}>
                           {isSelected && (
-                            <svg
-                              className='w-3 h-3 text-white'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                            >
-                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={3} d='M5 13l4 4L19 7' />
-                            </svg>
+                          <Check className='w-3 h-3 text-white'/>
                           )}
                         </div>
                       </div>
