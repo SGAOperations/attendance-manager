@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import Dashboard from '@/components/dashboard/Dashboard';
@@ -18,6 +18,57 @@ const Layout: React.FC = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'EBOARD';
   const { activeEvent } = useActiveVotingEvent();
+  const [canVoteInActiveEvent, setCanVoteInActiveEvent] = useState(false);
+
+  useEffect(() => {
+    if (!user || !activeEvent) {
+      setCanVoteInActiveEvent(false);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const checkMeetingSignInStatus = async () => {
+      setCanVoteInActiveEvent(false);
+
+      try {
+        // check if user is signed in to the meeting associated with the active voting event
+        const res = await fetch(
+          `/api/attendance/meeting/${activeEvent.meetingId}`
+        );
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch meeting attendance');
+        }
+
+        const attendanceRecords: Array<{
+          userId: string;
+          status: string;
+        }> = await res.json();
+
+        const isPresent = attendanceRecords.some(
+          record => record.userId === user.id && record.status === 'PRESENT'
+        );
+
+        if (!isCancelled) {
+          setCanVoteInActiveEvent(isPresent);
+        }
+
+      } catch (error) {
+        console.error('Failed to verify vote eligibility:', error);
+        if (!isCancelled) {
+          setCanVoteInActiveEvent(false);
+        }
+      }
+    };
+
+    checkMeetingSignInStatus();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeEvent, user]);
+
   const handleProfileClick = () => {
     setActiveTab('profile');
   };
@@ -137,12 +188,17 @@ const Layout: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col'>
-      <Header onProfileClick={handleProfileClick} onLogoClick={handleLogoClick}/>
+      <Header
+        onProfileClick={handleProfileClick}
+        onLogoClick={handleLogoClick}
+      />
       <div className='flex flex-1'>
         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <main className='flex-1 relative'>
           {renderContent()}
-          {activeEvent && <ActiveVotingModal event={activeEvent} />}
+          {activeEvent && canVoteInActiveEvent && (
+            <ActiveVotingModal event={activeEvent} />
+          )}
         </main>
       </div>
     </div>
