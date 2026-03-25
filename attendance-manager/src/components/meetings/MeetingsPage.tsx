@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   MeetingApiData,
-  UserApiData,
+  UserSchema,
   RequestApiData,
   RemainingAbsences,
   MeetingType,
   RequestForm
 } from '../../types';
+import { z } from 'zod';
 import { useAuth } from '../../contexts/AuthContext';
 import ViewRequestsPanel from './ViewRequestsPanel';
 import ViewRequestsModal from './ViewRequestsModal';
@@ -200,7 +201,7 @@ const MeetingsPage: React.FC = () => {
     }
   }, [user]);
 
-  const [members, setMembers] = useState<UserApiData[]>([]);
+  const [members, setMembers] = useState<z.infer<typeof UserSchema>[]>([]);
   const [bulkSelectionActive, setBulkSelectionActive] = useState({
     nonEboard: false,
     allMembers: false
