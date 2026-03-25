@@ -29,8 +29,17 @@ interface EditMeetingModalProps {
 }
 
 const formatDate = (dateStr: string) => {
-  const [month, day, year] = dateStr.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  if (dateStr.includes('/')) {
+    const [month, day, year] = dateStr.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  if (dateStr.includes('-')) {
+    const [year, month, day] = dateStr.split('-');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  throw new Error(`Unsupported date format: ${dateStr}`);
 };
 
 const formatTime = (timeStr: string) => {
