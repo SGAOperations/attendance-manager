@@ -34,6 +34,8 @@ export const VotingService = {
     meetingId: string;
     name: string;
     voteType: string;
+    notes?: string;
+    options?: string[];
     updatedBy?: string;
   }) {
     return await prisma.votingEvent.create({
@@ -41,6 +43,8 @@ export const VotingService = {
         meetingId: data.meetingId,
         name: data.name,
         voteType: data.voteType,
+        notes: data.notes,
+        options: data.options,
         updatedBy: data.updatedBy,
       },
       include: {
@@ -56,6 +60,8 @@ export const VotingService = {
       meetingId: string;
       name: string;
       voteType: string;
+      notes: string | null;
+      options: string[];
       updatedBy: string;
       deletedAt: Date | null;
     }>
