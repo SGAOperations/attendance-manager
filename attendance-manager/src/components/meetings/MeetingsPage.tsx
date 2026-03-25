@@ -18,6 +18,32 @@ import EditMeetingModal from './EditMeetingModal';
 import CreateRequestModal from './CreateRequestModal';
 import DeleteMeetingModal from './DeleteMeetingModal';
 
+const normalizeDate = (dateStr: string) => {
+  if (!dateStr) {
+    const today = new Date();
+    return `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+  }
+
+  // Already in MM/DD/YYYY format 
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
+    return dateStr;
+  }
+
+  // Convert YYYY-MM-DD to MM/DD/YYYY.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [year, month, day] = dateStr.split('-');
+    return `${Number(month)}/${Number(day)}/${year}`;
+  }
+
+  const parsed = new Date(dateStr);
+  if (!Number.isNaN(parsed.getTime())) {
+    return `${parsed.getMonth() + 1}/${parsed.getDate()}/${parsed.getFullYear()}`;
+  }
+
+  const today = new Date();
+  return `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+};
+
 const MeetingsPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'past' | 'upcoming'>('past');
@@ -98,7 +124,7 @@ const MeetingsPage: React.FC = () => {
     setEditingMeeting(meeting);
     setEditMeeting({
       name: meeting.name,
-      date: meeting.date,
+      date: normalizeDate(meeting.date),
       startTime: meeting.startTime,
       endTime: meeting.endTime,
       notes: meeting.notes,
