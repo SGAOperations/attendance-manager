@@ -1,4 +1,5 @@
-import { AttendanceApiData, MeetingApiData, UserApiData } from '@/types';
+import { AttendanceApiData, MeetingApiData, UserSchema } from '@/types';
+import {z} from 'zod';
 
 // API service functions with endpoints
 export const meetingAPI = {
@@ -39,7 +40,7 @@ export const meetingAPI = {
     }
   },
 
-  async getUsers(): Promise<UserApiData[]> {
+  async getUsers(): Promise<z.infer<typeof UserSchema>[] > {
     try {
       const response = await fetch('/api/users/only-name');
 
