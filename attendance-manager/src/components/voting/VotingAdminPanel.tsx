@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { MeetingApiData, VotingEventApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveVotingEvent } from '@/hooks/useActiveVotingEvent';
+import { X } from 'lucide-react';
 
 interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
@@ -10,8 +11,9 @@ interface VotingAdminPanelProps {
 
 const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   meetings,
-  onEventCreated
+  onEventCreated,
 }) => {
+  // ─── States ────────────────────────────────────────────────────────────────
   const { user } = useAuth();
   const [meetingId, setMeetingId] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -19,21 +21,45 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentEvent, setCurrentEvent] = useState<VotingEventApiData | null>(
-    null
+    null,
   );
+  const [options, setOptions] = useState<string[]>(['Option 1']);
+
+  // ─── Functions ─────────────────────────────────────────────────────────────
+  const addOption = () => {
+    // Add default value 'Option', let them rename it later
+    setOptions((prev) => {
+      const count = prev.filter((o) => o.startsWith('Option')).length;
+      const newOption = count === 0 ? 'Option' : `Option ${count + 1}`;
+      return [...prev, newOption];
+    });
+  };
+
+  const removeOption = (option: string) => {
+    setOptions((prev) => prev.filter((o) => o !== option));
+  };
+
+  // ─── Hooks ─────────────────────────────────────────────────────────────────
   const {
     activeEvent,
     loading: activeEventLoading,
-    refresh: refreshActiveEvent
+    refresh: refreshActiveEvent,
   } = useActiveVotingEvent();
 
   const effectiveCurrentEvent = currentEvent ?? activeEvent ?? null;
-  const hasActiveEvent = !!(effectiveCurrentEvent && !effectiveCurrentEvent.deletedAt);
+  const hasActiveEvent = !!(
+    effectiveCurrentEvent && !effectiveCurrentEvent.deletedAt
+  );
 
   const meetingsForDropdown = useMemo(() => {
     const today = new Date();
-    const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-    const upcoming = meetings.filter(m => {
+    const todayStr =
+      today.getFullYear() +
+      '-' +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(today.getDate()).padStart(2, '0');
+    const upcoming = meetings.filter((m) => {
       const raw = (m.date && String(m.date).trim()) || '';
       const meetingDateStr = raw.slice(0, 10);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(meetingDateStr)) return true;
@@ -50,7 +76,9 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (hasActiveEvent) {
-      setError('There is already an active voting event. Please end it before starting a new one.');
+      setError(
+        'There is already an active voting event. Please end it before starting a new one.',
+      );
       return;
     }
     if (!meetingId || !name.trim()) {
@@ -65,14 +93,15 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
       const res = await fetch('/api/voting-event', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           meetingId,
           name,
           voteType,
-          updatedBy: user.id
-        })
+          updatedBy: user.id,
+          options,
+        }),
       });
 
       if (!res.ok) {
@@ -86,6 +115,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
         onEventCreated(event);
       }
       setName('');
+      setOptions([]);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
@@ -101,16 +131,19 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
     setError(null);
 
     try {
-      const res = await fetch(`/api/voting-event/${effectiveCurrentEvent.votingEventId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
+      const res = await fetch(
+        `/api/voting-event/${effectiveCurrentEvent.votingEventId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            deletedAt: new Date().toISOString(),
+            updatedBy: user?.id,
+          }),
         },
-        body: JSON.stringify({
-          deletedAt: new Date().toISOString(),
-          updatedBy: user?.id
-        })
-      });
+      );
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -130,7 +163,9 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
 
   return (
     <div className='mt-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
-      <h2 className='text-lg font-semibold text-gray-900 mb-4'>Voting Controls</h2>
+      <h2 className='text-lg font-semibold text-gray-900 mb-4'>
+        Voting Controls
+      </h2>
 
       <form onSubmit={handleCreate} className='space-y-4'>
         <div>
@@ -139,11 +174,11 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           </label>
           <select
             value={meetingId}
-            onChange={e => setMeetingId(e.target.value)}
+            onChange={(e) => setMeetingId(e.target.value)}
             className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]'
           >
             <option value=''>Select a meeting</option>
-            {meetingsForDropdown.map(m => (
+            {meetingsForDropdown.map((m) => (
               <option key={m.meetingId} value={m.meetingId}>
                 {m.date} — {m.name}
               </option>
@@ -158,10 +193,47 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           <input
             type='text'
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]'
             placeholder='Enter the vote question or title'
           />
+        </div>
+        <div>
+          <label className='block text-sm font-medium text-gray-700 mb-1'>
+            Options
+          </label>
+          <div className='space-y-2'>
+            {options.map((option, index) => (
+              <div key={index} className='relative'>
+                <input
+                  type='text'
+                  value={option}
+                  onChange={(e) => {
+                    const newOptions = [...options];
+                    newOptions[index] = e.target.value;
+                    setOptions(newOptions);
+                  }}
+                  className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] pr-8' // add padding for the x
+                />
+                <X
+                  onClick={() => removeOption(option)}
+                  className='absolute right-2 top-1/2 -translate-y-1/2 text-red-500 text-sm hover:bg-red-50 rounded px-1'
+                />
+              </div>
+            ))}
+          </div>
+          <div className='flex justify-end mt-2'>
+            <button
+              type='button'
+              onClick={(e) => {
+                e.stopPropagation();
+                addOption();
+              }}
+              className='text-sm font-medium hover:underline'
+            >
+              + Add Option
+            </button>
+          </div>
         </div>
 
         <div>
@@ -170,7 +242,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           </label>
           <select
             value={voteType}
-            onChange={e => setVoteType(e.target.value)}
+            onChange={(e) => setVoteType(e.target.value)}
             className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]'
           >
             <option value='YES_NO'>Yes / No / Abstain</option>
@@ -221,4 +293,3 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
 };
 
 export default VotingAdminPanel;
-
