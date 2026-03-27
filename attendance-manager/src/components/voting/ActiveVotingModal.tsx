@@ -85,13 +85,16 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
         <p className='text-sm text-gray-600 mb-4'>
           {event.name || 'A new voting event is in progress.'}
         </p>
+        <p className='text-sm text-gray-600 mb-4'>
+          {event.voteType || 'A new voting event is in progress.'}
+        </p>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
           <fieldset className='space-y-2'>
             <legend className='text-sm font-medium text-gray-900'>
               Please select your vote:
             </legend>
-            {event.voteType === 'YES_NO' ? (
+            {event.voteType === 'ROLL_CALL' ? (
               Object.values(YES_NO_OPTIONS).map((option) => (
                 <label
                   key={option}
