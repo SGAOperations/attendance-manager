@@ -1,23 +1,63 @@
 import { prisma } from '../lib/prisma';
 
+async function attachVoterNamesToVotingEvent<T extends { voteType: string; votingRecords?: any[] }>(
+  event: T | null
+): Promise<T | null> {
+  if (!event) return event;
+  if (event.voteType !== 'ROLL_CALL') return event;
+  if (!event.votingRecords || event.votingRecords.length === 0) return event;
+
+  const userIds = Array.from(
+    new Set(
+      event.votingRecords
+        .map((r: any) => r?.userId)
+        .filter((id: unknown): id is string => typeof id === 'string' && id.length > 0)
+    )
+  );
+
+  if (userIds.length === 0) return event;
+
+  const users = await prisma.user.findMany({
+    where: { userId: { in: userIds } },
+    select: { userId: true, firstName: true, lastName: true },
+  });
+
+  const userById = new Map(users.map(u => [u.userId, u]));
+
+  return {
+    ...event,
+    votingRecords: event.votingRecords.map((record: any) => {
+      const user = typeof record?.userId === 'string' ? userById.get(record.userId) : undefined;
+      return {
+        ...record,
+        user: user
+          ? { firstName: user.firstName, lastName: user.lastName }
+          : null,
+      };
+    }),
+  };
+}
+
 export const VotingService = {
   async getAllVotingEvents() {
-    return await prisma.votingEvent.findMany({
+    const events = await prisma.votingEvent.findMany({
       include: {
         meeting: true,
         votingRecords: true,
       },
     });
+    return await Promise.all(events.map(e => attachVoterNamesToVotingEvent(e)));
   },
 
   async getVotingEventById(votingEventId: string) {
-    return await prisma.votingEvent.findUnique({
+    const event = await prisma.votingEvent.findUnique({
       where: { votingEventId },
       include: {
         meeting: true,
         votingRecords: true,
       },
     });
+    return await attachVoterNamesToVotingEvent(event);
   },
 
   async getVotingEventsByVoteType(voteType: string) {
