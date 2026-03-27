@@ -730,6 +730,30 @@ describe('ROLL_CALL results include voter names', () => {
     expect(record2.user.lastName).toBe('CallTwo');
   });
 
+  // same enrichment as GET [id], but via getAllVotingEvents() (list path)
+  it('getAllVotingEvents returns votingRecords with user first/last names for ROLL_CALL', async () => {
+    const events = await VotingService.getAllVotingEvents();
+    const data = events.find((e) => e != null && e.votingEventId === votingEventId);
+    expect(data).toBeDefined();
+    expect(data!.voteType).toBe('ROLL_CALL');
+    expect(Array.isArray(data!.votingRecords)).toBe(true);
+
+    const record1 = data!.votingRecords.find((r: any) => r.userId === user1Id) as any;
+    const record2 = data!.votingRecords.find((r: any) => r.userId === user2Id) as any;
+
+    expect(record1).toBeDefined();
+    expect(record1.result).toBe('YES');
+    expect(record1.user).toBeDefined();
+    expect(record1.user.firstName).toBe('Roll');
+    expect(record1.user.lastName).toBe('CallOne');
+
+    expect(record2).toBeDefined();
+    expect(record2.result).toBe('NO');
+    expect(record2.user).toBeDefined();
+    expect(record2.user.firstName).toBe('Roll');
+    expect(record2.user.lastName).toBe('CallTwo');
+  });
+
   // non-ROLL_CALL events should not receive user name data
   it('does not inject user names for non-ROLL_CALL events', async () => {
     const nonRollCallEvent = await prisma.votingEvent.create({
