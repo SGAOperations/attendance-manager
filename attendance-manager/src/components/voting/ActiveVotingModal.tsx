@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { VotingEventApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { YES_NO_OPTIONS } from '@/utils/consts';
 
 interface ActiveVotingModalProps {
   event: VotingEventApiData;
@@ -90,9 +91,12 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
             <legend className='text-sm font-medium text-gray-900'>
               Please select your vote:
             </legend>
-            <div className='space-y-1'>
-              {event.options.map((option) => (
-                <label className='flex items-center space-x-2 text-sm text-gray-800'>
+            {event.voteType === 'YES_NO' ? (
+              Object.values(YES_NO_OPTIONS).map((option) => (
+                <label
+                  key={option}
+                  className='flex items-center space-x-2 text-sm text-gray-800'
+                >
                   <input
                     type='radio'
                     name='vote'
@@ -103,8 +107,24 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
                   />
                   <span>{option}</span>
                 </label>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className='space-y-1'>
+                {event.options.map((option) => (
+                  <label className='flex items-center space-x-2 text-sm text-gray-800'>
+                    <input
+                      type='radio'
+                      name='vote'
+                      value={option}
+                      checked={choice === option}
+                      onChange={() => setChoice(option)}
+                      className='h-4 w-4 text-[#C8102E] border-gray-300 focus:ring-[#C8102E]'
+                    />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </fieldset>
 
           {error && (
