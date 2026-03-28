@@ -145,6 +145,10 @@ export interface VotingRecordApiData {
   votingEventId: string;
   userId: string;
   result: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+  } | null;
   createdAt: string;
   updatedAt?: string | null;
   deletedAt?: string | null;
