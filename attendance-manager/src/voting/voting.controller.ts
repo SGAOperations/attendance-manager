@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { VotingService } from './voting.service';
+import { VotingService, formatVotingEventForApi } from './voting.service';
 
 export const VotingController = {
   async getAllVotingEvents() {
@@ -63,7 +63,7 @@ export const VotingController = {
         options: body.options,
         updatedBy: body.updatedBy,
       });
-      return NextResponse.json(newVotingEvent, { status: 201 });
+      return NextResponse.json(formatVotingEventForApi(newVotingEvent), { status: 201 });
     } catch (error: any) {
       return NextResponse.json(
         { error: error.message || 'Failed to create voting event' },
@@ -130,7 +130,7 @@ export const VotingController = {
         params.votingEventId,
         updates
       );
-      return NextResponse.json(updatedVotingEvent);
+      return NextResponse.json(formatVotingEventForApi(updatedVotingEvent));
     } catch (error: any) {
       if (error.code === 'P2025') {
         return NextResponse.json(
