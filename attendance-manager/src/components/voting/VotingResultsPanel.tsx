@@ -76,13 +76,16 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
               {endedEvents.map(event => {
                 const records =
                   (event.votingRecords || []).filter(r => !r.deletedAt) || [];
-                const counts = records.reduce<Record<string, number>>(
-                  (acc, record) => {
-                    acc[record.result] = (acc[record.result] || 0) + 1;
-                    return acc;
-                  },
-                  {}
-                );
+                const counts =
+                  event.voteType === 'SECRET_BALLOT' && event.resultCounts
+                    ? event.resultCounts
+                    : records.reduce<Record<string, number>>(
+                        (acc, record) => {
+                          acc[record.result] = (acc[record.result] || 0) + 1;
+                          return acc;
+                        },
+                        {}
+                      );
                 const totalVotes = Object.values(counts).reduce(
                   (sum, n) => sum + n,
                   0
@@ -119,7 +122,7 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                           No votes recorded
                         </span>
                       ) : (
-                        <div className='flex flex-wrap gap-2'>
+                        <div className='flex flex-wrap gap-2 items-center'>
                           {Object.entries(counts).map(([key, value]) => (
                             <span
                               key={key}
@@ -131,6 +134,35 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                           <span className='inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs text-gray-500'>
                             Total: {totalVotes}
                           </span>
+                          {event.voteType === 'SECRET_BALLOT' &&
+                            event.secretBallotOutcomeKind === 'tie' && (
+                              <span className='inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800'>
+                                Tie
+                              </span>
+                            )}
+                          {event.voteType === 'SECRET_BALLOT' &&
+                            event.secretBallotOutcomeKind ===
+                              'motion_pass_fail' &&
+                            event.votePassed !== null &&
+                            event.votePassed !== undefined && (
+                              <span
+                                className={
+                                  event.votePassed
+                                    ? 'inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800'
+                                    : 'inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-800'
+                                }
+                              >
+                                {event.votePassed ? 'Passed' : 'Failed'}
+                              </span>
+                            )}
+                          {event.voteType === 'SECRET_BALLOT' &&
+                            event.secretBallotOutcomeKind === 'option_winner' &&
+                            event.winningResult != null &&
+                            event.winningResult !== '' && (
+                              <span className='inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800'>
+                                {formatResultLabel(event.winningResult)} won
+                              </span>
+                            )}
                         </div>
                       )}
                     </td>

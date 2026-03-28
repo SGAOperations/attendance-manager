@@ -138,6 +138,10 @@ export interface VotingEventApiData {
   createdAt: string;
   updatedAt?: string | null;
   deletedAt?: string | null;
+  resultCounts?: Record<string, number>;
+  votePassed?: boolean | null;
+  secretBallotOutcomeKind?: 'tie' | 'motion_pass_fail' | 'option_winner' | null;
+  winningResult?: string | null;
 }
 
 export interface VotingRecordApiData {
