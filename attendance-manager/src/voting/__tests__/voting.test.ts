@@ -1,9 +1,22 @@
-import { VotingService } from '../voting.service';
+import { VotingService, computeVotePassedFromCounts } from '../voting.service';
 import { VotingController } from '../voting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingService } from '@/meeting/meeting.service';
+import { VOTING_TYPES } from '@/utils/consts';
 
 jest.setTimeout(20000);
+
+describe('computeVotePassedFromCounts', () => {
+  it('Yes beats No using display labels; YES/NO uppercase supported', () => {
+    expect(
+      computeVotePassedFromCounts(
+        { Yes: 2, No: 1 },
+        ['Yes', 'No', 'Abstain', 'No Confidence']
+      )
+    ).toBe(true);
+    expect(computeVotePassedFromCounts({ YES: 1, NO: 2 }, [])).toBe(false);
+  });
+});
 
 describe('VotingService', () => {
   let testMeetingId: string;
@@ -833,6 +846,158 @@ describe('ROLL_CALL results include voter names', () => {
     await prisma.votingEvent.delete({
       where: { votingEventId: missingUserEvent.votingEventId },
     });
+  });
+});
+
+describe('Secret ballot results (aggregates only)', () => {
+  let testMeetingId: string;
+  let secretVotingEventId: string;
+  let testRoleId: string;
+  let user1Id: string;
+  let user2Id: string;
+  let user3Id: string;
+
+  beforeAll(async () => {
+    const role = await prisma.role.create({
+      data: { roleType: 'MEMBER' },
+    });
+    testRoleId = role.roleId;
+
+    const u1 = await prisma.user.create({
+      data: {
+        userId: 'test-secret-ballot-user-1',
+        supabaseAuthId: 'test-secret-supabase-1',
+        nuid: '009901001',
+        email: 'secret1@example.com',
+        firstName: 'Secret',
+        lastName: 'VoterOne',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user1Id = u1.userId;
+
+    const u2 = await prisma.user.create({
+      data: {
+        userId: 'test-secret-ballot-user-2',
+        supabaseAuthId: 'test-secret-supabase-2',
+        nuid: '009901002',
+        email: 'secret2@example.com',
+        firstName: 'Secret',
+        lastName: 'VoterTwo',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user2Id = u2.userId;
+
+    const u3 = await prisma.user.create({
+      data: {
+        userId: 'test-secret-ballot-user-3',
+        supabaseAuthId: 'test-secret-supabase-3',
+        nuid: '009901003',
+        email: 'secret3@example.com',
+        firstName: 'Secret',
+        lastName: 'VoterThree',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user3Id = u3.userId;
+
+    const meeting = await prisma.meeting.create({
+      data: {
+        name: 'Secret Ballot Meeting',
+        date: '2025-09-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        notes: 'Test',
+        type: 'REGULAR',
+      },
+    });
+    testMeetingId = meeting.meetingId;
+
+    const ve = await prisma.votingEvent.create({
+      data: {
+        meetingId: testMeetingId,
+        name: 'Budget approval (secret)',
+        voteType: VOTING_TYPES.SECRET_BALLOT.key,
+        notes: 'Motion notes for the secret ballot',
+        options: ['Yes', 'No', 'Abstain', 'No Confidence'],
+        deletedAt: new Date(),
+      },
+    });
+    secretVotingEventId = ve.votingEventId;
+
+    await prisma.votingRecord.createMany({
+      data: [
+        { votingEventId: secretVotingEventId, userId: user1Id, result: 'Yes' },
+        { votingEventId: secretVotingEventId, userId: user2Id, result: 'Yes' },
+        { votingEventId: secretVotingEventId, userId: user3Id, result: 'No' },
+      ],
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.votingRecord.deleteMany({
+      where: { votingEventId: secretVotingEventId },
+    });
+    await prisma.votingEvent.deleteMany({
+      where: { votingEventId: secretVotingEventId },
+    });
+    await prisma.meeting.deleteMany({ where: { meetingId: testMeetingId } });
+    await prisma.user.deleteMany({
+      where: { userId: { in: [user1Id, user2Id, user3Id] } },
+    });
+    await prisma.role.deleteMany({ where: { roleId: testRoleId } });
+  });
+
+  it('GET /api/voting-event/[id] returns resultCounts, votePassed, notes — no votingRecords', async () => {
+    const { GET } = await import('../../app/api/voting-event/[id]/route');
+    const req = new Request(
+      `http://localhost/api/voting-event/${secretVotingEventId}`
+    );
+    const params = Promise.resolve({ id: secretVotingEventId });
+    const response = await GET(req, { params });
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.voteType).toBe(VOTING_TYPES.SECRET_BALLOT.key);
+    expect(data.notes).toBe('Motion notes for the secret ballot');
+    expect(data.resultCounts).toEqual({ Yes: 2, No: 1 });
+    expect(data.votePassed).toBe(true);
+    expect(data).not.toHaveProperty('votingRecords');
+  });
+
+  it('getAllVotingEvents omits votingRecords for secret ballot with aggregates', async () => {
+    const events = await VotingService.getAllVotingEvents();
+    const row = events.find(
+      (e) => e != null && e.votingEventId === secretVotingEventId
+    );
+    expect(row).toBeDefined();
+    expect((row as any).resultCounts).toEqual({ Yes: 2, No: 1 });
+    expect((row as any).votePassed).toBe(true);
+    expect(row).not.toHaveProperty('votingRecords');
+  });
+
+  it('GET /api/voting-event/by-type returns aggregates only for SECRET_BALLOT', async () => {
+    const { GET } = await import(
+      '../../app/api/voting-event/by-type/[voteType]/route'
+    );
+    const req = new Request(
+      `http://localhost/api/voting-event/by-type/${VOTING_TYPES.SECRET_BALLOT.key}`
+    );
+    const params = Promise.resolve({
+      voteType: VOTING_TYPES.SECRET_BALLOT.key,
+    });
+    const response = await GET(req, { params });
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(Array.isArray(data)).toBe(true);
+    const row = data.find((e: any) => e.votingEventId === secretVotingEventId);
+    expect(row).toBeDefined();
+    expect(row.resultCounts).toEqual({ Yes: 2, No: 1 });
+    expect(row).not.toHaveProperty('votingRecords');
   });
 });
 

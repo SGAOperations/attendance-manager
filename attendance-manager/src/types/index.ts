@@ -138,6 +138,10 @@ export interface VotingEventApiData {
   createdAt: string;
   updatedAt?: string | null;
   deletedAt?: string | null;
+  /** Present for SECRET_BALLOT responses (aggregates only; no votingRecords). */
+  resultCounts?: Record<string, number>;
+  /** Present for SECRET_BALLOT when passage can be determined from counts + options. */
+  votePassed?: boolean | null;
 }
 
 export interface VotingRecordApiData {
