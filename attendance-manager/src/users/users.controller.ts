@@ -49,14 +49,6 @@ export const UsersController = {
     return NextResponse.json(user);
   },
 
-  async getRoleId(params: { role: RoleType }) {
-    const roleId = await UsersService.getRoleIdByRoleType(params.role);
-    if (!roleId) {
-      return NextResponse.json({ error: 'Role not found' }, { status: 404 });
-    }
-    return roleId;
-  },
-
   async checkUserExists(params: { userEmail: string }) {
     const user = await UsersService.getUserByEmail(params.userEmail);
     if (!user) {
