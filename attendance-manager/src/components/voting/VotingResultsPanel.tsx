@@ -135,10 +135,32 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                             Total: {totalVotes}
                           </span>
                           {event.voteType === 'SECRET_BALLOT' &&
+                            event.secretBallotOutcomeKind === 'tie' && (
+                              <span className='inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800'>
+                                Tie
+                              </span>
+                            )}
+                          {event.voteType === 'SECRET_BALLOT' &&
+                            event.secretBallotOutcomeKind ===
+                              'motion_pass_fail' &&
                             event.votePassed !== null &&
                             event.votePassed !== undefined && (
-                              <span className='inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800'>
+                              <span
+                                className={
+                                  event.votePassed
+                                    ? 'inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800'
+                                    : 'inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-800'
+                                }
+                              >
                                 {event.votePassed ? 'Passed' : 'Failed'}
+                              </span>
+                            )}
+                          {event.voteType === 'SECRET_BALLOT' &&
+                            event.secretBallotOutcomeKind === 'option_winner' &&
+                            event.winningResult != null &&
+                            event.winningResult !== '' && (
+                              <span className='inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800'>
+                                {formatResultLabel(event.winningResult)} won
                               </span>
                             )}
                         </div>

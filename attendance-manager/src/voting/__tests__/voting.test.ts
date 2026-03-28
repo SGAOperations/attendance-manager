@@ -1,4 +1,8 @@
-import { VotingService, computeVotePassedFromCounts } from '../voting.service';
+import {
+  VotingService,
+  computeVotePassedFromCounts,
+  deriveSecretBallotOutcome,
+} from '../voting.service';
 import { VotingController } from '../voting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingService } from '@/meeting/meeting.service';
@@ -15,6 +19,42 @@ describe('computeVotePassedFromCounts', () => {
       )
     ).toBe(true);
     expect(computeVotePassedFromCounts({ YES: 1, NO: 2 }, [])).toBe(false);
+  });
+});
+
+describe('deriveSecretBallotOutcome', () => {
+  it('uses Passed/Failed semantics for Yes/No motion tallies', () => {
+    const o = deriveSecretBallotOutcome({ Yes: 2, No: 1 }, [
+      'Yes',
+      'No',
+      'Abstain',
+    ]);
+    expect(o.outcomeKind).toBe('motion_pass_fail');
+    expect(o.votePassed).toBe(true);
+    expect(o.winningResult).toBeNull();
+  });
+
+  it('uses option winner when tallies use arbitrary option strings (not Yes/No)', () => {
+    const o = deriveSecretBallotOutcome({ 'Candidate 2': 1 }, [
+      'Candidate 1',
+      'Candidate 2',
+    ]);
+    expect(o.outcomeKind).toBe('option_winner');
+    expect(o.winningResult).toBe('Candidate 2');
+    expect(o.votePassed).toBe(false);
+  });
+
+  it('reports tie when top options are tied', () => {
+    const o = deriveSecretBallotOutcome({ Yes: 1, No: 1 }, []);
+    expect(o.outcomeKind).toBe('tie');
+    expect(o.winningResult).toBeNull();
+  });
+
+  it('returns null kind when there are no votes', () => {
+    const o = deriveSecretBallotOutcome({}, ['A', 'B']);
+    expect(o.outcomeKind).toBeNull();
+    expect(o.winningResult).toBeNull();
+    expect(o.votePassed).toBeNull();
   });
 });
 
@@ -743,7 +783,7 @@ describe('ROLL_CALL results include voter names', () => {
     expect(record2.user.lastName).toBe('CallTwo');
   });
 
-  // same enrichment as GET [id], but via getAllVotingEvents() (list path)
+  // same enrichment as GET [id], but via getAllVotingEvents() 
   it('getAllVotingEvents returns votingRecords with user first/last names for ROLL_CALL', async () => {
     const events = await VotingService.getAllVotingEvents();
     const data = events.find((e) => e != null && e.votingEventId === votingEventId);
@@ -966,6 +1006,8 @@ describe('Secret ballot results (aggregates only)', () => {
     expect(data.notes).toBe('Motion notes for the secret ballot');
     expect(data.resultCounts).toEqual({ Yes: 2, No: 1 });
     expect(data.votePassed).toBe(true);
+    expect(data.secretBallotOutcomeKind).toBe('motion_pass_fail');
+    expect(data.winningResult).toBeNull();
     expect(data).not.toHaveProperty('votingRecords');
   });
 
@@ -977,6 +1019,8 @@ describe('Secret ballot results (aggregates only)', () => {
     expect(row).toBeDefined();
     expect((row as any).resultCounts).toEqual({ Yes: 2, No: 1 });
     expect((row as any).votePassed).toBe(true);
+    expect((row as any).secretBallotOutcomeKind).toBe('motion_pass_fail');
+    expect((row as any).winningResult).toBeNull();
     expect(row).not.toHaveProperty('votingRecords');
   });
 
@@ -997,6 +1041,8 @@ describe('Secret ballot results (aggregates only)', () => {
     const row = data.find((e: any) => e.votingEventId === secretVotingEventId);
     expect(row).toBeDefined();
     expect(row.resultCounts).toEqual({ Yes: 2, No: 1 });
+    expect(row.secretBallotOutcomeKind).toBe('motion_pass_fail');
+    expect(row.winningResult).toBeNull();
     expect(row).not.toHaveProperty('votingRecords');
   });
 });
