@@ -614,6 +614,228 @@ describe('GET /api/voting-event/[id]', () => {
   });
 });
 
+describe('ROLL_CALL results include voter names', () => {
+  let testMeetingId: string;
+  let testRoleId: string;
+  let user1Id: string;
+  let user2Id: string;
+  let votingEventId: string;
+
+  beforeAll(async () => {
+    const role = await prisma.role.create({
+      data: { roleType: 'MEMBER' },
+    });
+    testRoleId = role.roleId;
+
+    const user1 = await prisma.user.create({
+      data: {
+        userId: 'test-roll-call-user-1',
+        supabaseAuthId: 'test-roll-call-supabase-auth-1',
+        nuid: '009900001',
+        email: 'rollcall1@example.com',
+        firstName: 'Roll',
+        lastName: 'CallOne',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user1Id = user1.userId;
+
+    const user2 = await prisma.user.create({
+      data: {
+        userId: 'test-roll-call-user-2',
+        supabaseAuthId: 'test-roll-call-supabase-auth-2',
+        nuid: '009900002',
+        email: 'rollcall2@example.com',
+        firstName: 'Roll',
+        lastName: 'CallTwo',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user2Id = user2.userId;
+
+    const meeting = await prisma.meeting.create({
+      data: {
+        name: 'Roll Call Results Meeting',
+        date: '2025-08-04',
+        startTime: '10:00',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: 'REGULAR',
+      },
+    });
+    testMeetingId = meeting.meetingId;
+
+    const votingEvent = await prisma.votingEvent.create({
+      data: {
+        meetingId: testMeetingId,
+        name: 'Roll Call Vote',
+        voteType: 'ROLL_CALL',
+        deletedAt: new Date(), 
+      },
+    });
+    votingEventId = votingEvent.votingEventId;
+
+    await prisma.votingRecord.createMany({
+      data: [
+        {
+          votingEventId,
+          userId: user1Id,
+          result: 'YES',
+        },
+        {
+          votingEventId,
+          userId: user2Id,
+          result: 'NO',
+        },
+      ],
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.votingRecord.deleteMany({ where: { votingEventId } });
+    await prisma.votingEvent.deleteMany({ where: { votingEventId } });
+    await prisma.meeting.deleteMany({ where: { meetingId: testMeetingId } });
+    await prisma.user.deleteMany({ where: { userId: { in: [user1Id, user2Id] } } });
+    await prisma.role.deleteMany({ where: { roleId: testRoleId } });
+  });
+
+  // concluded ROLL_CALL returns each voter's name and result
+  it('returns votingRecords with user first/last names', async () => {
+    const { GET } = await import('../../app/api/voting-event/[id]/route');
+    const req = new Request(`http://localhost/api/voting-event/${votingEventId}`);
+    const params = Promise.resolve({ id: votingEventId });
+
+    const response = await GET(req, { params });
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.voteType).toBe('ROLL_CALL');
+    expect(Array.isArray(data.votingRecords)).toBe(true);
+
+    const record1 = data.votingRecords.find((r: any) => r.userId === user1Id);
+    const record2 = data.votingRecords.find((r: any) => r.userId === user2Id);
+
+    expect(record1).toBeDefined();
+    expect(record1.result).toBe('YES');
+    expect(record1.user).toBeDefined();
+    expect(record1.user.firstName).toBe('Roll');
+    expect(record1.user.lastName).toBe('CallOne');
+
+    expect(record2).toBeDefined();
+    expect(record2.result).toBe('NO');
+    expect(record2.user).toBeDefined();
+    expect(record2.user.firstName).toBe('Roll');
+    expect(record2.user.lastName).toBe('CallTwo');
+  });
+
+  // same enrichment as GET [id], but via getAllVotingEvents() (list path)
+  it('getAllVotingEvents returns votingRecords with user first/last names for ROLL_CALL', async () => {
+    const events = await VotingService.getAllVotingEvents();
+    const data = events.find((e) => e != null && e.votingEventId === votingEventId);
+    expect(data).toBeDefined();
+    expect(data!.voteType).toBe('ROLL_CALL');
+    expect(Array.isArray(data!.votingRecords)).toBe(true);
+
+    const record1 = data!.votingRecords.find((r: any) => r.userId === user1Id) as any;
+    const record2 = data!.votingRecords.find((r: any) => r.userId === user2Id) as any;
+
+    expect(record1).toBeDefined();
+    expect(record1.result).toBe('YES');
+    expect(record1.user).toBeDefined();
+    expect(record1.user.firstName).toBe('Roll');
+    expect(record1.user.lastName).toBe('CallOne');
+
+    expect(record2).toBeDefined();
+    expect(record2.result).toBe('NO');
+    expect(record2.user).toBeDefined();
+    expect(record2.user.firstName).toBe('Roll');
+    expect(record2.user.lastName).toBe('CallTwo');
+  });
+
+  // non-ROLL_CALL events should not receive user name data
+  it('does not inject user names for non-ROLL_CALL events', async () => {
+    const nonRollCallEvent = await prisma.votingEvent.create({
+      data: {
+        meetingId: testMeetingId,
+        name: 'Non Roll Call Vote',
+        voteType: 'YES_NO',
+        deletedAt: new Date(),
+      },
+    });
+
+    await prisma.votingRecord.create({
+      data: {
+        votingEventId: nonRollCallEvent.votingEventId,
+        userId: user1Id,
+        result: 'YES',
+      },
+    });
+
+    const { GET } = await import('../../app/api/voting-event/[id]/route');
+    const req = new Request(
+      `http://localhost/api/voting-event/${nonRollCallEvent.votingEventId}`
+    );
+    const params = Promise.resolve({ id: nonRollCallEvent.votingEventId });
+    const response = await GET(req, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.voteType).toBe('YES_NO');
+    expect(Array.isArray(data.votingRecords)).toBe(true);
+    expect(data.votingRecords[0]).not.toHaveProperty('user');
+
+    await prisma.votingRecord.deleteMany({
+      where: { votingEventId: nonRollCallEvent.votingEventId },
+    });
+    await prisma.votingEvent.delete({
+      where: { votingEventId: nonRollCallEvent.votingEventId },
+    });
+  });
+
+  // missing user row should not break response (user is null)
+  it('returns user as null when a roll call voter user record is missing', async () => {
+    const missingUserEvent = await prisma.votingEvent.create({
+      data: {
+        meetingId: testMeetingId,
+        name: 'Roll Call Missing User Vote',
+        voteType: 'ROLL_CALL',
+        deletedAt: new Date(),
+      },
+    });
+
+    await prisma.votingRecord.create({
+      data: {
+        votingEventId: missingUserEvent.votingEventId,
+        userId: 'missing-roll-call-user',
+        result: 'ABSTAIN',
+      },
+    });
+
+    const { GET } = await import('../../app/api/voting-event/[id]/route');
+    const req = new Request(
+      `http://localhost/api/voting-event/${missingUserEvent.votingEventId}`
+    );
+    const params = Promise.resolve({ id: missingUserEvent.votingEventId });
+    const response = await GET(req, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.voteType).toBe('ROLL_CALL');
+    expect(Array.isArray(data.votingRecords)).toBe(true);
+    expect(data.votingRecords[0].result).toBe('ABSTAIN');
+    expect(data.votingRecords[0].user).toBeNull();
+
+    await prisma.votingRecord.deleteMany({
+      where: { votingEventId: missingUserEvent.votingEventId },
+    });
+    await prisma.votingEvent.delete({
+      where: { votingEventId: missingUserEvent.votingEventId },
+    });
+  });
+});
+
 describe('GET /api/voting-event/by-type/[voteType]', () => {
   let routeTestMeetingId: string;
   let routeTestMeeting2Id: string;
