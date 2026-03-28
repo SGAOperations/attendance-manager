@@ -217,7 +217,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           </select>
         </div>
 
-        {voteType === 'ROLL_CALL' && (
+        {voteType === 'SECRET_BALLOT' && (
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-1'>
               Options
