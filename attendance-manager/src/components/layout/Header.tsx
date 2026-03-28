@@ -13,6 +13,12 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick, onLogoClick }) => {
 /* Maps enum value to appropriate plain text */
 const rolePlainText = (role?: string) => {
   switch (role) {
+    case 'SUPER_ADMIN':
+      return 'Super admin'
+    case 'ADMIN':
+      return 'Admin'
+    case 'SENATOR':
+      return 'Senator';
     case 'EBOARD':
       return 'E-Board';
     case 'MEMBER':

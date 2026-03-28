@@ -181,7 +181,7 @@ const MeetingsPage: React.FC = () => {
   }, []);
 
   const nonEboardMembers = useMemo(
-    () => members.filter(member => member.role.roleType !== 'EBOARD'),
+    () => members.filter(member => member.roleType !== 'EBOARD'),
     [members]
   );
   const nonEboardMemberIds = useMemo(

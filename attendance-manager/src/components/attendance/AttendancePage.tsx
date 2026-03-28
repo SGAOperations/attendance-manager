@@ -330,8 +330,8 @@ const AttendancePage: React.FC = () => {
     setShowEditAttendanceModal(true);
   };
 
-  const eboardMembers = users.filter(m => m.role.roleType === 'EBOARD');
-  const regularMembers = users.filter(m => m.role.roleType === 'MEMBER');
+  const eboardMembers = users.filter(m => m.roleType === 'EBOARD');
+  const regularMembers = users.filter(m => m.roleType === 'MEMBER');
 
   return (
     <div className='flex-1 p-6 bg-gray-50'>

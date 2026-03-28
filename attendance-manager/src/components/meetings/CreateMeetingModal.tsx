@@ -244,12 +244,12 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
                     <p className='text-xs text-gray-500'>{member.email}</p>
                     <span
                       className={`inline-block px-2 py-1 text-xs rounded-full ${
-                        member.role.roleType === 'EBOARD'
+                        member.roleType === 'EBOARD'
                           ? 'bg-[#A4804A] text-white'
                           : 'bg-gray-100 text-gray-600'
                       }`}
                     >
-                      {member.role.roleType === 'EBOARD' ? 'Eboard' : 'Member'}
+                      {member.roleType === 'EBOARD' ? 'Eboard' : 'Member'}
                     </span>
                   </div>
                 </label>
