@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { VotingEventApiData, VotingRecordApiData } from '@/types';
+import VotingResultsModal from './VotingResultsModal';
 
 type VotingEventWithRelations = VotingEventApiData & {
   meeting?: {
@@ -38,7 +39,8 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
       const bDate = b.deletedAt ?? b.createdAt;
       return new Date(bDate).getTime() - new Date(aDate).getTime();
     });
-
+  const [selectedVote, setSelectedVote] = useState<string>('');
+  const [showVotingResultModal, setShowVotingResultsModal] = useState<boolean>(false);
   return (
     <div className='mt-8 bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
       <div className='flex items-center justify-between mb-4'>
@@ -95,6 +97,12 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                   <tr
                     key={event.votingEventId}
                     className='border-b border-gray-100 hover:bg-gray-50'
+                    onClick={() => {
+                      if(event.voteType !== 'SECRET_BALLOT') {
+                        setShowVotingResultsModal(true);
+                        setSelectedVote(event.votingEventId);
+                      }
+                    }}
                   >
                     <td className='py-3 px-4 align-top'>
                       <div className='text-gray-900 font-medium'>
@@ -173,6 +181,11 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
           </table>
         </div>
       )}
+      {
+        showVotingResultModal && (
+          <VotingResultsModal selectedVote={selectedVote} setShowVotingResultsModal={setShowVotingResultsModal} setSelectedVoting={setSelectedVote}/>
+        )
+      }
     </div>
   );
 };

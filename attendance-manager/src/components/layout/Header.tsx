@@ -35,7 +35,7 @@ const rolePlainText = (role?: string) => {
             </div>
             </Link>
             <div style={{paddingLeft: '8px'}} >
-              Version 2.1.0
+              Version 2.1.3
             </div>
           </div>
 
