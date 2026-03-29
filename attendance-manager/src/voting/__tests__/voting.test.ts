@@ -1190,6 +1190,79 @@ describe('POST /api/voting-event', () => {
     await VotingService.deleteVotingEvent(data.votingEventId);
   });
 
+  it('should persist notes when creating a voting event', async () => {
+    const { POST } = await import('../../app/api/voting-event/route');
+    const requestBody = {
+      meetingId: routeTestMeetingId,
+      name: 'POST Route Test Event With Notes',
+      voteType: 'YES_NO',
+      notes: 'Create notes test',
+      updatedBy: 'test-user',
+    };
+
+    const req = new Request('http://localhost/api/voting-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(data.notes).toBe('Create notes test');
+    await VotingService.deleteVotingEvent(data.votingEventId);
+  });
+
+  it('should auto-include No Confidence and Abstain for SECRET_BALLOT create', async () => {
+    const { POST } = await import('../../app/api/voting-event/route');
+    const requestBody = {
+      meetingId: routeTestMeetingId,
+      name: 'POST Secret Ballot Defaults',
+      voteType: VOTING_TYPES.SECRET_BALLOT.key,
+      options: ['Candidate 1', 'Candidate 2'],
+      updatedBy: 'test-user'
+    };
+
+    const req = new Request('http://localhost/api/voting-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(data.options).toEqual(
+      expect.arrayContaining(['Candidate 1', 'Candidate 2', 'No Confidence', 'Abstain'])
+    );
+    await VotingService.deleteVotingEvent(data.votingEventId);
+  });
+
+  it('should return 400 when options contains non-string values', async () => {
+    const { POST } = await import('../../app/api/voting-event/route');
+    const requestBody = {
+      meetingId: routeTestMeetingId,
+      name: 'POST Route Invalid Options',
+      voteType: VOTING_TYPES.SECRET_BALLOT.key,
+      options: ['Candidate 1', 123],
+      updatedBy: 'test-user'
+    };
+
+    const req = new Request('http://localhost/api/voting-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('options must be an array of strings');
+  });
+
   it('should return 400 when required fields are missing', async () => {
     const { POST } = await import('../../app/api/voting-event/route');
     const requestBody = {
@@ -1271,6 +1344,30 @@ describe('PUT /api/voting-event/[id]', () => {
     expect(data.updatedBy).toBe('test-updater');
     expect(data.votingEventId).toBe(routeTestVotingEventId);
     expect(data.updatedAt).toBeDefined();
+  });
+
+  it('should allow admin to update voting event notes', async () => {
+    const { PUT } = await import('../../app/api/voting-event/[id]/route');
+    const requestBody = {
+      notes: 'Updated notes from PUT test',
+      updatedBy: 'test-updater'
+    };
+
+    const req = new Request(
+      `http://localhost/api/voting-event/${routeTestVotingEventId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
+
+    const params = Promise.resolve({ id: routeTestVotingEventId });
+    const response = await PUT(req, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.notes).toBe('Updated notes from PUT test');
   });
 
   it('should return 404 when voting event is not found', async () => {

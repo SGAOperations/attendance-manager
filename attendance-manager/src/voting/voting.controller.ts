@@ -1,5 +1,24 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { VotingService, formatVotingEventForApi } from './voting.service';
+import { VOTING_TYPES } from '@/utils/consts';
+
+const optionsSchema = z.array(z.string());
+const REQUIRED_SECRET_BALLOT_OPTIONS = ['No Confidence', 'Abstain'] as const;
+
+function normalizeCreateOptionsForSecretBallot(
+  voteType: string,
+  options: string[] | undefined
+): string[] | undefined {
+  if (voteType !== VOTING_TYPES.SECRET_BALLOT.key) return options;
+  const merged = [...(options ?? [])];
+  for (const required of REQUIRED_SECRET_BALLOT_OPTIONS) {
+    if (!merged.includes(required)) {
+      merged.push(required);
+    }
+  }
+  return merged;
+}
 
 export const VotingController = {
   async getAllVotingEvents() {
@@ -47,11 +66,16 @@ export const VotingController = {
         { status: 400 }
       );
     }
-    if (body.options !== undefined && (!Array.isArray(body.options) || body.options.some((option: unknown) => typeof option !== 'string'))) {
-      return NextResponse.json(
-        { error: 'options must be an array of strings when provided' },
-        { status: 400 }
-      );
+    let parsedOptions: string[] | undefined;
+    if (body.options !== undefined) {
+      const parsed = optionsSchema.safeParse(body.options);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'options must be an array of strings when provided' },
+          { status: 400 }
+        );
+      }
+      parsedOptions = parsed.data;
     }
 
     try {
@@ -60,7 +84,7 @@ export const VotingController = {
         name: body.name,
         voteType: body.voteType,
         notes: body.notes,
-        options: body.options,
+        options: normalizeCreateOptionsForSecretBallot(body.voteType, parsedOptions),
         updatedBy: body.updatedBy,
       });
       return NextResponse.json(formatVotingEventForApi(newVotingEvent), { status: 201 });
@@ -112,11 +136,15 @@ export const VotingController = {
         { status: 400 }
       );
     }
-    if (updates.options !== undefined && (!Array.isArray(updates.options) || updates.options.some((option: unknown) => typeof option !== 'string'))) {
-      return NextResponse.json(
-        { error: 'options must be an array of strings' },
-        { status: 400 }
-      );
+    if (updates.options !== undefined) {
+      const parsed = optionsSchema.safeParse(updates.options);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'options must be an array of strings' },
+          { status: 400 }
+        );
+      }
+      updates.options = parsed.data;
     }
     if (updates.updatedBy && typeof updates.updatedBy !== 'string') {
       return NextResponse.json(
