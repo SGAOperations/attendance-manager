@@ -171,6 +171,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                   </td>
                   <td className='py-3 px-4 text-center'>
                     {canEditMeetings && (
+                      <div className='flex items-center gap-2'>
                       <button
                         onClick={() => handleEditMeeting(meeting)}
                         className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
