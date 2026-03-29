@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+      DIRECT_URL: ${{ secrets.DATABASE_URL_TEST }}
       NODE_ENV: test
     steps:
       - name: Checkout repository
