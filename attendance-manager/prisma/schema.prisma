@@ -23,8 +23,8 @@ model User {
   firstName  String
   lastName   String
   roleId     String
-  roleType   RoleType.    @default(None)
-  isVotingMember Boolean.   @default(False);
+  roleType       RoleType     @default(NONE)
+  isVotingMember Boolean      @default(false)
   password   String?  // Optional - Supabase handles authentication
   attendance Attendance[]
   role       Role         @relation(fields: [roleId], references: [roleId])
