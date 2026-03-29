@@ -30,7 +30,11 @@ jobs:
       - name: Generate Prisma Client
         working-directory: attendance-manager
         run: npx prisma generate
-      
+
+      - name: Run Database Migrations
+        working-directory: attendance-manager
+        run: npx prisma migrate deploy
+
       - name: Lint
         working-directory: attendance-manager
         run: npm run lint

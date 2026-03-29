@@ -34,6 +34,7 @@ describe('API Auth Utilities', () => {
         firstName: 'API',
         lastName: 'Test',
         roleId: testRoleId,
+        roleType: 'MEMBER',
         password: null,
       },
     });
