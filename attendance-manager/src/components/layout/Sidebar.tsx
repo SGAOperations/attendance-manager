@@ -13,7 +13,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   const { user } = useAuth();
-  const canViewMemberStats = checkCanViewMemberStats(user?.role)
+  const canViewMemberStats = checkCanViewMemberStats(user?.role);
 
   const [meetings, setMeetings] = React.useState<MeetingApiData[]>([]);
   const [users, setUsers] = React.useState<UserApiData[]>([]);

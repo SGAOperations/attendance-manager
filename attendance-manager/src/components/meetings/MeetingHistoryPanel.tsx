@@ -1,3 +1,4 @@
+import React from 'react';
 import { MeetingApiData, MeetingType } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkCanEditMeetings } from '@/utils/permissions';
