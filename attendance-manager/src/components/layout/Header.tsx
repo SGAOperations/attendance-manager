@@ -14,9 +14,9 @@ const Header: React.FC<HeaderProps> = ({ onProfileClick, onLogoClick }) => {
 const rolePlainText = (role?: string) => {
   switch (role) {
     case 'SUPER_ADMIN':
-      return 'Super admin'
+      return 'Super admin';
     case 'ADMIN':
-      return 'Admin'
+      return 'Admin';
     case 'SENATOR':
       return 'Senator';
     case 'EBOARD':

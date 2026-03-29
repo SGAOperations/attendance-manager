@@ -1,5 +1,6 @@
 import { MeetingApiData, MeetingType } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { checkCanEditMeetings } from '@/utils/permissions';
 
 interface MeetingHistoryPanelProps {
   setActiveTab: (option: 'past' | 'upcoming') => void;
@@ -29,7 +30,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
     return type;
   };
   const { user } = useAuth();
-  const isEboard = user?.role === 'EBOARD';
+  const canEditMeetings = checkCanEditMeetings(user?.role);
 
   return (
     <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
@@ -119,7 +120,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
               <th className='text-right py-3 px-4 font-medium text-gray-900'>
                 # of Members
               </th>
-              {isEboard && (
+              {canEditMeetings && (
                 <th className='text-center py-3 px-4 font-medium text-gray-900'>
                   Actions
                 </th>
@@ -165,7 +166,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                     </div>
                   </td>
                   <td className='py-3 px-4 text-center'>
-                    {isEboard && (
+                    {canEditMeetings && (
                       <button
                         onClick={() => handleEditMeeting(meeting)}
                         className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'

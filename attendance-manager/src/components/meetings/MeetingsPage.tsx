@@ -16,6 +16,7 @@ import MeetingHistoryPanel from './MeetingHistoryPanel';
 import CreateMeetingModal from './CreateMeetingModal';
 import EditMeetingModal from './EditMeetingModal';
 import CreateRequestModal from './CreateRequestModal';
+import { checkCanManageMeetings } from '@/utils/permissions';
 
 const MeetingsPage: React.FC = () => {
   const { user } = useAuth();
@@ -59,7 +60,7 @@ const MeetingsPage: React.FC = () => {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); 
 
   // Check if user is admin (EBOARD)
-  const isAdmin = user?.role === 'EBOARD';
+  const canManageMeetings = checkCanManageMeetings(user?.role);
   const isMember = user?.role === 'MEMBER';
   const [
     remainingAbsences,
@@ -484,7 +485,7 @@ const MeetingsPage: React.FC = () => {
           attendedMeetings={attendedMeetings}
           missedMeetings={missedMeetings}
           upcomingMeetings={upcomingMeetingsList.length}
-          isAdmin={isAdmin}
+          isAdmin={canManageMeetings}
           setShowCreateMeetingModal={setShowCreateMeetingModal}
         />
 

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { MeetingApiData, VotingEventApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveVotingEvent } from '@/hooks/useActiveVotingEvent';
+import { checkCanManageVoting } from '@/utils/permissions';
 
 interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
@@ -43,7 +44,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
     return meetings;
   }, [meetings]);
 
-  if (!user || user.role !== 'EBOARD') {
+  if (!user || !checkCanManageVoting(user?.role)) {
     return null;
   }
 
