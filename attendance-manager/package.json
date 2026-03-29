@@ -12,18 +12,21 @@
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
+    "@scalar/api-reference-react": "^0.9.13",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.84.0",
     "@types/react-dom": "^19.1.9",
+    "ajv": "^8.18.0",
     "jose": "^6.0.12",
-    "lint": "^0.8.19",
     "lucide-react": "^0.575.0",
     "next": "^15.3.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.1.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
@@ -37,11 +40,17 @@
     "cross-env": "^10.0.0",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
     "jest": "^30.0.5",
+    "next-openapi-gen": "^0.10.5",
     "postcss": "^8.5.6",
+    "prettier": "^3.8.1",
     "prisma": "^6.12.0",
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.4.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.57.2"
   }
 }

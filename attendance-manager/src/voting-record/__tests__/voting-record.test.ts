@@ -548,6 +548,46 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
     expect(Array.isArray(data)).toBe(true);
     expect(data.length).toBe(0);
   });
+
+  it('returns 403 for SECRET_BALLOT (no per-voter records)', async () => {
+    const secretEvent = await prisma.votingEvent.create({
+      data: {
+        meetingId: routeTestMeetingId,
+        name: 'Secret ballot route test',
+        voteType: 'SECRET_BALLOT',
+        options: ['Yes', 'No'],
+      },
+    });
+    await prisma.votingRecord.create({
+      data: {
+        votingEventId: secretEvent.votingEventId,
+        userId: routeTestUserId,
+        result: 'Yes',
+      },
+    });
+
+    const { GET } = await import(
+      '../../app/api/voting-record/by-voting-event/[votingEventId]/route'
+    );
+    const req = new Request(
+      `http://localhost/api/voting-record/by-voting-event/${secretEvent.votingEventId}`
+    );
+    const params = Promise.resolve({
+      votingEventId: secretEvent.votingEventId,
+    });
+    const response = await GET(req, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(data.error).toBeDefined();
+
+    await prisma.votingRecord.deleteMany({
+      where: { votingEventId: secretEvent.votingEventId },
+    });
+    await prisma.votingEvent.delete({
+      where: { votingEventId: secretEvent.votingEventId },
+    });
+  });
 });
 
 describe('POST /api/voting-record', () => {

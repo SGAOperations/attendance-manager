@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { UserRound } from 'lucide-react';
 
 interface HeaderProps {
   onProfileClick: () => void;
@@ -40,7 +41,7 @@ const rolePlainText = (role?: string) => {
             </div>
             </Link>
             <div style={{paddingLeft: '8px'}} >
-              Version 2.1.0
+              Version 2.1.3
             </div>
           </div>
 
@@ -66,19 +67,7 @@ const rolePlainText = (role?: string) => {
                     </span>
                   </div>
                   <div className='hidden sm:block'>
-                    <svg
-                      className='w-4 h-4 text-gray-600'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
-                      />
-                    </svg>
+                    <UserRound className='w-4 h-4 text-gray-600'/>
                   </div>
                 </button>
               </div>

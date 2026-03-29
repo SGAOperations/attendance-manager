@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import AttendanceMeetingSelect from './AttendanceMeetingSelect';
 
+import { z } from 'zod';
 import {
   MeetingApiData,
   AttendanceApiData,
-  UserApiData,
+  AttendanceSchema,
+  UserSchema,
   RequestApiData
 } from '@/types';
 import AttendanceMeetingEdit from './AttendanceMeetingEdit';
@@ -28,9 +30,12 @@ const AttendancePage: React.FC = () => {
   const [meetingsWithAttendance, setMeetingsWithAttendance] = useState<
     MeetingApiData[]
   >([]);
-  const [users, setUsers] = useState<UserApiData[]>([]);
+  const [users, setUsers] = useState<z.infer<typeof UserSchema>[]>([]);
 
-  const [deleteUser, setDeleteUser] = useState<UserApiData | null>(null);
+  type AttendanceType = z.infer<typeof AttendanceSchema>;
+
+
+  const [deleteUser, setDeleteUser] = useState<z.infer<typeof UserSchema> | null>(null);
 
   // New state for attendance marking and editing
   const [showEditAttendanceModal, setShowEditAttendanceModal] = useState(false);
@@ -38,7 +43,7 @@ const AttendancePage: React.FC = () => {
     null
   );
   const [nuidInput, setNuidInput] = useState('');
-  const [attendanceUsers, setAttendanceUsers] = useState<UserApiData[]>([]);
+  const [attendanceUsers, setAttendanceUsers] = useState<z.infer<typeof UserSchema>[]>([]);
   const [isLoadingAttendance, setIsLoadingAttendance] = useState(false);
   const [attendanceRecord, setAttendanceRecord] = useState<
     Record<string, AttendanceApiData[]>
@@ -162,7 +167,7 @@ const AttendancePage: React.FC = () => {
     setIsLoadingAttendance(true);
     try {
       const res = await fetch(`/api/meeting/${meetingId}/users`);
-      const allUsers: UserApiData[] = await res.json();
+      const allUsers: z.infer<typeof UserSchema>[] = await res.json();
       setAttendanceUsers(allUsers);
     } catch (error) {
       console.error('Error loading attendance users:', error);
@@ -201,7 +206,7 @@ const AttendancePage: React.FC = () => {
       }
       // Check if already marked as present
       const attendanceForMeeting = userToMark.attendance.find(
-        attendance => attendance.meetingId === selectedMeetingForCheck.meetingId
+        (attendance: AttendanceType) => attendance.meetingId === selectedMeetingForCheck.meetingId
       );
       if (
         attendanceForMeeting?.status === 'PRESENT' ||
@@ -293,7 +298,7 @@ const AttendancePage: React.FC = () => {
             u.userId === userId
               ? {
                   ...u,
-                  attendance: u.attendance.map(a =>
+                  attendance: u.attendance.map((a: AttendanceType) =>
                     a.attendanceId === attendanceId
                       ? { ...a, status: newStatus }
                       : a

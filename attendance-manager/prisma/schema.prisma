@@ -43,6 +43,8 @@ model Meeting {
   type       MeetingType
   attendance Attendance[]
   votingEvents VotingEvent[]
+  deletedAt      DateTime?
+  updatedAt      DateTime?
 }
 
 model Attendance {
@@ -72,6 +74,8 @@ model VotingEvent {
   meetingId      String
   name           String
   voteType       String
+  notes          String?
+  options        String[]        @default([])
   createdAt      DateTime        @default(now())
   updatedAt      DateTime?       @updatedAt
   deletedAt      DateTime?
