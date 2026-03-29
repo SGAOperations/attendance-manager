@@ -1,5 +1,4 @@
 import { VotingRecordApiData, VotingEventApiData } from '@/types';
-import { CircleCheck, CircleX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface VotingResultsModalProps {
@@ -13,7 +12,6 @@ const VotingResultsModal: React.FC<VotingResultsModalProps> = ({
   setShowVotingResultsModal,
   setSelectedVoting,
 }) => {
-    console.log('selected vote', selectedVote);
   const [results, setResults] = useState<VotingRecordApiData[]>([]);
   const [vote, setVote] = useState<VotingEventApiData>();
   useEffect(() => {
@@ -29,7 +27,6 @@ const VotingResultsModal: React.FC<VotingResultsModalProps> = ({
         );
       }
       const data = await response.json();
-      console.log(data);
       setResults(data.votingRecords);
       setVote(data);
     } catch (error) {
@@ -60,9 +57,7 @@ const VotingResultsModal: React.FC<VotingResultsModalProps> = ({
                     return (
                       <label
                         key={result.userId}
-                        className={`flex items-center space-x-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                          result.result === 'Yes' ? 'bg-green-50' : 'bg-red-50'
-                        }`}
+                        className={'flex items-center space-x-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors'}
                       >
                         <div className='w-10 h-10 bg-[#C8102E] rounded-full flex items-center justify-center flex-shrink-0'>
                           <span className='text-white text-sm font-semibold'>
@@ -74,15 +69,7 @@ const VotingResultsModal: React.FC<VotingResultsModalProps> = ({
                             {result?.user?.firstName} {result?.user?.lastName}
                           </p>
                         </div>
-                        {result.result === 'Yes' ? (
-                          <div className='flex-shrink-0'>
-                            <CircleCheck className='w-6 h-6 text-green-600'/>
-                          </div>
-                        ): (
-                            <div className='flex-shrink-0'>
-                            <CircleX className='w-6 h-6 text-red-600'/>
-                          </div>
-                        )}
+                        {result.result}
                       </label>
                     );
                   })}
