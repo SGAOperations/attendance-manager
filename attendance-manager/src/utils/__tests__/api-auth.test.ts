@@ -78,8 +78,7 @@ describe('API Auth Utilities', () => {
       expect(user?.userId).toBe(testUserId);
       expect(user?.supabaseAuthId).toBe(testSupabaseAuthId);
       expect(user?.email).toBe('apitest@example.com');
-      expect(user?.role).toBeDefined();
-      expect(user?.role.roleType).toBe('MEMBER');
+      expect(user?.roleType).toBe('MEMBER');
     });
 
     it('should return null when no session exists', async () => {
