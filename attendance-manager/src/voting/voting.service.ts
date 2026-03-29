@@ -5,14 +5,10 @@ const SECRET_BALLOT = VOTING_TYPES.SECRET_BALLOT.key;
 
 export function computeVotePassedFromCounts(
   counts: Record<string, number>,
-  options: string[]
+  options: string[],
 ): boolean | null {
-  const yes =
-    (counts['YES'] ?? 0) +
-    (counts['Yes'] ?? 0);
-  const no =
-    (counts['NO'] ?? 0) +
-    (counts['No'] ?? 0);
+  const yes = (counts['YES'] ?? 0) + (counts['Yes'] ?? 0);
+  const no = (counts['NO'] ?? 0) + (counts['No'] ?? 0);
   if (yes > 0 || no > 0) {
     return yes > no;
   }
@@ -31,6 +27,7 @@ export function computeVotePassedFromCounts(
 }
 
 // Yes, No, or Abstain
+// eslint-disable-next-line
 const YES_NO_ABSTAIN_RESULT_KEYS = new Set([
   'YES',
   'NO',
@@ -49,7 +46,7 @@ export type SecretBallotOutcomeKind =
 // Choose what shows up for secret ballot: Passed/Failed, who won, or Tie
 export function deriveSecretBallotOutcome(
   resultCounts: Record<string, number>,
-  options: string[]
+  options: string[],
 ): {
   outcomeKind: SecretBallotOutcomeKind;
   winningResult: string | null;
@@ -73,10 +70,8 @@ export function deriveSecretBallotOutcome(
   const isYesNoAbstainOnly =
     entries.length > 0 &&
     entries.every(([k]) => YES_NO_ABSTAIN_RESULT_KEYS.has(k));
-  const yes =
-    (resultCounts['YES'] ?? 0) + (resultCounts['Yes'] ?? 0);
-  const no =
-    (resultCounts['NO'] ?? 0) + (resultCounts['No'] ?? 0);
+  const yes = (resultCounts['YES'] ?? 0) + (resultCounts['Yes'] ?? 0);
+  const no = (resultCounts['NO'] ?? 0) + (resultCounts['No'] ?? 0);
   const hasYesNoVotes = yes > 0 || no > 0;
 
   if (isYesNoAbstainOnly && hasYesNoVotes && votePassed !== null) {
@@ -98,13 +93,15 @@ function buildResultCountsFromRecords(records: any[]): Record<string, number> {
 }
 
 // Secret ballot: aggregates + outcome labels
-function redactSecretBallotForResults<T extends {
-  voteType: string;
-  votingRecords?: any[];
-  options?: string[];
-  resultCounts?: Record<string, number>;
-  secretBallotOutcomeKind?: SecretBallotOutcomeKind;
-}>(event: T): T {
+function redactSecretBallotForResults<
+  T extends {
+    voteType: string;
+    votingRecords?: any[];
+    options?: string[];
+    resultCounts?: Record<string, number>;
+    secretBallotOutcomeKind?: SecretBallotOutcomeKind;
+  },
+>(event: T): T {
   if (event.voteType !== SECRET_BALLOT) return event;
 
   const records = event.votingRecords || [];
@@ -119,6 +116,7 @@ function redactSecretBallotForResults<T extends {
   const options = Array.isArray(event.options) ? event.options : [];
   const derived = deriveSecretBallotOutcome(resultCounts, options);
 
+  // eslint-disable-next-line
   const { votingRecords: _omit, ...rest } = event as any;
   return {
     ...rest,
@@ -129,16 +127,16 @@ function redactSecretBallotForResults<T extends {
   } as T;
 }
 
-export function formatVotingEventForApi<T extends { voteType: string; votingRecords?: any[] }>(
-  event: T | null
-): T | null {
+export function formatVotingEventForApi<
+  T extends { voteType: string; votingRecords?: any[] },
+>(event: T | null): T | null {
   if (!event) return event;
   return redactSecretBallotForResults(event as T);
 }
 
-async function attachVoterNamesToVotingEvent<T extends { voteType: string; votingRecords?: any[] }>(
-  event: T | null
-): Promise<T | null> {
+async function attachVoterNamesToVotingEvent<
+  T extends { voteType: string; votingRecords?: any[] },
+>(event: T | null): Promise<T | null> {
   if (!event) return event;
   if (event.voteType !== 'ROLL_CALL') return event;
   if (!event.votingRecords || event.votingRecords.length === 0) return event;
@@ -147,8 +145,11 @@ async function attachVoterNamesToVotingEvent<T extends { voteType: string; votin
     new Set(
       event.votingRecords
         .map((r: any) => r?.userId)
-        .filter((id: unknown): id is string => typeof id === 'string' && id.length > 0)
-    )
+        .filter(
+          (id: unknown): id is string =>
+            typeof id === 'string' && id.length > 0,
+        ),
+    ),
   );
 
   if (userIds.length === 0) return event;
@@ -158,12 +159,15 @@ async function attachVoterNamesToVotingEvent<T extends { voteType: string; votin
     select: { userId: true, firstName: true, lastName: true },
   });
 
-  const userById = new Map(users.map(u => [u.userId, u]));
+  const userById = new Map(users.map((u) => [u.userId, u]));
 
   return {
     ...event,
     votingRecords: event.votingRecords.map((record: any) => {
-      const user = typeof record?.userId === 'string' ? userById.get(record.userId) : undefined;
+      const user =
+        typeof record?.userId === 'string'
+          ? userById.get(record.userId)
+          : undefined;
       return {
         ...record,
         user: user
@@ -183,9 +187,9 @@ export const VotingService = {
       },
     });
     const withNames = await Promise.all(
-      events.map(e => attachVoterNamesToVotingEvent(e))
+      events.map((e) => attachVoterNamesToVotingEvent(e)),
     );
-    return withNames.map(e => formatVotingEventForApi(e)!);
+    return withNames.map((e) => formatVotingEventForApi(e)!);
   },
 
   getVotingEventById: async (votingEventId: string) => {
@@ -209,9 +213,9 @@ export const VotingService = {
       },
     });
     const withNames = await Promise.all(
-      events.map(e => attachVoterNamesToVotingEvent(e))
+      events.map((e) => attachVoterNamesToVotingEvent(e)),
     );
-    return withNames.map(e => formatVotingEventForApi(e)!);
+    return withNames.map((e) => formatVotingEventForApi(e)!);
   },
 
   async createVotingEvent(data: {

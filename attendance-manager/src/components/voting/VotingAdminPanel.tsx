@@ -211,11 +211,9 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
             onChange={(e) => setVoteType(e.target.value)}
             className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]'
           >
-            {
-              Object.values(VOTING_TYPES).map((type) => (
-                <option value={type.key}>{type.value}</option>
-              ))
-            }
+            {Object.values(VOTING_TYPES).map((type) => (
+              <option value={type.key}>{type.value}</option>
+            ))}
           </select>
         </div>
 

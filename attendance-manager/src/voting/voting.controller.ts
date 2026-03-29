@@ -8,7 +8,7 @@ const REQUIRED_SECRET_BALLOT_OPTIONS = ['No Confidence', 'Abstain'] as const;
 
 function normalizeCreateOptionsForSecretBallot(
   voteType: string,
-  options: string[] | undefined
+  options: string[] | undefined,
 ): string[] | undefined {
   if (voteType !== VOTING_TYPES.SECRET_BALLOT.key) return options;
   const merged = [...(options ?? [])];
@@ -110,7 +110,7 @@ export const VotingController = {
       if (!parsed.success) {
         return NextResponse.json(
           { error: 'options must be an array of strings when provided' },
-          { status: 400 }
+          { status: 400 },
         );
       }
       parsedOptions = parsed.data;
@@ -122,10 +122,15 @@ export const VotingController = {
         name: body.name,
         voteType: body.voteType,
         notes: body.notes,
-        options: normalizeCreateOptionsForSecretBallot(body.voteType, parsedOptions),
+        options: normalizeCreateOptionsForSecretBallot(
+          body.voteType,
+          parsedOptions,
+        ),
         updatedBy: body.updatedBy,
       });
-      return NextResponse.json(formatVotingEventForApi(newVotingEvent), { status: 201 });
+      return NextResponse.json(formatVotingEventForApi(newVotingEvent), {
+        status: 201,
+      });
     } catch (error: any) {
       return NextResponse.json(
         { error: error.message || 'Failed to create voting event' },
@@ -213,7 +218,7 @@ export const VotingController = {
       if (!parsed.success) {
         return NextResponse.json(
           { error: 'options must be an array of strings' },
-          { status: 400 }
+          { status: 400 },
         );
       }
       updates.options = parsed.data;

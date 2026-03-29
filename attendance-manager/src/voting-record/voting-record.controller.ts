@@ -23,14 +23,12 @@ export const VotingRecordController = {
           error:
             'Per-voter voting records are not available for secret ballot votes',
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
     const votingRecords =
       await VotingRecordService.getVotingRecordsByVotingEvent(
-      
-        params.votingEventId
-    ,
+        params.votingEventId,
       );
     return NextResponse.json(votingRecords);
   },
