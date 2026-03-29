@@ -2,6 +2,7 @@ import React from 'react';
 import { MeetingApiData, MeetingType } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkCanEditMeetings } from '@/utils/permissions';
+import { Calendar } from 'lucide-react';
 
 interface MeetingHistoryPanelProps {
   setActiveTab: (option: 'past' | 'upcoming') => void;
@@ -10,6 +11,7 @@ interface MeetingHistoryPanelProps {
   setTypeFilter: (type: MeetingType | null) => void;
   meetings: MeetingApiData[];
   handleEditMeeting: (meeting: MeetingApiData) => void;
+  handleDeleteMeeting: (meeting: MeetingApiData) => void;
   visibleMeetings: MeetingApiData[];
 }
 
@@ -19,6 +21,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
   typeFilter,
   setTypeFilter,
   handleEditMeeting,
+  handleDeleteMeeting,
   visibleMeetings
 }) => {
   //helper function that formats meeting type from all caps to normal
@@ -174,6 +177,13 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                       >
                         Edit
                       </button>
+                      <button
+                        onClick={() => handleDeleteMeeting(meeting)}
+                        className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
+                      >
+                        Delete
+                      </button>
+                        </div>
                     )}
                   </td>
                 </tr>
@@ -187,19 +197,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
       {visibleMeetings.length === 0 && (
         <div className='text-center py-12'>
           <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-            <svg
-              className='w-8 h-8 text-gray-400'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
-              />
-            </svg>
+            <Calendar className='w-8 h-8 text-gray-400'/>
           </div>
           <p className='text-gray-500 text-lg font-medium'>
             No {activeTab === 'past' ? 'past' : 'upcoming'} meetings

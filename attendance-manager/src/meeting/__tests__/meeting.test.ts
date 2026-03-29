@@ -28,6 +28,7 @@ describe('MeetingServices', () => {
     expect(newMeeting.endTime).toBe('8:13:15 PM');
     expect(newMeeting.notes).toBe('notes');
     expect(newMeeting.type).toBe(MeetingType.REGULAR);
+    expect(newMeeting.deletedAt).toBe(null);
   });
 
   it('should fetch all meetings', async () => {
@@ -73,6 +74,39 @@ describe('MeetingServices', () => {
       newMeeting.meetingId
     );
     expect(deletedMeeting).toBeNull();
+  });
+
+  it('should soft delete a meeting', async () => {
+    const meeting = await MeetingService.createMeeting(
+      {
+        name: 'Soft Delete Test',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: MeetingType.REGULAR
+      },
+      []
+    );
+
+    await MeetingService.softDeleteMeeting(meeting.meetingId);
+
+    const fetchedMeeting = await MeetingService.getMeetingById(
+      meeting.meetingId
+    );
+    expect(fetchedMeeting).toBeNull();
+
+    const allMeetings = await MeetingService.getAllMeeting();
+    const existsInList = allMeetings.find(
+      m => m.meetingId === meeting.meetingId
+    );
+    expect(existsInList).toBeUndefined();
+
+    const rawMeeting = await prisma.meeting.findUnique({
+      where: { meetingId: meeting.meetingId }
+    });
+    expect(rawMeeting).not.toBeNull();
+    expect(rawMeeting?.deletedAt).not.toBeNull();
   });
 });
 
@@ -454,5 +488,31 @@ describe('MeetingController', () => {
     await prisma.user.delete({ where: { userId: user2.userId } });
     await prisma.role.delete({ where: { roleId: role.roleId } });
     await MeetingService.deleteMeeting(newMeeting.meetingId);
+  });
+
+  it('should soft delete a meeting', async () => {
+    const meeting = await MeetingService.createMeeting(
+      {
+        name: 'Controller Delete Test',
+        startTime: '10:00',
+        date: '2025-12-01',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: MeetingType.REGULAR
+      },
+      []
+    );
+
+    const response = await MeetingController.deleteMeeting({
+      meetingId: meeting.meetingId
+    });
+
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.message).toContain('soft deleted');
+
+    const fetched = await MeetingService.getMeetingById(meeting.meetingId);
+    expect(fetched).toBeNull();
   });
 });

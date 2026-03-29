@@ -1,3 +1,5 @@
+import { Calendar, Clock } from 'lucide-react';
+
 interface AttendanceMeetingSelectProps {
   meetingsWithAttendance: {
     meetingId: string;
@@ -52,35 +54,11 @@ const AttendanceMeetingSelect: React.FC<AttendanceMeetingSelectProps> = ({
                     </p>
                     <div className='flex items-center space-x-4 mt-2'>
                       <div className='flex items-center space-x-1 text-xs text-gray-500'>
-                        <svg
-                          className='w-4 h-4'
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z'
-                          />
-                        </svg>
+                        <Calendar className='w-4 h-4'/>
                         <span>{meeting.date}</span>
                       </div>
                       <div className='flex items-center space-x-1 text-xs text-gray-500'>
-                        <svg
-                          className='w-4 h-4'
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                          />
-                        </svg>
+                        <Clock className='w-4 h-4'/>
                         <span>
                           {meeting.startTime} - {meeting.endTime}
                         </span>

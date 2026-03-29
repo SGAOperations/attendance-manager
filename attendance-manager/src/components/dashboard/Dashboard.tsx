@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../profile/LoginPage';
 import { User } from '@/types';
 import ViewMeetingModal from './ViewMeetingModal';
+import { AlertCircle, Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 
 interface Meeting {
   meetingId: string;
@@ -254,19 +255,7 @@ const Dashboard: React.FC = () => {
       <div className='flex-1 p-6 bg-gray-50'>
         <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
           <div className='flex items-center'>
-            <svg
-              className='w-5 h-5 text-red-400 mr-2'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-              />
-            </svg>
+            <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
             <p className='text-red-800'>Error: {error}</p>
           </div>
           <button
@@ -310,19 +299,7 @@ const Dashboard: React.FC = () => {
                 }
                 className='p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors'
               >
-                <svg
-                  className='w-5 h-5'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M15 19l-7-7 7-7'
-                  />
-                </svg>
+              <ChevronLeft className="w-5 h-5"/>
               </button>
               <button
                 onClick={() =>
@@ -335,19 +312,7 @@ const Dashboard: React.FC = () => {
                 }
                 className='p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors'
               >
-                <svg
-                  className='w-5 h-5'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M9 5l7 7-7 7'
-                  />
-                </svg>
+              <ChevronRight className='w-5 h-5'/>
               </button>
             </div>
           </div>
@@ -436,19 +401,7 @@ const Dashboard: React.FC = () => {
             {displayMeetings.length === 0 ? (
               <div className='text-center py-12'>
                 <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-                  <svg
-                    className='w-8 h-8 text-gray-400'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z'
-                    />
-                  </svg>
+                <Calendar className='w-8 h-8 text-gray-400'/>
                 </div>
                 <p className='text-gray-500 text-lg font-medium'>
                   {selectedDate
@@ -477,35 +430,11 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className='flex items-center space-x-4 text-sm text-gray-500 mb-3'>
                     <div className='flex items-center space-x-1'>
-                      <svg
-                        className='w-4 h-4'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z'
-                        />
-                      </svg>
+                      <Calendar className='w-4 h-4'/>
                       <span>{formatMeetingDate(meeting.date)}</span>
                     </div>
                     <div className='flex items-center space-x-1'>
-                      <svg
-                        className='w-4 h-4'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                        />
-                      </svg>
+                      <Clock className='w-4 h-4'/>                        
                       <span>
                         {meeting.startTime} - {meeting.endTime}
                       </span>

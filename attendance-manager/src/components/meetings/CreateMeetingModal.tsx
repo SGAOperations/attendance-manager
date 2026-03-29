@@ -1,5 +1,7 @@
-import { UserApiData, MeetingType, MeetingApiData } from '@/types';
+import { MeetingType, MeetingApiData, UserSchema } from '@/types';
 import { useMemo, useState } from 'react';
+import { z } from 'zod';
+
 
 interface CreateMeetingModalProps {
   newMeeting: {
@@ -20,7 +22,7 @@ interface CreateMeetingModalProps {
     type: MeetingType;
     selectedAttendees: string[];
   }) => void;
-  members: UserApiData[];
+  members: z.infer<typeof UserSchema>[];
   toggleNonEboardSelection: () => void;
   bulkSelectButtonClasses: (active: boolean) => string;
   bulkSelectionActive: {
