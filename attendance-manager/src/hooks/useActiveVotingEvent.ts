@@ -18,11 +18,11 @@ interface UseActiveVotingEventResult {
  * with deletedAt === null
  */
 export function useActiveVotingEvent(
-  options: UseActiveVotingEventOptions = {}
+  options: UseActiveVotingEventOptions = {},
 ): UseActiveVotingEventResult {
   const { pollIntervalMs = 10000 } = options;
   const [activeEvent, setActiveEvent] = useState<VotingEventApiData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export function useActiveVotingEvent(
       }
       const events: VotingEventApiData[] = await res.json();
 
-      const activeEvents = events.filter(e => !e.deletedAt);
+      const activeEvents = events.filter((e) => !e.deletedAt);
 
       if (activeEvents.length === 0) {
         setActiveEvent(null);
@@ -45,12 +45,11 @@ export function useActiveVotingEvent(
 
       const sorted = [...activeEvents].sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
       setActiveEvent(sorted[0]);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
-      console.error('Error fetching active voting event:', err);
       setError(message);
     } finally {
       setLoading(false);
@@ -73,7 +72,6 @@ export function useActiveVotingEvent(
     activeEvent,
     loading,
     error,
-    refresh: fetchActiveEvent
+    refresh: fetchActiveEvent,
   };
 }
-

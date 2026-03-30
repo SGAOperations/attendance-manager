@@ -42,13 +42,13 @@ export const MeetingController = {
       !body.type
     ) {
       const requiredFields = ['name', 'startTime', 'date', 'endTime', 'type'];
-      const missingFields = requiredFields.filter(field => {
+      const missingFields = requiredFields.filter((field) => {
         const value = body[field];
         return value === undefined || value === null || value === '';
       });
       return NextResponse.json(
         { error: 'Missing required fields', missingFields },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -56,7 +56,7 @@ export const MeetingController = {
     if (body.type !== 'FULL_BODY' && body.type !== 'REGULAR') {
       return NextResponse.json(
         { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -64,13 +64,13 @@ export const MeetingController = {
     if (body.attendeeIds && !Array.isArray(body.attendeeIds)) {
       return NextResponse.json(
         { error: 'attendeeIds must be an array' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const newMeeting = await MeetingService.createMeeting(
       body,
-      body.attendeeIds || []
+      body.attendeeIds || [],
     );
     return NextResponse.json(newMeeting, { status: 201 });
   },
@@ -82,13 +82,13 @@ export const MeetingController = {
     if (updates.type && !Object.values(MeetingType).includes(updates.type)) {
       return NextResponse.json(
         { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const updatedMeeting = await MeetingService.updateMeeting(
       params.meetingId,
-      updates
+      updates,
     );
     return NextResponse.json(updatedMeeting);
   },
@@ -98,7 +98,7 @@ export const MeetingController = {
 
     return NextResponse.json(
       { message: 'Meeting soft deleted successfully' },
-      { status: 200 }
+      { status: 200 },
     );
-  }
+  },
 };

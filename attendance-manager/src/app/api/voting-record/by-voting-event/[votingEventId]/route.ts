@@ -17,8 +17,10 @@ import { VotingRecordController } from '@/voting-record/voting-record.controller
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ votingEventId: string }> }
+  { params }: { params: Promise<{ votingEventId: string }> },
 ) {
   const { votingEventId } = await params;
-  return VotingRecordController.getVotingRecordsByVotingEvent({ votingEventId });
+  return VotingRecordController.getVotingRecordsByVotingEvent({
+    votingEventId,
+  });
 }

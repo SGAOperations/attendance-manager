@@ -1,9 +1,11 @@
 import { MeetingApiData, AttendanceApiData } from '@/types';
+import React from 'react';
 
 interface AttendanceHistoryProps {
   meetingsWithAttendance: MeetingApiData[];
   attendanceRecord: Record<string, AttendanceApiData[]>;
   isAdmin: boolean;
+
   openEditAttendanceModal: (meeting: MeetingApiData) => void;
   loading?: boolean;
 }
@@ -13,7 +15,7 @@ const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({
   attendanceRecord,
   isAdmin,
   openEditAttendanceModal,
-  loading = false
+  loading = false,
 }) => {
   // Loading screen
   if (loading) {
@@ -51,7 +53,7 @@ const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({
               </tr>
             </thead>
             <tbody>
-              {meetingsWithAttendance.map(record => (
+              {meetingsWithAttendance.map((record) => (
                 <tr
                   key={record.meetingId}
                   className='border-b border-gray-200 hover:bg-gray-50'
@@ -74,7 +76,7 @@ const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({
                     <div className='text-sm font-medium text-gray-900'>
                       {
                         attendanceRecord[record.meetingId]?.filter(
-                          record => record.status === 'PRESENT'
+                          (record) => record.status === 'PRESENT',
                         ).length
                       }
                     </div>
@@ -84,10 +86,10 @@ const AttendanceHistory: React.FC<AttendanceHistoryProps> = ({
                     <div className='text-xs text-[#C8102E] font-medium'>
                       {Math.floor(
                         ((attendanceRecord[record.meetingId]?.filter(
-                          r => r.status === 'PRESENT'
+                          (r) => r.status === 'PRESENT',
                         ).length ?? 0) /
                           (attendanceRecord[record.meetingId]?.length ?? 1)) *
-                          10000
+                          10000,
                       ) / 100}
                       %
                     </div>

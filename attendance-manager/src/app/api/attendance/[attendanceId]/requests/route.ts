@@ -10,7 +10,7 @@ import { RequestController } from '@/request/request.controller';
  */
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ attendanceId: string }> }
+  { params }: { params: Promise<{ attendanceId: string }> },
 ) {
   try {
     const { attendanceId } = await params;
@@ -19,7 +19,7 @@ export async function POST(
     if (!reason || !attendanceMode) {
       return NextResponse.json(
         { error: 'reason and attendanceMode are required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -32,11 +32,8 @@ export async function POST(
 
     return NextResponse.json(newRequest, { status: 201 });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to create request';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to create request';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-

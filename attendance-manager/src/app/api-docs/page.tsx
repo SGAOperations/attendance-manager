@@ -8,7 +8,8 @@ export default function ApiDocsPage() {
   return (
     <ApiReferenceReact
       configuration={{
-        _integration: 'nextjs',
+        // eslint-disable-next-line
+        _integration: "nextjs",
         url: '/openapi.json',
       }}
     />

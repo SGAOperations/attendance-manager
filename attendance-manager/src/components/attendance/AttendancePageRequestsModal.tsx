@@ -1,24 +1,30 @@
 import { RequestApiData } from '@/types';
 import { Calendar, Clock, FileText } from 'lucide-react';
+import React from 'react';
 
-interface AttendancePageRequestsModal {
+interface AttendancePageRequestsModalProps {
   setRequestsView: (view: 'history' | 'active') => void;
   requestsView: 'history' | 'active';
   requests: RequestApiData[];
   declinedRequestIds: string[];
+
   setRequests: (requests: RequestApiData[]) => void;
+
   setDeclinedRequestIds: (ids: string[]) => void;
+
   setShowRequestsModal: (show: boolean) => void;
 }
 
-const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
+const AttendancePageRequestsModal: React.FC<
+  AttendancePageRequestsModalProps
+> = ({
   setRequestsView,
   requestsView,
   requests,
   declinedRequestIds,
   setRequests,
   setDeclinedRequestIds,
-  setShowRequestsModal
+  setShowRequestsModal,
 }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -58,11 +64,11 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
             ? r.attendance?.status !== 'EXCUSED_ABSENCE' &&
               !declinedRequestIds.includes(r.requestId)
             : r.attendance?.status === 'EXCUSED_ABSENCE' ||
-              declinedRequestIds.includes(r.requestId)
+              declinedRequestIds.includes(r.requestId),
         ).length === 0 ? (
           <div className='text-center py-12'>
             <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <FileText className='w-8 h-8 text-gray-400'/>
+              <FileText className='w-8 h-8 text-gray-400' />
             </div>
             <p className='text-gray-500 text-lg font-medium'>
               {requestsView === 'active'
@@ -83,9 +89,9 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                   ? r.attendance?.status !== 'EXCUSED_ABSENCE' &&
                     !declinedRequestIds.includes(r.requestId)
                   : r.attendance?.status === 'EXCUSED_ABSENCE' ||
-                    declinedRequestIds.includes(r.requestId)
+                    declinedRequestIds.includes(r.requestId),
               )
-              .map(request => (
+              .map((request) => (
                 <div
                   key={request.requestId}
                   className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
@@ -99,15 +105,15 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                         </h4>
                         <div className='flex items-center space-x-4 text-sm text-gray-600 mb-2'>
                           <div className='flex items-center space-x-1'>
-                            <Calendar className='w-4 h-4'/>
+                            <Calendar className='w-4 h-4' />
                             <span>
                               {new Date(
-                                request.attendance.meeting.date
+                                request.attendance.meeting.date,
                               ).toLocaleDateString()}
                             </span>
                           </div>
                           <div className='flex items-center space-x-1'>
-                            <Clock className='w-4 h-4'/>
+                            <Clock className='w-4 h-4' />
                             <span>
                               {request.attendance.meeting.startTime} -{' '}
                               {request.attendance.meeting.endTime}
@@ -188,21 +194,21 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                                   {
                                     method: 'PATCH',
                                     headers: {
-                                      'Content-Type': 'application/json'
+                                      'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify({
-                                      status: 'EXCUSED_ABSENCE'
-                                    })
-                                  }
+                                      status: 'EXCUSED_ABSENCE',
+                                    }),
+                                  },
                                 );
 
                                 if (!updateResponse.ok)
                                   throw new Error(
-                                    'Failed to update attendance'
+                                    'Failed to update attendance',
                                   );
 
                                 alert(
-                                  `Request accepted! Attendance updated for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`
+                                  `Request accepted! Attendance updated for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`,
                                 );
 
                                 const response = await fetch('/api/requests');
@@ -217,7 +223,7 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                                     error instanceof Error
                                       ? error.message
                                       : 'Unknown error'
-                                  }`
+                                  }`,
                                 );
                               }
                             }}
@@ -234,26 +240,26 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                                   {
                                     method: 'PATCH',
                                     headers: {
-                                      'Content-Type': 'application/json'
+                                      'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify({
-                                      status: 'UNEXCUSED_ABSENCE'
-                                    })
-                                  }
+                                      status: 'UNEXCUSED_ABSENCE',
+                                    }),
+                                  },
                                 );
 
                                 if (!updateResponse.ok)
                                   throw new Error(
-                                    'Failed to update attendance'
+                                    'Failed to update attendance',
                                   );
 
                                 alert(
-                                  `Request rejected for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`
+                                  `Request rejected for ${request.attendance.user.firstName} ${request.attendance.user.lastName}`,
                                 );
 
                                 setDeclinedRequestIds([
                                   ...declinedRequestIds,
-                                  request.requestId
+                                  request.requestId,
                                 ]);
                               } catch (error) {
                                 alert(
@@ -261,7 +267,7 @@ const AttendancePageRequestsModal: React.FC<AttendancePageRequestsModal> = ({
                                     error instanceof Error
                                       ? error.message
                                       : 'Unknown error'
-                                  }`
+                                  }`,
                                 );
                               }
                             }}

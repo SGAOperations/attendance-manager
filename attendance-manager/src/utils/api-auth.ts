@@ -9,8 +9,11 @@ import { prisma } from '@/lib/prisma';
 export async function getAuthenticatedUser() {
   try {
     const supabase = await createServerSupabaseClient();
-    const { data: { session }, error } = await supabase.auth.getSession();
-    
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
     if (error || !session?.user) {
       return null;
     }
@@ -18,13 +21,15 @@ export async function getAuthenticatedUser() {
     // Get user from Prisma by supabaseAuthId
     const user = await prisma.user.findUnique({
       where: { supabaseAuthId: session.user.id },
-      include: { role: true }
+      include: { role: true },
     });
 
     return user;
   } catch (error) {
-    console.error('Error getting authenticated user:', error);
-    return null;
+    //console.error('Error getting authenticated user:', error);
+    if (error) {
+      return null;
+    }
   }
 }
 
@@ -34,17 +39,13 @@ export async function getAuthenticatedUser() {
  */
 export async function requireAuth() {
   const user = await getAuthenticatedUser();
-  
+
   if (!user) {
     return {
       user: null,
-      error: NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
     };
   }
 
   return { user, error: null };
 }
-
