@@ -34,15 +34,13 @@ const rolePlainText = (role?: string) => {
       <div className='w-full px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
           {/* Left side - SGA (always on far left) */}
-          <div className="flex flex-row items-end flex-shrink-0">
+          <div className='flex flex-row items-end flex-shrink-0'>
             <Link href='homepage' onClick={onLogoClick}>
               <div className='text-2xl font-bold text-[#C8102E] tracking-wider'>
-              SGA
-            </div>
+                SGA
+              </div>
             </Link>
-            <div style={{paddingLeft: '8px'}} >
-              Version 2.1.3
-            </div>
+            <div style={{ paddingLeft: '8px' }}>Version 2.1.3</div>
           </div>
 
           {/* Right side - Profile (always on far right) */}
@@ -67,7 +65,7 @@ const rolePlainText = (role?: string) => {
                     </span>
                   </div>
                   <div className='hidden sm:block'>
-                    <UserRound className='w-4 h-4 text-gray-600'/>
+                    <UserRound className='w-4 h-4 text-gray-600' />
                   </div>
                 </button>
               </div>

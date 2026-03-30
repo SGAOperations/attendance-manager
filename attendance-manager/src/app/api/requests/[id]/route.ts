@@ -3,7 +3,7 @@ import { RequestController } from '@/request/request.controller';
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -12,14 +12,14 @@ export async function GET(
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Failed to fetch request' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }
 
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -29,14 +29,14 @@ export async function PUT(
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Failed to update request' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -45,7 +45,7 @@ export async function DELETE(
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Failed to delete request' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }

@@ -18,7 +18,7 @@ export const UsersController = {
     await UsersService.deleteRole(params.roleId);
     return NextResponse.json(
       { message: 'Role deleted successfully' },
-      { status: 200 }
+      { status: 200 },
     );
   },
 
@@ -34,7 +34,8 @@ export const UsersController = {
 
   async listUsersSantizied() {
     const users = await UsersService.getAllUsers();
-    const sanitizedUsers = users.map(user => {
+    const sanitizedUsers = users.map((user) => {
+      // eslint-disable-next-line no-unused-vars
       const { email: _email, ...safeUser } = user;
       return safeUser;
     });
@@ -54,14 +55,15 @@ export const UsersController = {
     if (!user) {
       return NextResponse.json({
         exists: false,
-        user: null
+        user: null,
       });
     }
-    
+
+    // eslint-disable-next-line no-unused-vars
     const { roleId: _roleId, ...userData } = user;
     return NextResponse.json({
       exists: true,
-      user: userData
+      user: userData,
     });
   },
 
@@ -76,7 +78,7 @@ export const UsersController = {
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const roleId = await UsersService.getRoleIdByRoleType(RoleType.MEMBER);
@@ -102,20 +104,24 @@ export const UsersController = {
     await UsersService.deleteUser(params.userId);
     return NextResponse.json(
       { message: 'User deleted successfully' },
-      { status: 204 }
+      { status: 204 },
     );
   },
 
-  async validateNuid(params: { nuid: string; firstName: string; lastName: string }) {
+  async validateNuid(params: {
+    nuid: string;
+    firstName: string;
+    lastName: string;
+  }) {
     try {
       // Validate required fields
       if (!params.nuid || !params.firstName || !params.lastName) {
         return NextResponse.json(
-          { 
-            valid: false, 
-            error: 'Missing required fields: nuid, firstName, lastName' 
+          {
+            valid: false,
+            error: 'Missing required fields: nuid, firstName, lastName',
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -123,39 +129,39 @@ export const UsersController = {
       const nuidRegex = /^\d{9}$/;
       if (!nuidRegex.test(params.nuid)) {
         return NextResponse.json(
-          { 
-            valid: false, 
-            error: 'Invalid NUID format. Must be exactly 9 digits.' 
+          {
+            valid: false,
+            error: 'Invalid NUID format. Must be exactly 9 digits.',
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       // Check if user exists with this NUID
       const user = await UsersService.getUserByNuid(params.nuid);
-      
+
       if (!user) {
         return NextResponse.json(
-          { 
-            valid: false, 
-            error: 'No user found with this NUID' 
+          {
+            valid: false,
+            error: 'No user found with this NUID',
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       // Validate that names match
-      const namesMatch = 
+      const namesMatch =
         user.firstName.toLowerCase() === params.firstName.toLowerCase() &&
         user.lastName.toLowerCase() === params.lastName.toLowerCase();
 
       if (!namesMatch) {
         return NextResponse.json(
-          { 
-            valid: false, 
-            error: 'NUID does not match the provided name' 
+          {
+            valid: false,
+            error: 'NUID does not match the provided name',
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -168,28 +174,26 @@ export const UsersController = {
           nuid: user.nuid,
           firstName: user.firstName,
           lastName: user.lastName,
-          email: user.email
-        }
-      });
-    } catch (error) {
-      console.error('NUID validation error:', error);
-      return NextResponse.json(
-        { 
-          valid: false, 
-          error: 'Internal server error' 
+          email: user.email,
         },
-        { status: 500 }
+      });
+    } catch {
+      return NextResponse.json(
+        {
+          valid: false,
+          error: 'Internal server error',
+        },
+        { status: 500 },
       );
     }
   },
 
   async updateAttendence(request: Request) {
     const body = await request.json();
-    console.log('body', body);
     if (!body.userId || !body.meetingId || body.status === undefined) {
       return NextResponse.json(
         { error: 'Missing required fields' },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const validStatuses = [
@@ -197,23 +201,23 @@ export const UsersController = {
       'PRESENT',
       'PENDING_ABSENCE',
       'EXCUSED_ABSENCE',
-      'UNEXCUSED_ABSENCE'
+      'UNEXCUSED_ABSENCE',
     ];
     if (!validStatuses.includes(body.status)) {
       return NextResponse.json(
         { error: 'Invalid attendance value' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     await AttendanceService.upsertAttendance(
       body.userId,
       body.meetingId,
-      body.status
+      body.status,
     );
     return NextResponse.json({
       success: true,
-      message: 'Attendance updated successfully'
+      message: 'Attendance updated successfully',
     });
-  }
+  },
 };

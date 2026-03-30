@@ -6,13 +6,14 @@ import { RoleType } from '@/generated/prisma';
 
 export async function POST(request: Request) {
   try {
-    const { email, password, firstName, lastName, nuid, roleId } = await request.json();
+    const { email, password, firstName, lastName, nuid, roleId } =
+      await request.json();
 
     // Validate required fields
     if (!email || !password || !firstName || !lastName || !nuid) {
       return NextResponse.json(
         { error: 'Missing required fields' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -30,16 +31,13 @@ export async function POST(request: Request) {
     });
 
     if (authError) {
-      return NextResponse.json(
-        { error: authError.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
     if (!authData.user) {
       return NextResponse.json(
         { error: 'Failed to create user' },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -54,11 +52,13 @@ export async function POST(request: Request) {
             data: { roleType: RoleType.MEMBER },
           });
           finalRoleId = newRole.roleId;
-        } catch (createRoleError) {
-          console.error('Failed to create MEMBER role:', createRoleError);
+        } catch {
           return NextResponse.json(
-            { error: 'Failed to get or create default role. Please contact an administrator.' },
-            { status: 500 }
+            {
+              error:
+                'Failed to get or create default role. Please contact an administrator.',
+            },
+            { status: 500 },
           );
         }
       }
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
           lastName,
           nuid,
           roleId: finalRoleId,
-          roleType: RoleType.MEMBER,
+          roleType: RoleType.MEMBER
           password: undefined, // Optional - Supabase handles authentication
         },
         include: {
@@ -83,11 +83,11 @@ export async function POST(request: Request) {
       });
 
       return NextResponse.json(
-        { 
+        {
           message: 'User created successfully',
-          user: userProfile 
+          user: userProfile,
         },
-        { status: 201 }
+        { status: 201 },
       );
     } catch (dbError: any) {
       // Handle Prisma unique constraint violations
@@ -97,35 +97,38 @@ export async function POST(request: Request) {
           if (target.includes('email')) {
             return NextResponse.json(
               { error: 'An account with this email already exists' },
-              { status: 400 }
+              { status: 400 },
             );
           }
           if (target.includes('nuid')) {
             return NextResponse.json(
               { error: 'An account with this NUID already exists' },
-              { status: 400 }
+              { status: 400 },
             );
           }
           if (target.includes('supabaseAuthId')) {
             return NextResponse.json(
-              { error: 'An account with this authentication ID already exists' },
-              { status: 400 }
+              {
+                error: 'An account with this authentication ID already exists',
+              },
+              { status: 400 },
             );
           }
         }
         return NextResponse.json(
           { error: 'A user with this information already exists' },
-          { status: 400 }
+          { status: 400 },
         );
       }
       // Re-throw to be caught by outer catch block
       throw dbError;
     }
   } catch (error) {
-    console.error('Signup error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create user' },
-      { status: 500 }
+      {
+        error: error instanceof Error ? error.message : 'Failed to create user',
+      },
+      { status: 500 },
     );
   }
 }

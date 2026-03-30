@@ -1,10 +1,13 @@
 import { CircleCheck, Clock, X } from 'lucide-react';
 
+import React from 'react';
+
 interface MeetingStatisticsPanelProps {
   attendedMeetings: number;
   missedMeetings: number;
   upcomingMeetings: number;
   isAdmin: boolean;
+
   setShowCreateMeetingModal: (show: boolean) => void;
 }
 
@@ -26,7 +29,7 @@ const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
           {/* Attended Meetings */}
           <div className='text-center'>
             <div className='flex justify-center mb-2'>
-              <CircleCheck className='w-8 h-8 text-[#A4804A]'/>
+              <CircleCheck className='w-8 h-8 text-[#A4804A]' />
             </div>
             <h3 className='text-sm font-medium text-gray-900 mb-1'>
               Attended Meetings
@@ -39,7 +42,7 @@ const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
           {/* Missed Meetings */}
           <div className='text-center'>
             <div className='flex justify-center mb-2'>
-              <X className='w-8 h-8 text-[#A4804A]'/>
+              <X className='w-8 h-8 text-[#A4804A]' />
             </div>
             <h3 className='text-sm font-medium text-gray-900 mb-1'>
               Missed Meetings
@@ -52,7 +55,7 @@ const MeetingStatisticsPanel: React.FC<MeetingStatisticsPanelProps> = ({
           {/* Upcoming Meetings */}
           <div className='text-center'>
             <div className='flex justify-center mb-2'>
-              <Clock className='w-8 h-8 text-[#A4804A]'/>
+              <Clock className='w-8 h-8 text-[#A4804A]' />
             </div>
             <h3 className='text-sm font-medium text-gray-900 mb-1'>
               Upcoming Meetings

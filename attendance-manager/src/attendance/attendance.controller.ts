@@ -1,18 +1,18 @@
 import { AttendanceService } from './attendance.service';
 
-const allowedStatuses = [
+const ALLOWED_STATUSES = [
   'PRESENT',
   'EXCUSED_ABSENCE',
   'UNEXCUSED_ABSENCE',
   'PENDING',
 ] as const;
 
-type AttendanceStatus = typeof allowedStatuses[number];
+type AttendanceStatus = (typeof ALLOWED_STATUSES)[number];
 
 function isValidStatus(status: any): status is AttendanceStatus {
   return (
     typeof status === 'string' &&
-    allowedStatuses.includes(status as AttendanceStatus)
+    ALLOWED_STATUSES.includes(status as AttendanceStatus)
   );
 }
 
@@ -23,16 +23,18 @@ export const AttendanceController = {
     }
 
     const attendances = await AttendanceService.getUserAttendance(userId);
+    // eslint-disable-next-line
     const filtered_attendances = attendances
-      .filter(a => a.request)
-      .map(a => ({
+      .filter((a) => a.request)
+      .map((a) => ({
         ...a.request,
+        // eslint-disable-next-line
         AttendanceStatus: a.status,
         attendance: {
           attendanceId: a.attendanceId,
           meeting: a.meeting,
-          status: a.status
-        }
+          status: a.status,
+        },
       }));
     return filtered_attendances;
   },
@@ -63,7 +65,7 @@ export const AttendanceController = {
     return AttendanceService.createAttendance({
       userId: data.userId,
       meetingId: data.meetingId,
-      status: data.status
+      status: data.status,
     });
   },
 
@@ -118,5 +120,5 @@ export const AttendanceController = {
     }
 
     return AttendanceService.updateAttendanceStatus(requestId, status);
-  }
+  },
 };

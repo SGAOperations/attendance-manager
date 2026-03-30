@@ -39,7 +39,7 @@ export const RequestController = {
       attendanceId: data.attendanceId,
       reason: data.reason.trim(),
       attendanceMode: data.attendanceMode,
-      timeAdjustment: data.timeAdjustment || undefined
+      timeAdjustment: data.timeAdjustment || undefined,
     });
   },
 
@@ -93,5 +93,5 @@ export const RequestController = {
       throw new Error('Invalid or missing requestId');
     }
     return RequestService.deleteRequest(requestId);
-  }
+  },
 };

@@ -1,4 +1,5 @@
 import { RemainingAbsences } from '@/types';
+import React from 'react';
 import { Info } from 'lucide-react';
 
 interface AbsencesBannerProps {
@@ -12,13 +13,13 @@ interface AbsencesBannerProps {
 
 const AbsencesBanner: React.FC<AbsencesBannerProps> = ({
   bannerColor,
-  remainingAbsences
+  remainingAbsences,
 }) => {
   return (
     <div className={`mb-6 rounded-lg border-2 p-4 ${bannerColor}`}>
       <div className='flex items-start'>
         <div className='flex-shrink-0'>
-          <Info className='w-6 h-6 text-gray-600'/>
+          <Info className='w-6 h-6 text-gray-600' />
         </div>
         <div className='ml-3 flex-1'>
           <h3 className='text-sm font-semibold text-gray-900 mb-2'>
@@ -33,8 +34,8 @@ const AbsencesBanner: React.FC<AbsencesBannerProps> = ({
                     remainingAbsences.regular.remaining === 0
                       ? 'text-red-600'
                       : remainingAbsences.regular.remaining <= 1
-                      ? 'text-yellow-600'
-                      : 'text-green-600'
+                        ? 'text-yellow-600'
+                        : 'text-green-600'
                   }`}
                 >
                   {remainingAbsences.regular.remaining}
