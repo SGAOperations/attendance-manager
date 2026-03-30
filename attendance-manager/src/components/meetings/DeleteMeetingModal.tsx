@@ -1,10 +1,11 @@
 import { MeetingApiData } from '@/types';
 import { CircleAlert } from 'lucide-react';
+import React from 'react';
 
 interface DeleteMeetingModalProps {
   setShowDeleteMeetingModal: (show: boolean) => void;
   handleDeleteMeeting: () => void;
-  deleteMeeting: MeetingApiData
+  deleteMeeting: MeetingApiData;
 }
 
 const DeleteMeetingModal: React.FC<DeleteMeetingModalProps> = ({
@@ -12,19 +13,20 @@ const DeleteMeetingModal: React.FC<DeleteMeetingModalProps> = ({
   setShowDeleteMeetingModal,
   deleteMeeting,
 }) => {
-
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
       {/* Delete Confirmation Modal */}
       <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
         <div className='bg-white rounded-2xl p-6 w-full max-w-md mx-4'>
           <div className='flex items-center gap-3 mb-4'>
-          <CircleAlert />
-          <h3 className='text-lg font-semibold text-gray-900'>Delete Meeting</h3>
-        </div>
+            <CircleAlert />
+            <h3 className='text-lg font-semibold text-gray-900'>
+              Delete Meeting
+            </h3>
+          </div>
           <p className='text-gray-700 mb-6'>
-            Are you sure you want to delete meeting {deleteMeeting.name}? This action cannot be
-            undone.
+            Are you sure you want to delete meeting {deleteMeeting.name}? This
+            action cannot be undone.
           </p>
           <div className='flex space-x-4'>
             <button

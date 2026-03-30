@@ -2,13 +2,20 @@
 import React, { createContext, useState } from 'react';
 import { User, LoginCredentials } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { AtSign, CircleAlert, CircleCheck, LoaderCircle, LockKeyhole, UserRound } from 'lucide-react';
+import {
+  AtSign,
+  CircleAlert,
+  CircleCheck,
+  LoaderCircle,
+  LockKeyhole,
+  UserRound,
+} from 'lucide-react';
 
 const defaultUser: User = {
   id: '',
   email: '',
   name: '',
-  role: 'MEMBER'
+  role: 'MEMBER',
 };
 
 export const UserContext = createContext(defaultUser);
@@ -25,17 +32,17 @@ interface SignupCredentials {
 const LoginPage: React.FC = () => {
   // const router = useRouter();
   const { login, isLoading } = useAuth();
-  // const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line
   const [user, _setUser] = useState<User>({
     id: '',
     email: '',
     name: '',
-    role: 'MEMBER'
+    role: 'MEMBER',
   });
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
-    password: ''
+    password: '',
   });
   const [signupCredentials, setSignupCredentials] = useState<SignupCredentials>(
     {
@@ -44,8 +51,8 @@ const LoginPage: React.FC = () => {
       email: '',
       nuid: '',
       password: '',
-      confirmPassword: ''
-    }
+      confirmPassword: '',
+    },
   );
   const [error, setError] = useState<string>('');
 
@@ -61,7 +68,6 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        console.log('Logging in...');
         await login(credentials);
         // console.log('Logged in :)');
       } catch (error) {
@@ -90,6 +96,7 @@ const LoginPage: React.FC = () => {
       }
 
       try {
+        // eslint-disable-next-line
         const { confirmPassword: _confirmPassword, ...safeCredentials } = signupCredentials;
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
@@ -97,27 +104,24 @@ const LoginPage: React.FC = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            ...safeCredentials
+            ...safeCredentials,
             // roleId will default to MEMBER in signup route
           }),
         });
 
-        console.log('here', response);
         if (!response.ok) {
           const errorData = await response.json();
           setError(errorData.message || 'Signup failed. Please try again.');
           return;
         }
-
+        // eslint-disable-next-line
         const result = await response.json();
-        console.log('User created:', result);
         alert(
-          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`
+          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`,
         );
         setIsLoginMode(true);
         resetForms();
-      } catch (error) {
-        console.error('Login error:', error);
+      } catch {
         setError('Invalid email or password');
       }
     }
@@ -126,14 +130,14 @@ const LoginPage: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (isLoginMode) {
-      setCredentials(prev => ({
+      setCredentials((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     } else {
-      setSignupCredentials(prev => ({
+      setSignupCredentials((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -147,7 +151,7 @@ const LoginPage: React.FC = () => {
       email: '',
       nuid: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     });
   };
 
@@ -213,7 +217,7 @@ const LoginPage: React.FC = () => {
                     </label>
                     <div className='relative'>
                       <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                      <UserRound className='h-5 w-5 text-gray-400'/>
+                        <UserRound className='h-5 w-5 text-gray-400' />
                       </div>
                       <input
                         id='firstName'
@@ -237,7 +241,7 @@ const LoginPage: React.FC = () => {
                     </label>
                     <div className='relative'>
                       <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                        <UserRound className='h-5 w-5 text-gray-400'/>
+                        <UserRound className='h-5 w-5 text-gray-400' />
                       </div>
                       <input
                         id='lastName'
@@ -265,7 +269,7 @@ const LoginPage: React.FC = () => {
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <AtSign className='h-5 w-5 text-gray-400'/>
+                    <AtSign className='h-5 w-5 text-gray-400' />
                   </div>
                   <input
                     id='email'
@@ -293,7 +297,7 @@ const LoginPage: React.FC = () => {
                   </label>
                   <div className='relative'>
                     <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <CircleCheck className='h-5 w-5 text-gray-400'/>
+                      <CircleCheck className='h-5 w-5 text-gray-400' />
                     </div>
                     <input
                       id='nuid'
@@ -320,7 +324,7 @@ const LoginPage: React.FC = () => {
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <LockKeyhole className='h-5 w-5 text-gray-400'/>
+                    <LockKeyhole className='h-5 w-5 text-gray-400' />
                   </div>
                   <input
                     id='password'
@@ -355,7 +359,7 @@ const LoginPage: React.FC = () => {
                   </label>
                   <div className='relative'>
                     <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <CircleCheck className='h-5 w-5 text-gray-400'/>
+                      <CircleCheck className='h-5 w-5 text-gray-400' />
                     </div>
                     <input
                       id='confirmPassword'
@@ -376,7 +380,7 @@ const LoginPage: React.FC = () => {
                 <div className='bg-red-900 border border-red-700 rounded-xl p-4'>
                   <div className='flex'>
                     <div className='flex-shrink-0'>
-                      <CircleAlert className='h-5 w-5 text-red-400'/>
+                      <CircleAlert className='h-5 w-5 text-red-400' />
                     </div>
                     <div className='ml-3'>
                       <p className='text-sm text-red-200'>{error}</p>
@@ -390,13 +394,10 @@ const LoginPage: React.FC = () => {
                   type='submit'
                   disabled={isLoading}
                   className='group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-[#C8102E] hover:bg-[#A8102E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C8102E] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl'
-                  onClick={() => {
-                    console.log('clicked');
-                  }}
                 >
                   {isLoading ? (
                     <div className='flex items-center'>
-                      <LoaderCircle className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                      <LoaderCircle className='animate-spin -ml-1 mr-3 h-5 w-5 text-white' />
                       {isLoginMode ? 'Signing in...' : 'Creating account...'}
                     </div>
                   ) : isLoginMode ? (

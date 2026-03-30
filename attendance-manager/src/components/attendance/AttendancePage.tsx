@@ -8,7 +8,7 @@ import {
   AttendanceApiData,
   AttendanceSchema,
   UserSchema,
-  RequestApiData
+  RequestApiData,
 } from '@/types';
 import AttendanceMeetingEdit from './AttendanceMeetingEdit';
 import AttendanceMeetingUserList from './AttendanceMeetingUserList';
@@ -33,16 +33,19 @@ const AttendancePage: React.FC = () => {
 
   type AttendanceType = z.infer<typeof AttendanceSchema>;
 
-
-  const [deleteUser, setDeleteUser] = useState<z.infer<typeof UserSchema> | null>(null);
+  const [deleteUser, setDeleteUser] = useState<z.infer<
+    typeof UserSchema
+  > | null>(null);
 
   // New state for attendance marking and editing
   const [showEditAttendanceModal, setShowEditAttendanceModal] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingApiData | null>(
-    null
+    null,
   );
   const [nuidInput, setNuidInput] = useState('');
-  const [attendanceUsers, setAttendanceUsers] = useState<z.infer<typeof UserSchema>[]>([]);
+  const [attendanceUsers, setAttendanceUsers] = useState<
+    z.infer<typeof UserSchema>[]
+  >([]);
   const [isLoadingAttendance, setIsLoadingAttendance] = useState(false);
   const [attendanceRecord, setAttendanceRecord] = useState<
     Record<string, AttendanceApiData[]>
@@ -57,16 +60,14 @@ const AttendancePage: React.FC = () => {
   const [attendanceCheckStep, setAttendanceCheckStep] = useState<
     'select-meeting' | 'user-list' | 'check-in'
   >('select-meeting');
-  const [
-    selectedMeetingForCheck,
-    setSelectedMeetingForCheck
-  ] = useState<MeetingApiData | null>(null);
+  const [selectedMeetingForCheck, setSelectedMeetingForCheck] =
+    useState<MeetingApiData | null>(null);
 
   // New state for Requests viewing (admin archive)
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [requests, setRequests] = useState<RequestApiData[]>([]);
   const [requestsView, setRequestsView] = useState<'active' | 'history'>(
-    'active'
+    'active',
   );
   const [declinedRequestIds, setDeclinedRequestIds] = useState<string[]>([]);
 
@@ -74,12 +75,8 @@ const AttendancePage: React.FC = () => {
   const isAdmin = user?.role === 'EBOARD';
   useEffect(() => {
     const loadMeetings = async () => {
-      try {
-        const allMeetings = await meetingAPI.getAllMeetings();
-        setMeetings(allMeetings);
-      } catch (err) {
-        console.error('Error loading meetings:', err);
-      }
+      const allMeetings = await meetingAPI.getAllMeetings();
+      setMeetings(allMeetings);
     };
 
     loadMeetings();
@@ -90,8 +87,8 @@ const AttendancePage: React.FC = () => {
       try {
         const allUsers = await meetingAPI.getUsers();
         setUsers(allUsers);
-      } catch (err) {
-        console.error('Error loading meetings:', err);
+      } catch {
+        /* 'Error loading user profile:', error */
       } finally {
         setIsLoadingMembers(false);
       }
@@ -106,15 +103,15 @@ const AttendancePage: React.FC = () => {
 
       try {
         const response = await fetch(
-          `/api/attendance/meeting/${selectedMeetingForCheck.meetingId}`
+          `/api/attendance/meeting/${selectedMeetingForCheck.meetingId}`,
         );
         const allAttendance = await response.json();
         setAttendanceRecord((prev: Record<string, AttendanceApiData[]>) => ({
           ...prev,
-          [selectedMeetingForCheck.meetingId]: allAttendance
+          [selectedMeetingForCheck.meetingId]: allAttendance,
         }));
-      } catch (error) {
-        console.error('Error fetching attendance users:', error);
+      } catch {
+        /* 'Error loading user profile:', error */
       } finally {
         // sets loading to false
         setIsLoadingMembers(false);
@@ -134,8 +131,9 @@ const AttendancePage: React.FC = () => {
         const attendances = await meetingAPI.getAttendances(meeting.meetingId);
 
         const totalMembers = attendances.length;
-        const attendedMembers = attendances.filter(a => a.status === 'Present')
-          .length;
+        const attendedMembers = attendances.filter(
+          (a) => a.status === 'Present',
+        ).length;
         const percentage =
           totalMembers === 0
             ? 0
@@ -145,11 +143,11 @@ const AttendancePage: React.FC = () => {
           ...meeting,
           totalMembers,
           attendedMembers,
-          percentage
+          percentage,
         });
         setAttendanceRecord((prev: Record<string, AttendanceApiData[]>) => ({
           ...prev,
-          [meeting.meetingId]: attendances
+          [meeting.meetingId]: attendances,
         }));
       }
       setMeetingsWithAttendance(updatedMeetings);
@@ -168,8 +166,7 @@ const AttendancePage: React.FC = () => {
       const res = await fetch(`/api/meeting/${meetingId}/users`);
       const allUsers: z.infer<typeof UserSchema>[] = await res.json();
       setAttendanceUsers(allUsers);
-    } catch (error) {
-      console.error('Error loading attendance users:', error);
+    } catch {
       alert('Failed to load attendance data');
     } finally {
       setIsLoadingAttendance(false);
@@ -198,21 +195,24 @@ const AttendancePage: React.FC = () => {
 
     try {
       // Find user by NUID
-      const userToMark = attendanceUsers.find(u => u.nuid === nuidInput.trim());
+      const userToMark = attendanceUsers.find(
+        (u) => u.nuid === nuidInput.trim(),
+      );
       if (!userToMark) {
         alert('NUID not found. Please check and try again.');
         return;
       }
       // Check if already marked as present
       const attendanceForMeeting = userToMark.attendance.find(
-        (attendance: AttendanceType) => attendance.meetingId === selectedMeetingForCheck.meetingId
+        (attendance: AttendanceType) =>
+          attendance.meetingId === selectedMeetingForCheck.meetingId,
       );
       if (
         attendanceForMeeting?.status === 'PRESENT' ||
         attendanceForMeeting?.status === 'Present'
       ) {
         alert(
-          `${userToMark.firstName} ${userToMark.lastName} is already marked as present!`
+          `${userToMark.firstName} ${userToMark.lastName} is already marked as present!`,
         );
         setNuidInput('');
         return;
@@ -224,10 +224,10 @@ const AttendancePage: React.FC = () => {
         body: JSON.stringify({
           userId: userToMark.userId,
           meetingId: selectedMeetingForCheck.meetingId,
-          status: 'PRESENT'
-        })
+          status: 'PRESENT',
+        }),
       });
-      const updatedUsers = attendanceUsers.map(u => {
+      const updatedUsers = attendanceUsers.map((u) => {
         if (u.nuid === nuidInput.trim()) {
           return { ...u, status: 'PRESENT' }; // update just this user
         }
@@ -241,15 +241,14 @@ const AttendancePage: React.FC = () => {
       }
 
       alert(
-        `✓ ${userToMark.firstName} ${userToMark.lastName} marked as present!`
+        `✓ ${userToMark.firstName} ${userToMark.lastName} marked as present!`,
       );
       setNuidInput('');
 
       // Reload meetings to update statistics
       const allMeetings = await meetingAPI.getAllMeetings();
       setMeetings(allMeetings);
-    } catch (error) {
-      console.error('Error marking attendance:', error);
+    } catch {
       alert('Failed to mark attendance. Please try again.');
     }
   };
@@ -265,7 +264,7 @@ const AttendancePage: React.FC = () => {
   // Function to soft delete a member
   const handleDeleteMember = async (userId: string) => {
     await fetch(`/api/users/${userId}`, { method: 'DELETE' });
-    setUsers(prev => prev.filter(u => u.userId !== userId));
+    setUsers((prev) => prev.filter((u) => u.userId !== userId));
   };
 
   // Function to toggle attendance status in edit modal
@@ -273,7 +272,7 @@ const AttendancePage: React.FC = () => {
     attendanceId: string,
     currentStatus: string,
     userId: string,
-    meetingId: string
+    meetingId: string,
   ) => {
     try {
       const newStatus =
@@ -283,7 +282,7 @@ const AttendancePage: React.FC = () => {
       const response = await fetch(`/api/attendance/${attendanceId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
       });
 
       if (!response.ok) {
@@ -292,38 +291,37 @@ const AttendancePage: React.FC = () => {
 
       // Reload attendance data
       if (selectedMeeting) {
-        setAttendanceUsers(prev =>
-          prev.map(u =>
+        setAttendanceUsers((prev) =>
+          prev.map((u) =>
             u.userId === userId
               ? {
                   ...u,
                   attendance: u.attendance.map((a: AttendanceType) =>
                     a.attendanceId === attendanceId
                       ? { ...a, status: newStatus }
-                      : a
-                  )
+                      : a,
+                  ),
                 }
-              : u
-          )
+              : u,
+          ),
         );
         // TODO (jwuchen): either find a better way to do this or don't trigger this till edit attendance componenet is closed
-        setMeetings(prevMeetings =>
-          prevMeetings.map(meeting =>
+        setMeetings((prevMeetings) =>
+          prevMeetings.map((meeting) =>
             meeting.meetingId === meetingId
               ? {
                   ...meeting,
-                  attendance: meeting.attendance.map(a =>
+                  attendance: meeting.attendance.map((a) =>
                     a.attendanceId === attendanceId
                       ? { ...a, status: newStatus }
-                      : a
-                  )
+                      : a,
+                  ),
                 }
-              : meeting
-          )
+              : meeting,
+          ),
         );
       }
-    } catch (error) {
-      console.error('Error updating attendance:', error);
+    } catch {
       alert('Failed to update attendance. Please try again.');
     }
   };
@@ -335,8 +333,8 @@ const AttendancePage: React.FC = () => {
     setShowEditAttendanceModal(true);
   };
 
-  const eboardMembers = users.filter(m => m.role.roleType === 'EBOARD');
-  const regularMembers = users.filter(m => m.role.roleType === 'MEMBER');
+  const eboardMembers = users.filter((m) => m.role.roleType === 'EBOARD');
+  const regularMembers = users.filter((m) => m.role.roleType === 'MEMBER');
 
   return (
     <div className='flex-1 p-6 bg-gray-50'>

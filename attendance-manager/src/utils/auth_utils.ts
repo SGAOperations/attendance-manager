@@ -8,45 +8,41 @@ export const login = async (
   credentials: LoginCredentials,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
   setUser: Dispatch<SetStateAction<User>>,
-  router: ReturnType<typeof useRouter>
+  router: ReturnType<typeof useRouter>,
 ) => {
   setIsLoading(true);
-  console.log(decodeURIComponent(credentials.email));
   try {
     const res = await fetch(
-      `/api/users/get-user-by-email/${credentials.email}`
+      `/api/users/get-user-by-email/${credentials.email}`,
     );
     if (!res.ok) {
-      console.error(
-        `Response status: ${res.status}\n. Response Msg: ${await res.text}`
-      );
       throw new Error(
-        `Response status: ${res.status}\n. Response Msg: ${await res.text}`
+        `Response status: ${res.status}\n. Response Msg: ${await res.text}`,
       );
     }
 
-    let user_details: UserData = await res.json();
+    let userDetails: UserData = await res.json();
     if (
       !(
-        user_details.role.roleType === 'EBOARD' ||
-        user_details.role.roleType === 'MEMBER'
+        userDetails.role.roleType === 'EBOARD' ||
+        userDetails.role.roleType === 'MEMBER'
       )
     ) {
       alert('Incorrect Roles');
       return;
     }
-    if (credentials.password !== user_details.password) {
+    if (credentials.password !== userDetails.password) {
       alert('Invalid email or password');
       return;
     }
 
     // Mock user data based on email
     const user: User = {
-      id: user_details.userId,
+      id: userDetails.userId,
       email: credentials.email,
-      name: user_details.firstName + ' ' + user_details.lastName,
-      role: user_details.role.roleType,
-      avatar: undefined
+      name: userDetails.firstName + ' ' + userDetails.lastName,
+      role: userDetails.role.roleType,
+      avatar: undefined,
     };
 
     setUser(user);
@@ -59,6 +55,6 @@ export const login = async (
   }
 };
 
-export const logout = (setUser: (arg0: null) => void) => {
+export const logout = (setUser: (value: null) => void) => {
   setUser(null);
 };

@@ -4,7 +4,7 @@ import { AttendanceController } from '../../../../../attendance/attendance.contr
 /**
  * Get User Attendance
  * @description Gets all attendances associated with a user
- * @body GetUserMeetingParams
+ * @body GetUserAttendanceParams
  * @response GetUserAttendanceResponse
  * @openapi
  */

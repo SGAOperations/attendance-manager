@@ -14,13 +14,15 @@ export async function GET(
 ) {
   try {
     const { userId } = await params;
-    const remainingAbsences = await AttendanceController.getRemainingUnexcusedAbsences(userId);
+    const remainingAbsences =
+      await AttendanceController.getRemainingUnexcusedAbsences(userId);
     return NextResponse.json(remainingAbsences);
   } catch (error: any) {
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch remaining unexcused absences' },
+      {
+        error: error.message || 'Failed to fetch remaining unexcused absences',
+      },
       { status: 400 },
     );
   }
 }
-

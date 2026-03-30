@@ -1,9 +1,12 @@
 import { MeetingApiData, RequestForm } from '@/types';
+import React from 'react';
 
 interface CreateRequestModalProps {
   upcomingMeetingsList: MeetingApiData[];
   requestForm: RequestForm;
+
   setRequestForm: (request: RequestForm) => void;
+
   setShowCreateRequestModal: (show: boolean) => void;
   handleSubmitRequest: () => void;
 }
@@ -13,7 +16,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({
   requestForm,
   setRequestForm,
   setShowCreateRequestModal,
-  handleSubmitRequest
+  handleSubmitRequest,
 }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -33,7 +36,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({
                 No upcoming meetings available
               </p>
             ) : (
-              upcomingMeetingsList.map(meeting => (
+              upcomingMeetingsList.map((meeting) => (
                 <label
                   key={meeting.meetingId}
                   className='flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer'
@@ -41,23 +44,23 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({
                   <input
                     type='checkbox'
                     checked={requestForm.selectedMeetings.includes(
-                      meeting.meetingId
+                      meeting.meetingId,
                     )}
-                    onChange={e => {
+                    onChange={(e) => {
                       if (e.target.checked) {
                         setRequestForm({
                           ...requestForm,
                           selectedMeetings: [
                             ...requestForm.selectedMeetings,
-                            meeting.meetingId
-                          ]
+                            meeting.meetingId,
+                          ],
                         });
                       } else {
                         setRequestForm({
                           ...requestForm,
                           selectedMeetings: requestForm.selectedMeetings.filter(
-                            id => id !== meeting.meetingId
-                          )
+                            (id) => id !== meeting.meetingId,
+                          ),
                         });
                       }
                     }}
@@ -96,13 +99,13 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({
               <input
                 type='checkbox'
                 checked={requestForm.requestTypes.leavingEarly}
-                onChange={e =>
+                onChange={(e) =>
                   setRequestForm({
                     ...requestForm,
                     requestTypes: {
                       ...requestForm.requestTypes,
-                      leavingEarly: e.target.checked
-                    }
+                      leavingEarly: e.target.checked,
+                    },
                   })
                 }
                 className='w-4 h-4 text-[#C8102E] border-gray-300 rounded focus:ring-[#C8102E]'
@@ -121,13 +124,13 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({
               <input
                 type='checkbox'
                 checked={requestForm.requestTypes.comingLate}
-                onChange={e =>
+                onChange={(e) =>
                   setRequestForm({
                     ...requestForm,
                     requestTypes: {
                       ...requestForm.requestTypes,
-                      comingLate: e.target.checked
-                    }
+                      comingLate: e.target.checked,
+                    },
                   })
                 }
                 className='w-4 h-4 text-[#C8102E] border-gray-300 rounded focus:ring-[#C8102E]'
@@ -144,13 +147,13 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({
               <input
                 type='checkbox'
                 checked={requestForm.requestTypes.goingOnline}
-                onChange={e =>
+                onChange={(e) =>
                   setRequestForm({
                     ...requestForm,
                     requestTypes: {
                       ...requestForm.requestTypes,
-                      goingOnline: e.target.checked
-                    }
+                      goingOnline: e.target.checked,
+                    },
                   })
                 }
                 className='w-4 h-4 text-[#C8102E] border-gray-300 rounded focus:ring-[#C8102E]'
@@ -174,10 +177,10 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({
           </label>
           <textarea
             value={requestForm.explanation}
-            onChange={e =>
+            onChange={(e) =>
               setRequestForm({
                 ...requestForm,
-                explanation: e.target.value
+                explanation: e.target.value,
               })
             }
             className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -198,9 +201,9 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({
                 requestTypes: {
                   leavingEarly: false,
                   comingLate: false,
-                  goingOnline: false
+                  goingOnline: false,
                 },
-                explanation: ''
+                explanation: '',
               });
             }}
             className='flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium'

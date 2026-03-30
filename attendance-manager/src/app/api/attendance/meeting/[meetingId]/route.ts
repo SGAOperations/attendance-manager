@@ -14,7 +14,8 @@ export async function GET(
 ) {
   try {
     const { meetingId } = await params;
-    const attendance = await AttendanceController.getMeetingAttendance(meetingId);
+    const attendance =
+      await AttendanceController.getMeetingAttendance(meetingId);
     return NextResponse.json(attendance);
   } catch (error: any) {
     return NextResponse.json(
