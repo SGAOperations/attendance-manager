@@ -23,7 +23,7 @@ model User {
   firstName  String
   lastName   String
   roleId     String
-  roleType       RoleType     @default(NONE)
+  roleType       RoleType     @default(MEMBER)
   isVotingMember Boolean      @default(false)
   password   String?  // Optional - Supabase handles authentication
   attendance Attendance[]
@@ -97,7 +97,6 @@ model VotingRecord {
 }
 
 enum RoleType {
-  NONE
   SUPER_ADMIN
   ADMIN
   SENATOR

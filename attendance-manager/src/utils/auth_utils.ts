@@ -28,7 +28,6 @@ export const login = async (
     let user_details: UserData = await res.json();
     if (
       !(
-        user_details.roleType === 'NONE' ||
         user_details.roleType === 'SENATOR' ||
         user_details.roleType === 'SUPER_ADMIN' ||
         user_details.roleType === 'ADMIN' ||

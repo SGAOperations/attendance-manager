@@ -1,5 +1,5 @@
--- Add roleType column with default NONE
-ALTER TABLE "User" ADD COLUMN "roleType" "RoleType" NOT NULL DEFAULT 'NONE';
+-- Add roleType column with default MEMBER
+ALTER TABLE "User" ADD COLUMN "roleType" "RoleType" NOT NULL DEFAULT 'MEMBER';
 
 -- Add isVotingMember column with default false
 ALTER TABLE "User" ADD COLUMN "isVotingMember" BOOLEAN NOT NULL DEFAULT false;
