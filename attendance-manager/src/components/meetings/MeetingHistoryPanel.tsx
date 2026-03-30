@@ -3,7 +3,6 @@ import { MeetingApiData, MeetingType } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkCanEditMeetings } from '@/utils/permissions';
 import { Calendar } from 'lucide-react';
-import React from 'react';
 
 interface MeetingHistoryPanelProps {
   setActiveTab: (option: 'past' | 'upcoming') => void;
