@@ -1,10 +1,11 @@
 import { MeetingApiData } from '@/types';
 import { Check, Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import React from 'react';
 
 interface EditMeetingModalProps {
-  selectedUserIds: string[],
-  setSelectedUserIds: React.Dispatch<React.SetStateAction<string[]>>,
+  selectedUserIds: string[];
+  setSelectedUserIds: React.Dispatch<React.SetStateAction<string[]>>;
   editMeeting: {
     name: string;
     date: string;
@@ -14,8 +15,9 @@ interface EditMeetingModalProps {
     type: 'FULL_BODY' | 'REGULAR';
   };
   handleUpdateMeeting: (
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ) => void | Promise<void>;
+
   setEditMeeting: (meeting: {
     name: string;
     date: string;
@@ -24,7 +26,9 @@ interface EditMeetingModalProps {
     notes: string;
     type: 'FULL_BODY' | 'REGULAR';
   }) => void;
+
   setShowEditMeetingModal: (show: boolean) => void;
+
   setEditingMeeting: (editing: MeetingApiData | null) => void;
 }
 
@@ -57,30 +61,32 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   handleUpdateMeeting,
   setEditMeeting,
   setShowEditMeetingModal,
-  setEditingMeeting
+  setEditingMeeting,
 }) => {
-
   const [users, setUsers] = useState<any[]>([]);
   const [search, setSearch] = useState('');
 
   const toggleUser = (userId: string) => {
     setSelectedUserIds((prev: any) =>
-      prev.includes(userId) ? prev.filter((id: any) => id !== userId) : [...prev, userId]
+      prev.includes(userId)
+        ? prev.filter((id: any) => id !== userId)
+        : [...prev, userId],
     );
   };
 
-  const filteredUsers = users.filter(user =>
-    `${user.firstName} ${user.lastName}`.toLowerCase().includes(search.toLowerCase())
+  const filteredUsers = users.filter((user) =>
+    `${user.firstName} ${user.lastName}`
+      .toLowerCase()
+      .includes(search.toLowerCase()),
   );
 
   const fetchUsers = () => {
     fetch('/api/users')
-      .then(response => response.json())
-      .then(json => setUsers(json))
+      .then((response) => response.json())
+      .then((json) => setUsers(json))
+      // eslint-disable-next-line
       .catch(error => console.error(error));
   };
-
-  
 
   useEffect(() => {
     fetchUsers();
@@ -93,7 +99,6 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
           Edit Meeting
         </h3>
         <form className='space-y-6' onSubmit={handleUpdateMeeting}>
-
           {/* Meeting Name */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -102,7 +107,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             <input
               type='text'
               value={editMeeting.name}
-              onChange={e =>
+              onChange={(e) =>
                 setEditMeeting({ ...editMeeting, name: e.target.value })
               }
               className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -120,7 +125,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
               <input
                 type='date'
                 value={formatDate(editMeeting.date)}
-                onChange={e =>
+                onChange={(e) =>
                   setEditMeeting({ ...editMeeting, date: e.target.value })
                 }
                 className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -134,7 +139,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
               <input
                 type='time'
                 value={formatTime(editMeeting.startTime)}
-                onChange={e =>
+                onChange={(e) =>
                   setEditMeeting({ ...editMeeting, startTime: e.target.value })
                 }
                 className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -148,7 +153,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
               <input
                 type='time'
                 value={formatTime(editMeeting.endTime)}
-                onChange={e =>
+                onChange={(e) =>
                   setEditMeeting({ ...editMeeting, endTime: e.target.value })
                 }
                 className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -164,10 +169,10 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             </label>
             <select
               value={editMeeting.type}
-              onChange={e =>
+              onChange={(e) =>
                 setEditMeeting({
                   ...editMeeting,
-                  type: e.target.value as 'FULL_BODY' | 'REGULAR'
+                  type: e.target.value as 'FULL_BODY' | 'REGULAR',
                 })
               }
               className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -185,7 +190,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             </label>
             <textarea
               value={editMeeting.notes}
-              onChange={e =>
+              onChange={(e) =>
                 setEditMeeting({ ...editMeeting, notes: e.target.value })
               }
               className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -211,11 +216,11 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             <div className='border border-gray-300 rounded-xl overflow-hidden'>
               {/* Search bar */}
               <div className='flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 bg-gray-50'>
-                <Search className='w-4 h-4 text-gray-400 flex-shrink-0'/>
+                <Search className='w-4 h-4 text-gray-400 flex-shrink-0' />
                 <input
                   type='text'
                   value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder='Search members...'
                   className='w-full text-sm bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 transition-all duration-150'
                 />
@@ -225,7 +230,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                     onClick={() => setSearch('')}
                     className='text-gray-400 hover:text-gray-600 transition-colors duration-150'
                   >
-                    <X className='w-3.5 h-3.5'/>
+                    <X className='w-3.5 h-3.5' />
                   </button>
                 )}
               </div>
@@ -234,7 +239,9 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
               <div className='max-h-40 overflow-y-auto divide-y divide-gray-100'>
                 {filteredUsers.length === 0 ? (
                   <div className='flex items-center justify-center py-6 text-sm text-gray-400'>
-                    {users.length === 0 ? 'Loading members...' : 'No members found'}
+                    {users.length === 0
+                      ? 'Loading members...'
+                      : 'No members found'}
                   </div>
                 ) : (
                   filteredUsers.map((user) => {
@@ -244,24 +251,37 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                         key={user.userId}
                         onClick={() => toggleUser(user.userId)}
                         className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-150 select-none ${
-                          isSelected ? 'bg-red-50 hover:bg-red-100' : 'bg-white hover:bg-gray-50'
+                          isSelected
+                            ? 'bg-red-50 hover:bg-red-100'
+                            : 'bg-white hover:bg-gray-50'
                         }`}
                       >
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-150 ${
-                          isSelected ? 'bg-[#C8102E] text-white scale-105' : 'bg-gray-100 text-gray-500'
-                        }`}>
-                          {user.firstName?.[0]}{user.lastName?.[0]}
+                        <div
+                          className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-150 ${
+                            isSelected
+                              ? 'bg-[#C8102E] text-white scale-105'
+                              : 'bg-gray-100 text-gray-500'
+                          }`}
+                        >
+                          {user.firstName?.[0]}
+                          {user.lastName?.[0]}
                         </div>
-                        <span className={`flex-1 text-sm font-medium transition-colors duration-150 ${
-                          isSelected ? 'text-gray-900' : 'text-gray-500'
-                        }`}>
+                        <span
+                          className={`flex-1 text-sm font-medium transition-colors duration-150 ${
+                            isSelected ? 'text-gray-900' : 'text-gray-500'
+                          }`}
+                        >
                           {user.firstName} {user.lastName}
                         </span>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 ${
-                          isSelected ? 'bg-[#C8102E] border-[#C8102E] scale-110' : 'border-gray-300 scale-100'
-                        }`}>
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 ${
+                            isSelected
+                              ? 'bg-[#C8102E] border-[#C8102E] scale-110'
+                              : 'border-gray-300 scale-100'
+                          }`}
+                        >
                           {isSelected && (
-                          <Check className='w-3 h-3 text-white'/>
+                            <Check className='w-3 h-3 text-white' />
                           )}
                         </div>
                       </div>
@@ -285,7 +305,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                   startTime: '',
                   endTime: '',
                   notes: '',
-                  type: 'REGULAR'
+                  type: 'REGULAR',
                 });
               }}
               className='flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-150 font-medium'

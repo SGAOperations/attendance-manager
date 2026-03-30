@@ -11,17 +11,17 @@ const ProfilePage: React.FC = () => {
     logout();
   };
 
-/* Maps enum value to appropriate plain text */
-const rolePlainText = (role?: string) => {
-  switch (role) {
-    case 'EBOARD':
-      return 'E-Board';
-    case 'MEMBER':
-      return 'Member';
-    default:
-      return role;
-  }
-};
+  /* Maps enum value to appropriate plain text */
+  const rolePlainText = (role?: string) => {
+    switch (role) {
+      case 'EBOARD':
+        return 'E-Board';
+      case 'MEMBER':
+        return 'Member';
+      default:
+        return role;
+    }
+  };
 
   if (!user) {
     return (

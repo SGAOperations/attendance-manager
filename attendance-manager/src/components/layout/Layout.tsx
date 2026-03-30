@@ -36,7 +36,7 @@ const Layout: React.FC = () => {
       try {
         // check if user is signed in to the meeting associated with the active voting event
         const res = await fetch(
-          `/api/attendance/meeting/${activeEvent.meetingId}`
+          `/api/attendance/meeting/${activeEvent.meetingId}`,
         );
 
         if (!res.ok) {
@@ -49,15 +49,13 @@ const Layout: React.FC = () => {
         }> = await res.json();
 
         const isPresent = attendanceRecords.some(
-          record => record.userId === user.id && record.status === 'PRESENT'
+          (record) => record.userId === user.id && record.status === 'PRESENT',
         );
 
         if (!isCancelled) {
           setCanVoteInActiveEvent(isPresent);
         }
-
-      } catch (error) {
-        console.error('Failed to verify vote eligibility:', error);
+      } catch {
         if (!isCancelled) {
           setCanVoteInActiveEvent(false);
         }
@@ -139,7 +137,7 @@ const Layout: React.FC = () => {
               <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
                 <div className='text-center py-12'>
                   <div className='w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-                  <TriangleAlert className='w-8 h-8 text-red-600'/>
+                    <TriangleAlert className='w-8 h-8 text-red-600' />
                   </div>
                   <h2 className='text-xl font-semibold text-gray-900 mb-2'>
                     Admin Access Required

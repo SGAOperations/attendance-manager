@@ -1,14 +1,16 @@
 import { RequestApiData } from '@/types';
 import { Calendar, Clock, FileText } from 'lucide-react';
+import React from 'react';
 
 interface ViewRequestsModalProps {
   myRequests: RequestApiData[];
+
   setShowMyRequestsModal: (show: boolean) => void;
 }
 
 const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
   myRequests,
-  setShowMyRequestsModal
+  setShowMyRequestsModal,
 }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -20,7 +22,7 @@ const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
         {myRequests.length === 0 ? (
           <div className='text-center py-12'>
             <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <FileText className='w-8 h-8 text-gray-400'/>
+              <FileText className='w-8 h-8 text-gray-400' />
             </div>
             <p className='text-gray-500 text-lg font-medium'>
               No requests found
@@ -31,7 +33,7 @@ const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
           </div>
         ) : (
           <div className='space-y-4'>
-            {myRequests.map(request => (
+            {myRequests.map((request) => (
               <div
                 key={request.requestId}
                 className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
@@ -45,15 +47,15 @@ const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
                       </h4>
                       <div className='flex items-center space-x-4 text-sm text-gray-600 mb-2'>
                         <div className='flex items-center space-x-1'>
-                          <Calendar className='w-4 h-4'/>
+                          <Calendar className='w-4 h-4' />
                           <span>
                             {new Date(
-                              request.attendance.meeting.date
+                              request.attendance.meeting.date,
                             ).toLocaleDateString()}
                           </span>
                         </div>
                         <div className='flex items-center space-x-1'>
-                          <Clock className='w-4 h-4'/>
+                          <Clock className='w-4 h-4' />
                           <span>
                             {request.attendance.meeting.startTime} -{' '}
                             {request.attendance.meeting.endTime}

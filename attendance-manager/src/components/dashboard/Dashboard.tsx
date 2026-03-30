@@ -2,7 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../profile/LoginPage';
 import { User } from '@/types';
 import ViewMeetingModal from './ViewMeetingModal';
-import { AlertCircle, Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import {
+  AlertCircle,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+} from 'lucide-react';
 
 interface Meeting {
   meetingId: string;
@@ -17,78 +23,61 @@ interface Meeting {
 // API service functions with endpoints
 const meetingAPI = {
   async getAllMeetings(): Promise<Meeting[]> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await fetch('/api/meeting');
-      console.log('getAllMeetings response status:', response.status);
-      console.log(
-        'getAllMeetings response headers:',
-        response.headers.get('content-type')
-      );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('getAllMeetings error response:', errorText);
         throw new Error(
-          `Failed to fetch meetings (${response.status}): ${errorText}`
+          `Failed to fetch meetings (${response.status}): ${errorText}`,
         );
       }
 
       const data = await response.json();
-      console.log('getAllMeetings data:', data);
       return data;
     } catch (error) {
-      console.error('getAllMeetings error:', error);
       throw error;
     }
   },
 
   async getMeetingsByDate(): Promise<Record<string, Meeting[]>> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await fetch('/api/meeting/by-date');
-      console.log('getMeetingsByDate response status:', response.status);
-      console.log(
-        'getMeetingsByDate response headers:',
-        response.headers.get('content-type')
-      );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('getMeetingsByDate error response:', errorText);
         throw new Error(
-          `Failed to fetch meetings by date (${response.status}): ${errorText}`
+          `Failed to fetch meetings by date (${response.status}): ${errorText}`,
         );
       }
 
       const data = await response.json();
-      console.log('getMeetingsByDate data:', data);
       return data;
     } catch (error) {
-      console.error('getMeetingsByDate error:', error);
       throw error;
     }
   },
 
   async getMeeting(meetingId: string): Promise<Meeting> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await fetch(`/api/meeting/${meetingId}`);
-      console.log('getMeeting response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('getMeeting error response:', errorText);
         throw new Error(
-          `Failed to fetch meeting (${response.status}): ${errorText}`
+          `Failed to fetch meeting (${response.status}): ${errorText}`,
         );
       }
 
       const data = await response.json();
-      console.log('getMeeting data:', data);
       return data;
     } catch (error) {
-      console.error('getMeeting error:', error);
       throw error;
     }
-  }
+  },
 };
 
 const Dashboard: React.FC = () => {
@@ -114,16 +103,15 @@ const Dashboard: React.FC = () => {
 
         const [allMeetings, groupedMeetings] = await Promise.all([
           meetingAPI.getAllMeetings(),
-          meetingAPI.getMeetingsByDate()
+          meetingAPI.getMeetingsByDate(),
         ]);
 
         setMeetings(allMeetings);
         setMeetingsByDate(groupedMeetings);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : 'Failed to load meetings'
+          err instanceof Error ? err.message : 'Failed to load meetings',
         );
-        console.error('Error loading meetings:', err);
       } finally {
         setLoading(false);
       }
@@ -148,7 +136,7 @@ const Dashboard: React.FC = () => {
     for (let i = startingDay - 1; i >= 0; i--) {
       days.push(new Date(year, month - 1, prevMonthLastDate - i));
     }
-    
+
     // Add days in current month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
@@ -156,7 +144,7 @@ const Dashboard: React.FC = () => {
 
     // Add head of next month until total is in 7-days format
     let nextDay = 1;
-    
+
     while (days.length % 7 !== 0) {
       days.push(new Date(year, month + 1, nextDay++));
     }
@@ -167,7 +155,7 @@ const Dashboard: React.FC = () => {
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -208,7 +196,7 @@ const Dashboard: React.FC = () => {
       })
       .sort(
         (a: Meeting, b: Meeting) =>
-          new Date(a.date).getTime() - new Date(b.date).getTime()
+          new Date(a.date).getTime() - new Date(b.date).getTime(),
       );
   };
 
@@ -224,13 +212,13 @@ const Dashboard: React.FC = () => {
     const localDate = new Date(
       parseInt(year),
       parseInt(month) - 1,
-      parseInt(day)
+      parseInt(day),
     );
 
     return localDate.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   }
 
@@ -255,7 +243,7 @@ const Dashboard: React.FC = () => {
       <div className='flex-1 p-6 bg-gray-50'>
         <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
           <div className='flex items-center'>
-            <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
+            <AlertCircle className='w-5 h-5 text-red-400 mr-2' />
             <p className='text-red-800'>Error: {error}</p>
           </div>
           <button
@@ -293,26 +281,26 @@ const Dashboard: React.FC = () => {
                   setCurrentDate(
                     new Date(
                       currentDate.getFullYear(),
-                      currentDate.getMonth() - 1
-                    )
+                      currentDate.getMonth() - 1,
+                    ),
                   )
                 }
                 className='p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors'
               >
-              <ChevronLeft className="w-5 h-5"/>
+                <ChevronLeft className='w-5 h-5' />
               </button>
               <button
                 onClick={() =>
                   setCurrentDate(
                     new Date(
                       currentDate.getFullYear(),
-                      currentDate.getMonth() + 1
-                    )
+                      currentDate.getMonth() + 1,
+                    ),
                   )
                 }
                 className='p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors'
               >
-              <ChevronRight className='w-5 h-5'/>
+                <ChevronRight className='w-5 h-5' />
               </button>
             </div>
           </div>
@@ -325,7 +313,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className='grid grid-cols-7 gap-1 mb-4'>
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div
                 key={day}
                 className='text-center text-sm font-medium text-gray-500 py-2'
@@ -345,7 +333,9 @@ const Dashboard: React.FC = () => {
                     onClick={() => {
                       if (!inCurrentMonth) {
                         // navigate the calendar to the clicked day's month
-                        setCurrentDate(new Date(day.getFullYear(), day.getMonth(), 1));
+                        setCurrentDate(
+                          new Date(day.getFullYear(), day.getMonth(), 1),
+                        );
                       }
                       setSelectedDate(day);
                     }}
@@ -354,10 +344,10 @@ const Dashboard: React.FC = () => {
                         ? isToday(day)
                           ? 'bg-[#C8102E] text-white shadow-lg'
                           : isSelected(day)
-                          ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E] border-2 border-[#C8102E]'
-                          : hasMeeting(day)
-                          ? 'bg-[#A4804A] bg-opacity-10 text-[#A4804A] hover:bg-[#A4804A] hover:bg-opacity-20'
-                          : 'hover:bg-gray-100'
+                            ? 'bg-[#C8102E] bg-opacity-10 text-[#C8102E] border-2 border-[#C8102E]'
+                            : hasMeeting(day)
+                              ? 'bg-[#A4804A] bg-opacity-10 text-[#A4804A] hover:bg-[#A4804A] hover:bg-opacity-20'
+                              : 'hover:bg-gray-100'
                         : 'text-gray-400 bg-gray-50'
                     }`}
                   >
@@ -401,7 +391,7 @@ const Dashboard: React.FC = () => {
             {displayMeetings.length === 0 ? (
               <div className='text-center py-12'>
                 <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-                <Calendar className='w-8 h-8 text-gray-400'/>
+                  <Calendar className='w-8 h-8 text-gray-400' />
                 </div>
                 <p className='text-gray-500 text-lg font-medium'>
                   {selectedDate
@@ -415,7 +405,7 @@ const Dashboard: React.FC = () => {
                 </p>
               </div>
             ) : (
-              displayMeetings.map(meeting => (
+              displayMeetings.map((meeting) => (
                 <div
                   key={meeting.meetingId}
                   className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
@@ -430,22 +420,22 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className='flex items-center space-x-4 text-sm text-gray-500 mb-3'>
                     <div className='flex items-center space-x-1'>
-                      <Calendar className='w-4 h-4'/>
+                      <Calendar className='w-4 h-4' />
                       <span>{formatMeetingDate(meeting.date)}</span>
                     </div>
                     <div className='flex items-center space-x-1'>
-                      <Clock className='w-4 h-4'/>                        
+                      <Clock className='w-4 h-4' />
                       <span>
                         {meeting.startTime} - {meeting.endTime}
                       </span>
                     </div>
                   </div>
                   <div className='flex items-center justify-between'>
-                    <div className='flex items-center space-x-1'>
-                    </div>
-                    <button 
-                      onClick={() => handleViewModal(meeting)} 
-                      className='text-[#C8102E] hover:text-[#A8102E] text-sm font-medium'>
+                    <div className='flex items-center space-x-1'></div>
+                    <button
+                      onClick={() => handleViewModal(meeting)}
+                      className='text-[#C8102E] hover:text-[#A8102E] text-sm font-medium'
+                    >
                       View Details
                     </button>
                   </div>
@@ -455,14 +445,13 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
-     {showViewModal && selectedMeeting && (
-      <ViewMeetingModal
-        meeting={selectedMeeting}
-        setShowViewMeetingModal={setShowViewModal}
-      />
-    )}
-
-  </div>
+      {showViewModal && selectedMeeting && (
+        <ViewMeetingModal
+          meeting={selectedMeeting}
+          setShowViewMeetingModal={setShowViewModal}
+        />
+      )}
+    </div>
   );
 };
 

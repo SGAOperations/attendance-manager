@@ -27,8 +27,8 @@ export const AttendanceService = {
       where: { userId },
       include: {
         meeting: true,
-        request: true
-      }
+        request: true,
+      },
     });
   },
 
@@ -38,23 +38,23 @@ export const AttendanceService = {
       where: { meetingId },
       include: {
         user: true,
-        request: true
-      }
+        request: true,
+      },
     });
   },
 
   // Update attendees for meeting
   async updateMeetingAttendees(meetingId: string, userIds: string[]) {
     await prisma.attendance.deleteMany({
-      where: { meetingId }
+      where: { meetingId },
     });
 
     return prisma.attendance.createMany({
-      data: userIds.map(userId => ({
+      data: userIds.map((userId) => ({
         userId,
         meetingId,
-        status: AttendanceStatus.PENDING 
-      }))
+        status: AttendanceStatus.PENDING,
+      })),
     });
   },
 
@@ -70,40 +70,41 @@ export const AttendanceService = {
   // Update attendance status
   async updateAttendance(
     attendanceId: string,
-    data: { status?: AttendanceStatus }
+    data: { status?: AttendanceStatus },
   ) {
     return prisma.attendance.update({
       where: { attendanceId: attendanceId },
       data: {
-        ...data
-      }
+        ...data,
+      },
     });
   },
 
   async upsertAttendance(
     userId: string,
     meetingId: string,
-    status: AttendanceStatus
+    status: AttendanceStatus,
   ) {
     return prisma.attendance.upsert({
       where: {
+        // eslint-disable-next-line
         userId_meetingId: { userId, meetingId }
       },
       update: {
-        status
+        status,
       },
       create: {
         userId,
         meetingId,
-        status
-      }
+        status,
+      },
     });
   },
 
   // Delete an attendance record
   async deleteAttendance(attendanceId: string) {
     return prisma.attendance.delete({
-      where: { attendanceId }
+      where: { attendanceId },
     });
   },
 
@@ -121,10 +122,10 @@ export const AttendanceService = {
 
     // Count unexcused absences by meeting type
     const regularCount = unexcusedAbsences.filter(
-      (attendance) => attendance.meeting.type === MeetingType.REGULAR
+      (attendance) => attendance.meeting.type === MeetingType.REGULAR,
     ).length;
     const fullBodyCount = unexcusedAbsences.filter(
-      (attendance) => attendance.meeting.type === MeetingType.FULL_BODY
+      (attendance) => attendance.meeting.type === MeetingType.FULL_BODY,
     ).length;
 
     // Allowed absences: 3 for regular, 1 for full-body
@@ -148,14 +149,14 @@ export const AttendanceService = {
   async updateAttendanceForUser(
     userId: string,
     attendanceId: string,
-    status: string
+    status: string,
   ) {
     if (!isAttendanceStatus(status)) {
       throw new Error('Invalid attendance status: ' + status);
     }
     const attendanceRecord = await prisma.attendance.update({
       where: { attendanceId, userId },
-      data: { status: convertToAttendanceStatus(status) }
+      data: { status: convertToAttendanceStatus(status) },
     });
     if (!attendanceRecord) {
       throw new Error('Attendance record not found for this user');
@@ -170,7 +171,7 @@ export const AttendanceService = {
 
     const request = await prisma.request.findUnique({
       where: { requestId },
-      include: { attendance: true }
+      include: { attendance: true },
     });
 
     if (!request || !request.attendance) {
@@ -179,9 +180,9 @@ export const AttendanceService = {
 
     const attendanceRecord = await prisma.attendance.update({
       where: { attendanceId: request.attendance.attendanceId },
-      data: { status: convertToAttendanceStatus(status) }
+      data: { status: convertToAttendanceStatus(status) },
     });
 
     return attendanceRecord;
-  }
+  },
 };

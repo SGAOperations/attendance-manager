@@ -1,9 +1,11 @@
 import { UserApiData } from '@/types';
+import React from 'react';
 
 interface AttendanceMembersProps {
   eboardMembers: UserApiData[];
   regularMembers: UserApiData[];
   loading?: boolean;
+
   setDeleteUser: (userId: UserApiData | null) => void;
 }
 
@@ -11,7 +13,7 @@ const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
   eboardMembers,
   regularMembers,
   loading = false,
-  setDeleteUser
+  setDeleteUser,
 }) => {
   // Loading screen
   if (loading) {
@@ -33,7 +35,7 @@ const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
       <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
         <h2 className='text-xl font-semibold text-gray-900 mb-4'>Eboard</h2>
         <div className='space-y-3 max-h-64 overflow-y-auto'>
-          {eboardMembers.map(member => (
+          {eboardMembers.map((member) => (
             <div
               key={member.userId}
               className='flex items-center space-x-3 p-3 bg-gray-50 rounded-lg'
@@ -64,7 +66,7 @@ const AttendanceMembers: React.FC<AttendanceMembersProps> = ({
       <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
         <h2 className='text-xl font-semibold text-gray-900 mb-4'>Members</h2>
         <div className='space-y-3 max-h-64 overflow-y-auto'>
-          {regularMembers.map(member => (
+          {regularMembers.map((member) => (
             <div
               key={member.userId}
               className='flex items-center space-x-3 p-3 bg-gray-50 rounded-lg'

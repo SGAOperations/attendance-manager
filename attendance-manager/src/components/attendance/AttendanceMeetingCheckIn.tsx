@@ -1,14 +1,16 @@
 import { MeetingApiData, AttendanceApiData } from '@/types';
+import React from 'react';
 
 interface AttendanceMeetingCheckInProps {
   selectedMeetingForCheck: MeetingApiData;
   nuidInput: string;
+
   setNuidInput: (nuid: string) => void;
   handleMarkAttendance: () => void;
   attendanceRecord: Record<string, AttendanceApiData[]>;
   closeAttendanceCheck: () => void;
   setAttendanceCheckStep: (
-    step: 'select-meeting' | 'user-list' | 'check-in'
+    step: 'select-meeting' | 'user-list' | 'check-in',
   ) => void;
 }
 
@@ -19,7 +21,7 @@ const AttendanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
   handleMarkAttendance,
   attendanceRecord,
   closeAttendanceCheck,
-  setAttendanceCheckStep
+  setAttendanceCheckStep,
 }) => {
   return (
     <>
@@ -51,8 +53,8 @@ const AttendanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
         <input
           type='text'
           value={nuidInput}
-          onChange={e => setNuidInput(e.target.value)}
-          onKeyDown={e => {
+          onChange={(e) => setNuidInput(e.target.value)}
+          onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleMarkAttendance();
             }
@@ -69,7 +71,7 @@ const AttendanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
           <span className='text-sm font-semibold text-gray-900'>
             {
               attendanceRecord[selectedMeetingForCheck.meetingId]?.filter(
-                record => record.status === 'PRESENT'
+                (record) => record.status === 'PRESENT',
               ).length
             }{' '}
             / {attendanceRecord[selectedMeetingForCheck.meetingId].length}{' '}
@@ -80,11 +82,13 @@ const AttendanceMeetingCheckIn: React.FC<AttendanceMeetingCheckInProps> = ({
           <div
             className='bg-[#C8102E] h-2 rounded-full transition-all duration-300'
             style={{
-              width: `${(attendanceRecord[
-                selectedMeetingForCheck.meetingId
-              ]?.filter(record => record.status === 'PRESENT').length /
-                attendanceRecord[selectedMeetingForCheck.meetingId].length) *
-                100}%`
+              width: `${
+                (attendanceRecord[selectedMeetingForCheck.meetingId]?.filter(
+                  (record) => record.status === 'PRESENT',
+                ).length /
+                  attendanceRecord[selectedMeetingForCheck.meetingId].length) *
+                100
+              }%`,
             }}
           ></div>
         </div>

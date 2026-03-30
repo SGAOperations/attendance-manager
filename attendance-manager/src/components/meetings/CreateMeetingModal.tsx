@@ -1,7 +1,7 @@
 import { MeetingType, MeetingApiData, UserSchema } from '@/types';
 import { useMemo, useState } from 'react';
 import { z } from 'zod';
-
+import React from 'react';
 
 interface CreateMeetingModalProps {
   newMeeting: {
@@ -13,6 +13,7 @@ interface CreateMeetingModalProps {
     type: MeetingType;
     selectedAttendees: string[];
   };
+
   setNewMeeting: (meeting: {
     name: string;
     date: string;
@@ -24,13 +25,16 @@ interface CreateMeetingModalProps {
   }) => void;
   members: z.infer<typeof UserSchema>[];
   toggleNonEboardSelection: () => void;
+
   bulkSelectButtonClasses: (active: boolean) => string;
   bulkSelectionActive: {
     nonEboard: boolean;
     allMembers: boolean;
   };
   toggleAllMembersSelection: () => void;
+
   setShowCreateMeetingModal: (show: boolean) => void;
+
   setMeetings: (meetings: MeetingApiData[]) => void;
 }
 
@@ -43,7 +47,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
   bulkSelectionActive,
   toggleAllMembersSelection,
   setShowCreateMeetingModal,
-  setMeetings
+  setMeetings,
 }) => {
   const [searchMemberQuery, setSearchMemberQuery] = useState('');
 
@@ -53,11 +57,11 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
     const lowerQuery = query.toLowerCase();
 
     return members.filter(
-      member =>
+      (member) =>
         `${member.firstName} ${member.lastName}`
           .toLowerCase()
           .includes(lowerQuery) ||
-        member.email.toLowerCase().includes(lowerQuery)
+        member.email.toLowerCase().includes(lowerQuery),
     );
   }, [members, searchMemberQuery]);
 
@@ -76,7 +80,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
             <input
               type='text'
               value={newMeeting.name}
-              onChange={e =>
+              onChange={(e) =>
                 setNewMeeting({ ...newMeeting, name: e.target.value })
               }
               className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -94,7 +98,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
               <input
                 type='date'
                 value={newMeeting.date}
-                onChange={e =>
+                onChange={(e) =>
                   setNewMeeting({ ...newMeeting, date: e.target.value })
                 }
                 className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -108,7 +112,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
               <input
                 type='time'
                 value={newMeeting.startTime}
-                onChange={e =>
+                onChange={(e) =>
                   setNewMeeting({ ...newMeeting, startTime: e.target.value })
                 }
                 className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -122,7 +126,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
               <input
                 type='time'
                 value={newMeeting.endTime}
-                onChange={e =>
+                onChange={(e) =>
                   setNewMeeting({ ...newMeeting, endTime: e.target.value })
                 }
                 className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -138,7 +142,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
             </label>
             <textarea
               value={newMeeting.notes || ''}
-              onChange={e =>
+              onChange={(e) =>
                 setNewMeeting({ ...newMeeting, notes: e.target.value })
               }
               className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -154,10 +158,10 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
             </label>
             <select
               value={newMeeting.type || 'REGULAR'}
-              onChange={e =>
+              onChange={(e) =>
                 setNewMeeting({
                   ...newMeeting,
-                  type: e.target.value as 'FULL_BODY' | 'REGULAR'
+                  type: e.target.value as 'FULL_BODY' | 'REGULAR',
                 })
               }
               className='w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
@@ -175,7 +179,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
             <input
               type='text'
               value={searchMemberQuery}
-              onChange={e => setSearchMemberQuery(e.target.value)}
+              onChange={(e) => setSearchMemberQuery(e.target.value)}
               placeholder='Search members...'
               className='w-full mb-4 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E]'
             />
@@ -184,7 +188,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
                 type='button'
                 onClick={toggleNonEboardSelection}
                 className={bulkSelectButtonClasses(
-                  bulkSelectionActive.nonEboard
+                  bulkSelectionActive.nonEboard,
                 )}
               >
                 Select All Members (Non-Eboard)
@@ -193,7 +197,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
                 type='button'
                 onClick={toggleAllMembersSelection}
                 className={bulkSelectButtonClasses(
-                  bulkSelectionActive.allMembers
+                  bulkSelectionActive.allMembers,
                 )}
               >
                 Select Everyone (Eboard + Members)
@@ -204,7 +208,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
                 <p className='text-sm text-gray-500'>No members found.</p>
               )}
 
-              {filteredMembers.map(member => (
+              {filteredMembers.map((member) => (
                 <label
                   key={member.userId}
                   className='flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer'
@@ -212,23 +216,24 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
                   <input
                     type='checkbox'
                     checked={newMeeting.selectedAttendees.includes(
-                      member.userId
+                      member.userId,
                     )}
-                    onChange={e => {
+                    onChange={(e) => {
                       if (e.target.checked) {
                         setNewMeeting({
                           ...newMeeting,
                           selectedAttendees: [
                             ...newMeeting.selectedAttendees,
-                            member.userId
-                          ]
+                            member.userId,
+                          ],
                         });
                       } else {
                         setNewMeeting({
                           ...newMeeting,
-                          selectedAttendees: newMeeting.selectedAttendees.filter(
-                            id => id !== member.userId
-                          )
+                          selectedAttendees:
+                            newMeeting.selectedAttendees.filter(
+                              (id) => id !== member.userId,
+                            ),
                         });
                       }
                     }}
@@ -275,7 +280,7 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
                   endTime: '',
                   notes: '',
                   type: 'REGULAR',
-                  selectedAttendees: []
+                  selectedAttendees: [],
                 });
               }}
               className='flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium'
@@ -285,14 +290,14 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
             <button
               type='submit'
               className='flex-1 px-6 py-3 bg-[#C8102E] text-white rounded-xl hover:bg-[#A8102E] transition-colors font-medium'
-              onClick={async e => {
+              onClick={async (e) => {
                 e.preventDefault();
 
                 try {
                   const response = await fetch('/api/meeting', {
                     method: 'POST',
                     headers: {
-                      'Content-Type': 'application/json'
+                      'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                       name: newMeeting.name,
@@ -301,16 +306,15 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
                       endTime: newMeeting.endTime,
                       notes: newMeeting.notes,
                       type: newMeeting.type,
-                      attendeeIds: newMeeting.selectedAttendees
-                    })
+                      attendeeIds: newMeeting.selectedAttendees,
+                    }),
                   });
 
                   if (!response.ok) {
                     throw new Error('Failed to create meeting');
                   }
 
-                  const createdMeeting = await response.json();
-                  console.log('Meeting created:', createdMeeting);
+                  await response.json();
 
                   // Refresh meetings list
                   const meetingsResponse = await fetch('/api/meeting');
@@ -326,12 +330,11 @@ const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
                     endTime: '',
                     notes: '',
                     type: 'REGULAR',
-                    selectedAttendees: []
+                    selectedAttendees: [],
                   });
 
                   alert('Meeting created successfully!');
-                } catch (error) {
-                  console.error('Error creating meeting:', error);
+                } catch {
                   alert('Failed to create meeting. Please try again.');
                 }
               }}

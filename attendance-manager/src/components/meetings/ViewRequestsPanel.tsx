@@ -1,9 +1,13 @@
 import { RequestApiData, User } from '@/types';
+import React from 'react';
 
 interface ViewRequestsProps {
   isMember: boolean;
+
   setShowCreateRequestModal: (show: boolean) => void;
+
   setShowMyRequestsModal: (show: boolean) => void;
+
   setMyRequests: (value: RequestApiData[]) => void;
   user: User | null;
 }
@@ -13,7 +17,7 @@ const ViewRequestsPanel: React.FC<ViewRequestsProps> = ({
   setShowCreateRequestModal,
   setShowMyRequestsModal,
   setMyRequests,
-  user
+  user,
 }) => {
   return (
     <div className='mb-6 flex justify-between items-start'>
@@ -37,7 +41,7 @@ const ViewRequestsPanel: React.FC<ViewRequestsProps> = ({
               try {
                 // Fetch user's requests using the new endpoint
                 const response = await fetch(
-                  `/api/attendance/user/requests/${user?.id}`
+                  `/api/attendance/user/requests/${user?.id}`,
                 );
                 if (!response.ok) {
                   throw new Error('Failed to fetch requests');

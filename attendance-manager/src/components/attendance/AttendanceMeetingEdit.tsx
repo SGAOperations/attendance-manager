@@ -1,4 +1,5 @@
 import { UserApiData, AttendanceApiData, MeetingApiData } from '@/types';
+import React from 'react';
 import { CircleCheck } from 'lucide-react';
 
 interface AttendanceMeetingSelectProps {
@@ -7,12 +8,17 @@ interface AttendanceMeetingSelectProps {
   selectedMeeting: MeetingApiData;
   toggleAttendanceStatus: (
     attendanceId: string,
+
     currentStatus: string,
+
     userId: string,
-    meetingId: string
+
+    meetingId: string,
   ) => void;
   isLoadingAttendance: boolean;
+
   setShowEditAttendanceModal: (show: boolean) => void;
+
   setSelectedMeeting: (meeting: MeetingApiData | null) => void;
 }
 
@@ -23,7 +29,7 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
   toggleAttendanceStatus,
   isLoadingAttendance,
   setShowEditAttendanceModal,
-  setSelectedMeeting
+  setSelectedMeeting,
 }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -48,7 +54,7 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                 </p>
                 <p className='text-sm text-gray-600'>
                   {attendanceRecord[selectedMeeting.meetingId]?.filter(
-                    record => record.status === 'PRESENT'
+                    (record) => record.status === 'PRESENT',
                   ).length ?? 0}
                   {' / '}
                   {attendanceUsers.length} present
@@ -64,13 +70,13 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                 </p>
               ) : (
                 <div className='divide-y divide-gray-200'>
-                  {attendanceUsers.map(user => {
+                  {attendanceUsers.map((user) => {
                     const isPresent = attendanceRecord[
                       selectedMeeting.meetingId
                     ]?.some(
-                      record =>
+                      (record) =>
                         record.userId === user.userId &&
-                        record.status === 'PRESENT'
+                        record.status === 'PRESENT',
                     );
 
                     return (
@@ -84,19 +90,19 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                           type='checkbox'
                           checked={isPresent}
                           onChange={() => {
-                            console.log('user', user);
-                            const hasAttendanceForMeeting = user.attendance.find(
-                              attendance =>
-                                attendance.meetingId ===
-                                selectedMeeting.meetingId
-                            );
+                            const hasAttendanceForMeeting =
+                              user.attendance.find(
+                                (attendance) =>
+                                  attendance.meetingId ===
+                                  selectedMeeting.meetingId,
+                              );
 
                             if (hasAttendanceForMeeting) {
                               toggleAttendanceStatus(
                                 hasAttendanceForMeeting.attendanceId,
                                 hasAttendanceForMeeting.status,
                                 user.userId,
-                                hasAttendanceForMeeting.meetingId
+                                hasAttendanceForMeeting.meetingId,
                               );
                             }
                           }}
@@ -120,7 +126,7 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                         </div>
                         {isPresent && (
                           <div className='flex-shrink-0'>
-                            <CircleCheck className='w-6 h-6 text-green-600'/>
+                            <CircleCheck className='w-6 h-6 text-green-600' />
                           </div>
                         )}
                       </label>

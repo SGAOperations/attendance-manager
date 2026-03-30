@@ -5,7 +5,7 @@ import {
   RequestApiData,
   RemainingAbsences,
   MeetingType,
-  RequestForm
+  RequestForm,
 } from '../../types';
 import { z } from 'zod';
 import { useAuth } from '../../contexts/AuthContext';
@@ -26,7 +26,7 @@ const normalizeDate = (dateStr: string) => {
     return `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
   }
 
-  // Already in MM/DD/YYYY format 
+  // Already in MM/DD/YYYY format
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
     return dateStr;
   }
@@ -53,7 +53,7 @@ const MeetingsPage: React.FC = () => {
   const [showEditMeetingModal, setShowEditMeetingModal] = useState(false);
   const [showDeleteMeetingModal, setShowDeleteMeetingModal] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<MeetingApiData | null>(
-    null
+    null,
   );
   const [newMeeting, setNewMeeting] = useState({
     name: '',
@@ -62,7 +62,7 @@ const MeetingsPage: React.FC = () => {
     endTime: '',
     notes: '',
     type: 'REGULAR' as MeetingType, // defaults to REGULAR
-    selectedAttendees: [] as string[]
+    selectedAttendees: [] as string[],
   });
   const [editMeeting, setEditMeeting] = useState({
     name: '',
@@ -70,10 +70,10 @@ const MeetingsPage: React.FC = () => {
     startTime: '',
     endTime: '',
     notes: '',
-    type: 'REGULAR' as 'FULL_BODY' | 'REGULAR'
+    type: 'REGULAR' as 'FULL_BODY' | 'REGULAR',
   });
   const [deleteMeeting, setDeleteMeeting] = useState<MeetingApiData | null>(
-    null
+    null,
   );
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
   const [showCreateRequestModal, setShowCreateRequestModal] = useState(false);
@@ -84,28 +84,26 @@ const MeetingsPage: React.FC = () => {
     requestTypes: {
       leavingEarly: false,
       comingLate: false,
-      goingOnline: false
+      goingOnline: false,
     },
-    explanation: ''
+    explanation: '',
   });
   const [typeFilter, setTypeFilter] = useState<MeetingType | null>(null);
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); 
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
   // Check if user is admin (EBOARD)
   const canManageMeetings = checkCanManageMeetings(user?.role);
   const isMember = user?.role === 'MEMBER';
-  const [
-    remainingAbsences,
-    setRemainingAbsences
-  ] = useState<RemainingAbsences | null>(null);
+  const [remainingAbsences, setRemainingAbsences] =
+    useState<RemainingAbsences | null>(null);
 
   const fetchMeetings = () => {
     fetch('/api/meeting')
-      .then(response => response.json())
-      .then(json => {
-        console.log(json);
+      .then((response) => response.json())
+      .then((json) => {
         setMeetings(json);
       })
+      // eslint-disable-next-line
       .catch(error => console.error(error));
   };
 
@@ -116,10 +114,10 @@ const MeetingsPage: React.FC = () => {
   useEffect(() => {
     if (!editingMeeting?.meetingId) return;
     fetch(`/api/meeting/${editingMeeting.meetingId}/users`)
-      .then(response => response.json())
-      .then(json => setSelectedUserIds(json.map((d: any) => d.userId)))
+      .then((response) => response.json())
+      .then((json) => setSelectedUserIds(json.map((d: any) => d.userId)))
+      // eslint-disable-next-line
       .catch(console.error);
-    console.log('updated to '+selectedUserIds.length);
   }, [editingMeeting?.meetingId, showEditMeetingModal]);
 
   const handleEditMeeting = (meeting: MeetingApiData) => {
@@ -130,7 +128,7 @@ const MeetingsPage: React.FC = () => {
       startTime: meeting.startTime,
       endTime: meeting.endTime,
       notes: meeting.notes,
-      type: meeting.type as 'FULL_BODY' | 'REGULAR'
+      type: meeting.type as 'FULL_BODY' | 'REGULAR',
     });
     setShowEditMeetingModal(true);
   };
@@ -148,15 +146,15 @@ const MeetingsPage: React.FC = () => {
       const response = await fetch(`/api/meeting/${editingMeeting.meetingId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editMeeting)
+        body: JSON.stringify(editMeeting),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         alert(
-          `Failed to update meeting: ${errorData.error || 'Unknown error'}`
+          `Failed to update meeting: ${errorData.error || 'Unknown error'}`,
         );
         return;
       }
@@ -164,7 +162,7 @@ const MeetingsPage: React.FC = () => {
       await fetch(`/api/meeting/${editingMeeting.meetingId}/users`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userIds: selectedUserIds })
+        body: JSON.stringify({ userIds: selectedUserIds }),
       });
 
       // Refresh meetings list
@@ -179,11 +177,10 @@ const MeetingsPage: React.FC = () => {
         startTime: '',
         endTime: '',
         notes: '',
-        type: 'REGULAR'
+        type: 'REGULAR',
       });
       alert('Meeting updated successfully!');
-    } catch (error) {
-      console.error('Error updating meeting:', error);
+    } catch {
       alert('Failed to update meeting. Please try again.');
     }
   };
@@ -192,12 +189,12 @@ const MeetingsPage: React.FC = () => {
   useEffect(() => {
     if (user?.id) {
       fetch(`/api/attendance/user/${user.id}/remaining-absences`)
-        .then(response => response.json())
+        .then((response) => response.json())
         .then((data: RemainingAbsences) => {
           setRemainingAbsences(data);
         })
-        .catch(error => {
-          console.error('Failed to fetch remaining absences:', error);
+        .catch((error) => {
+          alert(`Failed to fetch remaining absences: ${error}`);
         });
     }
   }, [user]);
@@ -205,16 +202,16 @@ const MeetingsPage: React.FC = () => {
   const [members, setMembers] = useState<z.infer<typeof UserSchema>[]>([]);
   const [bulkSelectionActive, setBulkSelectionActive] = useState({
     nonEboard: false,
-    allMembers: false
+    allMembers: false,
   });
 
   useEffect(() => {
     fetch('/api/users')
-      .then(res => res.json())
-      .then(data => {
-        console.log('Fetched members:', data); // <-- check this
+      .then((res) => res.json())
+      .then((data) => {
         setMembers(data);
       })
+      // eslint-disable-next-line
       .catch(err => console.error(err));
   }, []);
 
@@ -223,15 +220,16 @@ const MeetingsPage: React.FC = () => {
     [members]
   );
   const nonEboardMemberIds = useMemo(
-    () => nonEboardMembers.map(member => member.userId),
-    [nonEboardMembers]
+    () => nonEboardMembers.map((member) => member.userId),
+    [nonEboardMembers],
   );
-  const allMemberIds = useMemo(() => members.map(member => member.userId), [
-    members
-  ]);
+  const allMemberIds = useMemo(
+    () => members.map((member) => member.userId),
+    [members],
+  );
   const selectedAttendeeSet = useMemo(
     () => new Set(newMeeting.selectedAttendees),
-    [newMeeting.selectedAttendees]
+    [newMeeting.selectedAttendees],
   );
 
   const bulkSelectButtonClasses = (active: boolean) =>
@@ -243,17 +241,17 @@ const MeetingsPage: React.FC = () => {
 
   const toggleNonEboardSelection = () => {
     if (bulkSelectionActive.nonEboard) {
-      setNewMeeting(prev => ({
+      setNewMeeting((prev) => ({
         ...prev,
         selectedAttendees: prev.selectedAttendees.filter(
-          id => !nonEboardMemberIds.includes(id)
-        )
+          (id) => !nonEboardMemberIds.includes(id),
+        ),
       }));
-      setBulkSelectionActive(prev => ({ ...prev, nonEboard: false }));
+      setBulkSelectionActive((prev) => ({ ...prev, nonEboard: false }));
     } else {
-      setNewMeeting(prev => ({
+      setNewMeeting((prev) => ({
         ...prev,
-        selectedAttendees: nonEboardMemberIds
+        selectedAttendees: nonEboardMemberIds,
       }));
       setBulkSelectionActive({ nonEboard: true, allMembers: false });
     }
@@ -261,10 +259,10 @@ const MeetingsPage: React.FC = () => {
 
   const toggleAllMembersSelection = () => {
     if (bulkSelectionActive.allMembers) {
-      setNewMeeting(prev => ({ ...prev, selectedAttendees: [] }));
-      setBulkSelectionActive(prev => ({ ...prev, allMembers: false }));
+      setNewMeeting((prev) => ({ ...prev, selectedAttendees: [] }));
+      setBulkSelectionActive((prev) => ({ ...prev, allMembers: false }));
     } else {
-      setNewMeeting(prev => ({ ...prev, selectedAttendees: allMemberIds }));
+      setNewMeeting((prev) => ({ ...prev, selectedAttendees: allMemberIds }));
       setBulkSelectionActive({ nonEboard: false, allMembers: true });
     }
   };
@@ -273,9 +271,9 @@ const MeetingsPage: React.FC = () => {
     if (!bulkSelectionActive.nonEboard) return;
     const allSelected =
       nonEboardMemberIds.length > 0 &&
-      nonEboardMemberIds.every(id => selectedAttendeeSet.has(id));
+      nonEboardMemberIds.every((id) => selectedAttendeeSet.has(id));
     if (!allSelected) {
-      setBulkSelectionActive(prev => ({ ...prev, nonEboard: false }));
+      setBulkSelectionActive((prev) => ({ ...prev, nonEboard: false }));
     }
   }, [bulkSelectionActive.nonEboard, nonEboardMemberIds, selectedAttendeeSet]);
 
@@ -283,39 +281,37 @@ const MeetingsPage: React.FC = () => {
     if (!bulkSelectionActive.allMembers) return;
     const allSelected =
       allMemberIds.length > 0 &&
-      allMemberIds.every(id => selectedAttendeeSet.has(id));
+      allMemberIds.every((id) => selectedAttendeeSet.has(id));
     if (!allSelected) {
-      setBulkSelectionActive(prev => ({ ...prev, allMembers: false }));
+      setBulkSelectionActive((prev) => ({ ...prev, allMembers: false }));
     }
   }, [bulkSelectionActive.allMembers, allMemberIds, selectedAttendeeSet]);
 
   // Calculate statistics from real meetings
   const today = new Date();
   // Calculate statistics from real data
-  const attendedMeetings = meetings.filter(m => {
+  const attendedMeetings = meetings.filter((m) => {
     const meetingDate = new Date(m.date);
     if (meetingDate > today) return false; // Skip upcoming meetings
     // Check if current user attended this meeting
     return m.attendance.some(
-      a => a.userId === user?.id && a.status === 'PRESENT'
+      (a) => a.userId === user?.id && a.status === 'PRESENT',
     );
   }).length;
 
-  const missedMeetings = meetings.filter(m => {
+  const missedMeetings = meetings.filter((m) => {
     const meetingDate = new Date(m.date);
     if (meetingDate > today) return false; // Skip upcoming meetings
     // Check if current user was absent
     return m.attendance.some(
-      a =>
+      (a) =>
         a.userId === user?.id &&
-        (a.status === 'UNEXCUSED_ABSENCE' || a.status === 'EXCUSED_ABSENCE')
+        (a.status === 'UNEXCUSED_ABSENCE' || a.status === 'EXCUSED_ABSENCE'),
     );
   }).length;
 
-
-
   // Filter meetings based on active tab
-  const filteredMeetings = meetings.filter(m => {
+  const filteredMeetings = meetings.filter((m) => {
     // change to 'meetings' for implementation
     const meetingDate = new Date(m.date);
     if (activeTab === 'past') {
@@ -329,7 +325,7 @@ const MeetingsPage: React.FC = () => {
   }
 
   // Get upcoming meetings for request creation
-  const upcomingMeetingsList = meetings.filter(m => parseEST(m.date) > today);
+  const upcomingMeetingsList = meetings.filter((m) => parseEST(m.date) > today);
 
   // Handle request submission
   const handleSubmitRequest = async () => {
@@ -364,16 +360,14 @@ const MeetingsPage: React.FC = () => {
       : 'IN_PERSON';
 
     // timeAdjustment: can only have one (leavingEarly or comingLate)
-    let timeAdjustment:
-      | 'ARRIVING_LATE'
-      | 'LEAVING_EARLY'
-      | undefined = undefined;
+    let timeAdjustment: 'ARRIVING_LATE' | 'LEAVING_EARLY' | undefined =
+      undefined;
     if (
       requestForm.requestTypes.leavingEarly &&
       requestForm.requestTypes.comingLate
     ) {
       alert(
-        'Please select only one time adjustment (either leaving early OR coming late)'
+        'Please select only one time adjustment (either leaving early OR coming late)',
       );
       return;
     } else if (requestForm.requestTypes.leavingEarly) {
@@ -394,19 +388,19 @@ const MeetingsPage: React.FC = () => {
           body: JSON.stringify({
             userId: user.id,
             meetingId: meetingId,
-            status: 'PENDING'
-          })
+            status: 'PENDING',
+          }),
         });
 
         if (!attendanceResponse.ok) {
           throw new Error(
-            `Failed to create/update attendance for meeting ${meetingId}`
+            `Failed to create/update attendance for meeting ${meetingId}`,
           );
         }
 
         // Fetch the user's attendance to find the one we just created/updated
         const userAttendanceResponse = await fetch(
-          `/api/attendance/user/${user.id}`
+          `/api/attendance/user/${user.id}`,
         );
         if (!userAttendanceResponse.ok) {
           throw new Error('Failed to fetch attendance record'); // single quotes
@@ -414,12 +408,12 @@ const MeetingsPage: React.FC = () => {
 
         const userAttendance = await userAttendanceResponse.json();
         const attendanceRecord = userAttendance.find(
-          (a: any) => a.meetingId === meetingId
+          (a: any) => a.meetingId === meetingId,
         );
 
         if (!attendanceRecord || !attendanceRecord.attendanceId) {
           throw new Error(
-            `Attendance record not found for meeting ${meetingId}`
+            `Attendance record not found for meeting ${meetingId}`,
           );
         }
 
@@ -429,7 +423,7 @@ const MeetingsPage: React.FC = () => {
         const requestPayload: any = {
           attendanceId,
           reason: requestForm.explanation,
-          attendanceMode
+          attendanceMode,
         };
 
         if (timeAdjustment) {
@@ -439,14 +433,14 @@ const MeetingsPage: React.FC = () => {
         const requestResponse = await fetch('/api/requests', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestPayload)
+          body: JSON.stringify(requestPayload),
         });
 
         if (!requestResponse.ok) {
           const errorData = await requestResponse.json();
           throw new Error(
             errorData.error ||
-              `Failed to create request for meeting ${meetingId}`
+              `Failed to create request for meeting ${meetingId}`,
           );
         }
 
@@ -462,9 +456,9 @@ const MeetingsPage: React.FC = () => {
         requestTypes: {
           leavingEarly: false,
           comingLate: false,
-          goingOnline: false
+          goingOnline: false,
         },
-        explanation: ''
+        explanation: '',
       });
       setShowCreateRequestModal(false);
     } catch (error) {
@@ -475,16 +469,16 @@ const MeetingsPage: React.FC = () => {
 
   const handleDeleteMeeting = async () => {
     if (!deleteMeeting) return;
-    
+
     try {
       const response = await fetch(`/api/meeting/${deleteMeeting.meetingId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         alert(
-          `Failed to delete meeting: ${errorData.error || 'Unknown error'}`
+          `Failed to delete meeting: ${errorData.error || 'Unknown error'}`,
         );
         return;
       }
@@ -496,16 +490,14 @@ const MeetingsPage: React.FC = () => {
       // Close modal and reset
       setShowDeleteMeetingModal(false);
       setDeleteMeeting(null);
-
-    } catch (error) {
-      console.error('Error deleting meeting:', error);
+    } catch {
       alert('Failed to delete meeting. Please try again.');
     }
   };
 
   // visibleMeetings are meetings post-type-filter
   const visibleMeetings = typeFilter
-    ? filteredMeetings.filter(m => m.type === typeFilter)
+    ? filteredMeetings.filter((m) => m.type === typeFilter)
     : filteredMeetings;
 
   // Determine banner color based on remaining absences
@@ -589,8 +581,8 @@ const MeetingsPage: React.FC = () => {
       {/* Edit Meeting Modal */}
       {showEditMeetingModal && editingMeeting && (
         <EditMeetingModal
-          selectedUserIds={selectedUserIds}        
-          setSelectedUserIds={setSelectedUserIds}  
+          selectedUserIds={selectedUserIds}
+          setSelectedUserIds={setSelectedUserIds}
           editMeeting={editMeeting}
           handleUpdateMeeting={handleUpdateMeeting}
           setEditMeeting={setEditMeeting}

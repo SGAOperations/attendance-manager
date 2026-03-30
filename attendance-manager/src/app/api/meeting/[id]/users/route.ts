@@ -12,24 +12,22 @@ import { AttendanceController } from '@/attendance/attendance.controller';
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   return MeetingController.getUsers({ meetingId: id });
 }
 
-
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params;  // necessary
+  const { id } = await params; // necessary
   const body = await request.json();
   const result = await AttendanceController.updateMeetingAttendees(
     id,
-    body.userIds
+    body.userIds,
   );
   // return JSON with the payload (e.g. count)
-  return NextResponse.json(result);         // type: Response
-  
+  return NextResponse.json(result); // type: Response
 }
