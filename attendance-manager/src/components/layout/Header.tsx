@@ -11,23 +11,23 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onProfileClick, onLogoClick }) => {
   const { user } = useAuth();
 
-/* Maps enum value to appropriate plain text */
-const rolePlainText = (role?: string) => {
-  switch (role) {
-    case 'SUPER_ADMIN':
-      return 'Super admin';
-    case 'ADMIN':
-      return 'Admin';
-    case 'SENATOR':
-      return 'Senator';
-    case 'EBOARD':
-      return 'E-Board';
-    case 'MEMBER':
-      return 'Member';
-    default:
-      return role;
-  }
-};
+  /* Maps enum value to appropriate plain text */
+  const rolePlainText = (role?: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'Super admin';
+      case 'ADMIN':
+        return 'Admin';
+      case 'SENATOR':
+        return 'Senator';
+      case 'EBOARD':
+        return 'E-Board';
+      case 'MEMBER':
+        return 'Member';
+      default:
+        return role;
+    }
+  };
 
   return (
     <header className='bg-white shadow-lg border-b border-gray-200 w-full'>

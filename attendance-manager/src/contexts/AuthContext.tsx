@@ -5,7 +5,7 @@ import React, {
   useContext,
   useState,
   useEffect,
-  ReactNode,
+  ReactNode
 } from 'react';
 import { User, LoginCredentials, AuthContextType } from '../types';
 import { useRouter } from 'next/navigation';
@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const checkSession = async () => {
       try {
         const {
-          data: { session },
+          data: { session }
         } = await supabase.auth.getSession();
 
         if (session?.user) {
@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Listen for auth changes
     const {
-      data: { subscription },
+      data: { subscription }
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         await loadUserProfile(session.user.id);
@@ -96,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: credentials.email,
-        password: credentials.password,
+        password: credentials.password
       });
 
       if (error) {
@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     // eslint-disable-next-line
     logout,
-    isLoading,
+    isLoading
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

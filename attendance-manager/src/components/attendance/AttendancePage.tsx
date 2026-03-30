@@ -8,7 +8,7 @@ import {
   AttendanceApiData,
   AttendanceSchema,
   UserSchema,
-  RequestApiData,
+  RequestApiData
 } from '@/types';
 import AttendanceMeetingEdit from './AttendanceMeetingEdit';
 import AttendanceMeetingUserList from './AttendanceMeetingUserList';
@@ -41,7 +41,7 @@ const AttendancePage: React.FC = () => {
   // New state for attendance marking and editing
   const [showEditAttendanceModal, setShowEditAttendanceModal] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingApiData | null>(
-    null,
+    null
   );
   const [nuidInput, setNuidInput] = useState('');
   const [attendanceUsers, setAttendanceUsers] = useState<
@@ -61,14 +61,16 @@ const AttendancePage: React.FC = () => {
   const [attendanceCheckStep, setAttendanceCheckStep] = useState<
     'select-meeting' | 'user-list' | 'check-in'
   >('select-meeting');
-  const [selectedMeetingForCheck, setSelectedMeetingForCheck] =
-    useState<MeetingApiData | null>(null);
+  const [
+    selectedMeetingForCheck,
+    setSelectedMeetingForCheck
+  ] = useState<MeetingApiData | null>(null);
 
   // New state for Requests viewing (admin archive)
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [requests, setRequests] = useState<RequestApiData[]>([]);
   const [requestsView, setRequestsView] = useState<'active' | 'history'>(
-    'active',
+    'active'
   );
   const [declinedRequestIds, setDeclinedRequestIds] = useState<string[]>([]);
 
@@ -104,12 +106,12 @@ const AttendancePage: React.FC = () => {
 
       try {
         const response = await fetch(
-          `/api/attendance/meeting/${selectedMeetingForCheck.meetingId}`,
+          `/api/attendance/meeting/${selectedMeetingForCheck.meetingId}`
         );
         const allAttendance = await response.json();
         setAttendanceRecord((prev: Record<string, AttendanceApiData[]>) => ({
           ...prev,
-          [selectedMeetingForCheck.meetingId]: allAttendance,
+          [selectedMeetingForCheck.meetingId]: allAttendance
         }));
       } catch {
         /* 'Error loading user profile:', error */
@@ -132,9 +134,8 @@ const AttendancePage: React.FC = () => {
         const attendances = await meetingAPI.getAttendances(meeting.meetingId);
 
         const totalMembers = attendances.length;
-        const attendedMembers = attendances.filter(
-          (a) => a.status === 'Present',
-        ).length;
+        const attendedMembers = attendances.filter(a => a.status === 'Present')
+          .length;
         const percentage =
           totalMembers === 0
             ? 0
@@ -144,11 +145,11 @@ const AttendancePage: React.FC = () => {
           ...meeting,
           totalMembers,
           attendedMembers,
-          percentage,
+          percentage
         });
         setAttendanceRecord((prev: Record<string, AttendanceApiData[]>) => ({
           ...prev,
-          [meeting.meetingId]: attendances,
+          [meeting.meetingId]: attendances
         }));
       }
       setMeetingsWithAttendance(updatedMeetings);
@@ -196,9 +197,7 @@ const AttendancePage: React.FC = () => {
 
     try {
       // Find user by NUID
-      const userToMark = attendanceUsers.find(
-        (u) => u.nuid === nuidInput.trim(),
-      );
+      const userToMark = attendanceUsers.find(u => u.nuid === nuidInput.trim());
       if (!userToMark) {
         alert('NUID not found. Please check and try again.');
         return;
@@ -206,14 +205,14 @@ const AttendancePage: React.FC = () => {
       // Check if already marked as present
       const attendanceForMeeting = userToMark.attendance.find(
         (attendance: AttendanceType) =>
-          attendance.meetingId === selectedMeetingForCheck.meetingId,
+          attendance.meetingId === selectedMeetingForCheck.meetingId
       );
       if (
         attendanceForMeeting?.status === 'PRESENT' ||
         attendanceForMeeting?.status === 'Present'
       ) {
         alert(
-          `${userToMark.firstName} ${userToMark.lastName} is already marked as present!`,
+          `${userToMark.firstName} ${userToMark.lastName} is already marked as present!`
         );
         setNuidInput('');
         return;
@@ -225,10 +224,10 @@ const AttendancePage: React.FC = () => {
         body: JSON.stringify({
           userId: userToMark.userId,
           meetingId: selectedMeetingForCheck.meetingId,
-          status: 'PRESENT',
-        }),
+          status: 'PRESENT'
+        })
       });
-      const updatedUsers = attendanceUsers.map((u) => {
+      const updatedUsers = attendanceUsers.map(u => {
         if (u.nuid === nuidInput.trim()) {
           return { ...u, status: 'PRESENT' }; // update just this user
         }
@@ -242,7 +241,7 @@ const AttendancePage: React.FC = () => {
       }
 
       alert(
-        `✓ ${userToMark.firstName} ${userToMark.lastName} marked as present!`,
+        `✓ ${userToMark.firstName} ${userToMark.lastName} marked as present!`
       );
       setNuidInput('');
 
@@ -265,7 +264,7 @@ const AttendancePage: React.FC = () => {
   // Function to soft delete a member
   const handleDeleteMember = async (userId: string) => {
     await fetch(`/api/users/${userId}`, { method: 'DELETE' });
-    setUsers((prev) => prev.filter((u) => u.userId !== userId));
+    setUsers(prev => prev.filter(u => u.userId !== userId));
   };
 
   // Function to toggle attendance status in edit modal
@@ -273,7 +272,7 @@ const AttendancePage: React.FC = () => {
     attendanceId: string,
     currentStatus: string,
     userId: string,
-    meetingId: string,
+    meetingId: string
   ) => {
     try {
       const newStatus =
@@ -283,7 +282,7 @@ const AttendancePage: React.FC = () => {
       const response = await fetch(`/api/attendance/${attendanceId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!response.ok) {
@@ -292,34 +291,34 @@ const AttendancePage: React.FC = () => {
 
       // Reload attendance data
       if (selectedMeeting) {
-        setAttendanceUsers((prev) =>
-          prev.map((u) =>
+        setAttendanceUsers(prev =>
+          prev.map(u =>
             u.userId === userId
               ? {
                   ...u,
                   attendance: u.attendance.map((a: AttendanceType) =>
                     a.attendanceId === attendanceId
                       ? { ...a, status: newStatus }
-                      : a,
-                  ),
+                      : a
+                  )
                 }
-              : u,
-          ),
+              : u
+          )
         );
         // TODO (jwuchen): either find a better way to do this or don't trigger this till edit attendance componenet is closed
-        setMeetings((prevMeetings) =>
-          prevMeetings.map((meeting) =>
+        setMeetings(prevMeetings =>
+          prevMeetings.map(meeting =>
             meeting.meetingId === meetingId
               ? {
                   ...meeting,
-                  attendance: meeting.attendance.map((a) =>
+                  attendance: meeting.attendance.map(a =>
                     a.attendanceId === attendanceId
                       ? { ...a, status: newStatus }
-                      : a,
-                  ),
+                      : a
+                  )
                 }
-              : meeting,
-          ),
+              : meeting
+          )
         );
       }
     } catch {

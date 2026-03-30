@@ -8,16 +8,16 @@ export const login = async (
   credentials: LoginCredentials,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
   setUser: Dispatch<SetStateAction<User>>,
-  router: ReturnType<typeof useRouter>,
+  router: ReturnType<typeof useRouter>
 ) => {
   setIsLoading(true);
   try {
     const res = await fetch(
-      `/api/users/get-user-by-email/${credentials.email}`,
+      `/api/users/get-user-by-email/${credentials.email}`
     );
     if (!res.ok) {
       throw new Error(
-        `Response status: ${res.status}\n. Response Msg: ${await res.text}`,
+        `Response status: ${res.status}\n. Response Msg: ${await res.text}`
       );
     }
 
@@ -28,7 +28,7 @@ export const login = async (
         userDetails.roleType === 'SUPER_ADMIN' ||
         userDetails.roleType === 'ADMIN' ||
         userDetails.roleType === 'EBOARD' ||
-        userDetails.roleType === 'MEMBER' 
+        userDetails.roleType === 'MEMBER'
       )
     ) {
       alert('Incorrect Roles');
@@ -45,7 +45,7 @@ export const login = async (
       email: credentials.email,
       name: userDetails.firstName + ' ' + userDetails.lastName,
       role: userDetails.roleType,
-      avatar: undefined,
+      avatar: undefined
     };
 
     setUser(user);
