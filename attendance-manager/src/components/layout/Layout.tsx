@@ -75,41 +75,6 @@ const Layout: React.FC = () => {
     setActiveTab('dashboard');
   };
 
-  // Render 404 page if user is not authenticated
-  // if (!user) {
-  //   return (
-  //     <div className='flex-1 p-6 bg-gray-50 min-h-screen'>
-  //       <div className='mb-6'>
-  //         <h1 className='text-2xl font-bold text-gray-900 mb-2'>
-  //           Page Not Found
-  //         </h1>
-  //         <p className='text-gray-600'>
-  //           You must be authenticated to access this page.
-  //         </p>
-  //       </div>
-  //       <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
-  //         <div className='text-center py-12'>
-  //           <div className='w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-  //           <TriangleAlert className='w-8 h-8 text-red-600'/>
-  //           </div>
-  //           <h2 className='text-xl font-semibold text-gray-900 mb-2'>
-  //             Authentication Required
-  //           </h2>
-  //           <p className='text-gray-600 mb-6'>
-  //             Please log in to access this page.
-  //           </p>
-  //           <a
-  //             href='/login'
-  //             className='inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors'
-  //           >
-  //             Go to Login
-  //           </a>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':

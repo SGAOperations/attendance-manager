@@ -1,5 +1,7 @@
 'use client';
-import React, { createContext, useState } from 'react';
+// eslint-disable-next-line
+export const dynamic = 'force-dynamic';
+import React, { createContext, useEffect, useState } from 'react';
 import { User, LoginCredentials } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -10,6 +12,8 @@ import {
   LockKeyhole,
   UserRound,
 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase';
 
 const defaultUser: User = {
   id: '',
@@ -40,6 +44,11 @@ const LoginPage: React.FC = () => {
     role: 'MEMBER',
   });
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isPasswordResetMode, setIsPasswordResetMode] = useState(false);
+  const [isPasswordResetRequestMode, setIsPasswordResetRequestMode] =
+    useState(false);
+  const searchParams = useSearchParams();
+  const supabase = createClient();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
     password: '',
@@ -59,6 +68,69 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (isPasswordResetMode) {
+      if (!signupCredentials.password || !signupCredentials.confirmPassword) {
+        setError('Please enter a new password');
+        return;
+      }
+
+      if (signupCredentials.password.length < 6) {
+        setError('Password must be at least 6 characters long');
+        return;
+      }
+
+      if (signupCredentials.password !== signupCredentials.confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: signupCredentials.password,
+        });
+
+        if (error) {
+          setError(error.message);
+          return;
+        }
+        alert('Password updated successfully!');
+        setIsPasswordResetMode(false);
+      } catch {
+        setError('Failed to update password');
+      }
+      return;
+    }
+    if (isPasswordResetRequestMode) {
+      if (!credentials.email) {
+        setError('Please fill in all fields');
+        return;
+      }
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: credentials.email,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setError(data.error || 'Failed to send reset email');
+          return;
+        }
+
+        alert('If an account exists, a reset email has been sent.');
+        setIsPasswordResetRequestMode(false); // exit reset mode
+      } catch {
+        setError('Something went wrong. Please try again.');
+      }
+
+      return;
+    }
 
     if (isLoginMode) {
       // Login logic
@@ -68,8 +140,9 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        await login(credentials);
-        // console.log('Logged in :)');
+        if (!isPasswordResetMode) {
+          await login(credentials);
+        }
       } catch (error) {
         setError('Login failed. Please try again.\n Error msg: ' + error);
       }
@@ -111,7 +184,7 @@ const LoginPage: React.FC = () => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          setError(errorData.message || 'Signup failed. Please try again.');
+          setError(`Signup failed. ${errorData.error}`);
           return;
         }
         // eslint-disable-next-line
@@ -129,7 +202,7 @@ const LoginPage: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (isLoginMode) {
+    if (isLoginMode && !isPasswordResetMode) {
       setCredentials((prev) => ({
         ...prev,
         [name]: value,
@@ -141,6 +214,27 @@ const LoginPage: React.FC = () => {
       }));
     }
   };
+
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    const code = searchParams.get('code');
+
+    if (mode === 'reset' && code) {
+      setIsPasswordResetMode(true);
+
+      // get session for resetting password
+      const exchange = async () => {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setError(`Error exchanging code: ${error.message}`);
+        }
+      };
+
+      exchange();
+    } else {
+      setIsPasswordResetMode(false);
+    }
+  }, [searchParams, supabase]);
 
   const resetForms = () => {
     setError('');
@@ -260,32 +354,36 @@ const LoginPage: React.FC = () => {
               )}
 
               {/* Email field */}
-              <div>
-                <label
-                  htmlFor='email'
-                  className='block text-sm font-medium text-white mb-2'
-                >
-                  Email Address
-                </label>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <AtSign className='h-5 w-5 text-gray-400' />
+              {!isPasswordResetMode && (
+                <div>
+                  <label
+                    htmlFor='email'
+                    className='block text-sm font-medium text-white mb-2'
+                  >
+                    Email Address
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                      <AtSign className='h-5 w-5 text-gray-400' />
+                    </div>
+                    <input
+                      id='email'
+                      name='email'
+                      type='email'
+                      autoComplete='email'
+                      required
+                      className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
+                      placeholder='Enter your email'
+                      value={
+                        isLoginMode && !isPasswordResetMode
+                          ? credentials.email
+                          : signupCredentials.email
+                      }
+                      onChange={handleInputChange}
+                    />
                   </div>
-                  <input
-                    id='email'
-                    name='email'
-                    type='email'
-                    autoComplete='email'
-                    required
-                    className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
-                    placeholder='Enter your email'
-                    value={
-                      isLoginMode ? credentials.email : signupCredentials.email
-                    }
-                    onChange={handleInputChange}
-                  />
                 </div>
-              </div>
+              )}
 
               {!isLoginMode && (
                 <div>
@@ -315,41 +413,45 @@ const LoginPage: React.FC = () => {
               )}
 
               {/* Password field */}
-              <div>
-                <label
-                  htmlFor='password'
-                  className='block text-sm font-medium text-white mb-2'
-                >
-                  Password
-                </label>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <LockKeyhole className='h-5 w-5 text-gray-400' />
+              {!isPasswordResetRequestMode && (
+                <div>
+                  <label
+                    htmlFor='password'
+                    className='block text-sm font-medium text-white mb-2'
+                  >
+                    Password
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                      <LockKeyhole className='h-5 w-5 text-gray-400' />
+                    </div>
+                    <input
+                      id='password'
+                      name='password'
+                      type='password'
+                      autoComplete={
+                        isLoginMode ? 'current-password' : 'new-password'
+                      }
+                      required
+                      className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
+                      placeholder={
+                        isLoginMode
+                          ? 'Enter your password'
+                          : 'Create a password'
+                      }
+                      value={
+                        isLoginMode && !isPasswordResetMode
+                          ? credentials.password
+                          : signupCredentials.password
+                      }
+                      onChange={handleInputChange}
+                    />
                   </div>
-                  <input
-                    id='password'
-                    name='password'
-                    type='password'
-                    autoComplete={
-                      isLoginMode ? 'current-password' : 'new-password'
-                    }
-                    required
-                    className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
-                    placeholder={
-                      isLoginMode ? 'Enter your password' : 'Create a password'
-                    }
-                    value={
-                      isLoginMode
-                        ? credentials.password
-                        : signupCredentials.password
-                    }
-                    onChange={handleInputChange}
-                  />
                 </div>
-              </div>
+              )}
 
               {/* Confirm Password field - only for signup */}
-              {!isLoginMode && (
+              {(!isLoginMode || isPasswordResetMode) && (
                 <div>
                   <label
                     htmlFor='confirmPassword'
@@ -369,10 +471,31 @@ const LoginPage: React.FC = () => {
                       required={!isLoginMode}
                       className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
                       placeholder='Confirm your password'
-                      value={signupCredentials.confirmPassword}
+                      value={
+                        isLoginMode && !isPasswordResetMode
+                          ? credentials.password
+                          : signupCredentials.confirmPassword
+                      }
                       onChange={handleInputChange}
                     />
                   </div>
+                </div>
+              )}
+
+              {isLoginMode && (
+                <div>
+                  <label
+                    htmlFor='password'
+                    className='block text-sm font-medium text-white mb-2 flex items-center justify-center'
+                    style={{ cursor: 'pointer' }}
+                    onClick={() =>
+                      setIsPasswordResetRequestMode((prev) => !prev)
+                    }
+                  >
+                    {isPasswordResetRequestMode
+                      ? 'Exit Password Reset Mode'
+                      : 'Forgot your password? Click Here to Reset'}
+                  </label>
                 </div>
               )}
 
@@ -400,6 +523,8 @@ const LoginPage: React.FC = () => {
                       <LoaderCircle className='animate-spin -ml-1 mr-3 h-5 w-5 text-white' />
                       {isLoginMode ? 'Signing in...' : 'Creating account...'}
                     </div>
+                  ) : isPasswordResetRequestMode || isPasswordResetMode ? (
+                    'Reset Password'
                   ) : isLoginMode ? (
                     'Sign In'
                   ) : (
