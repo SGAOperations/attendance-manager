@@ -1,4 +1,7 @@
+import { NextResponse } from 'next/server';
 import { VotingController } from '@/voting/voting.controller';
+import { requireAuth } from '@/utils/api-auth';
+import { checkCanManageVoting } from '@/utils/permissions';
 
 /**
  * @swagger
@@ -54,6 +57,11 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const { user, error } = await requireAuth();
+  if (error) return error;
+  if (!checkCanManageVoting(user.roleType)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
   const { id } = await params;
   return VotingController.updateVotingEvent(request, { votingEventId: id });
 }

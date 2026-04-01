@@ -1,4 +1,7 @@
+import { NextResponse } from 'next/server';
 import { VotingController } from '@/voting/voting.controller';
+import { requireAuth } from '@/utils/api-auth';
+import { checkCanManageVoting } from '@/utils/permissions';
 
 /**
  * @swagger
@@ -30,5 +33,10 @@ export async function GET() {
  *         description: Missing required fields or invalid data.
  */
 export async function POST(request: Request) {
+  const { user, error } = await requireAuth();
+  if (error) return error;
+  if (!checkCanManageVoting(user.roleType)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
   return VotingController.createVotingEvent(request);
 }
