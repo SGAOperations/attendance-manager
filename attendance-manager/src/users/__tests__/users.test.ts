@@ -28,6 +28,13 @@ describe('UsersService', () => {
   let testRoleId: string;
 
   beforeAll(async () => {
+    // Clean up any leftover data from previous runs
+    await prisma.user.deleteMany({
+      where: {
+        nuid: { in: ['001234567', '001234568', '001234570', '001234571'] }
+      }
+    });
+
     const role = await prisma.role.create({
       data: { roleType: 'MEMBER' }
     });
