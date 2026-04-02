@@ -104,7 +104,6 @@ describe('Auth Flow Integration Tests', () => {
       // Verify user was created in database
       const createdUser = await prisma.user.findUnique({
         where: { supabaseAuthId },
-        include: { role: true }
       });
       expect(createdUser).toBeDefined();
       expect(createdUser?.email).toBe(testUser.email);
@@ -151,8 +150,7 @@ describe('Auth Flow Integration Tests', () => {
       expect(getUserResponse.status).toBe(200);
       expect(userProfile.supabaseAuthId).toBe(supabaseAuthId);
       expect(userProfile.email).toBe(testUser.email);
-      expect(userProfile.role).toBeDefined();
-      expect(userProfile.role.roleType).toBe('MEMBER');
+      expect(userProfile.roleType).toBe('MEMBER');
 
       // Step 4: Session check (simulate middleware/AuthContext session check)
       mockGetSession.mockResolvedValueOnce({

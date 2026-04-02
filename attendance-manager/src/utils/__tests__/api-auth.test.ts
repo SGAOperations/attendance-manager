@@ -8,7 +8,7 @@ jest.setTimeout(20000);
 
 // Mock Supabase server client
 jest.mock('@/lib/supabase-server', () => ({
-  createServerSupabaseClient: jest.fn(),
+  createServerSupabaseClient: jest.fn()
 }));
 
 describe('API Auth Utilities', () => {
@@ -21,7 +21,7 @@ describe('API Auth Utilities', () => {
   beforeAll(async () => {
     // Create test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' },
+      data: { roleType: 'MEMBER' }
     });
     testRoleId = role.roleId;
 
@@ -34,8 +34,9 @@ describe('API Auth Utilities', () => {
         firstName: 'API',
         lastName: 'Test',
         roleId: testRoleId,
-        password: null,
-      },
+        roleType: 'MEMBER',
+        password: null
+      }
     });
     testUserId = user.userId;
     testSupabaseAuthId = user.supabaseAuthId!;
@@ -48,14 +49,16 @@ describe('API Auth Utilities', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockSupabaseClient = {
       auth: {
-        getSession: mockGetSession,
-      },
+        getSession: mockGetSession
+      }
     };
 
-    (createServerSupabaseClient as jest.Mock).mockResolvedValue(mockSupabaseClient);
+    (createServerSupabaseClient as jest.Mock).mockResolvedValue(
+      mockSupabaseClient
+    );
   });
 
   describe('getAuthenticatedUser', () => {
@@ -65,11 +68,11 @@ describe('API Auth Utilities', () => {
           session: {
             user: {
               id: testSupabaseAuthId,
-              email: 'apitest@example.com',
-            },
-          },
+              email: 'apitest@example.com'
+            }
+          }
         },
-        error: null,
+        error: null
       });
 
       const user = await getAuthenticatedUser();
@@ -78,14 +81,13 @@ describe('API Auth Utilities', () => {
       expect(user?.userId).toBe(testUserId);
       expect(user?.supabaseAuthId).toBe(testSupabaseAuthId);
       expect(user?.email).toBe('apitest@example.com');
-      expect(user?.role).toBeDefined();
-      expect(user?.role.roleType).toBe('MEMBER');
+      expect(user?.roleType).toBe('MEMBER');
     });
 
     it('should return null when no session exists', async () => {
       mockGetSession.mockResolvedValue({
         data: { session: null },
-        error: null,
+        error: null
       });
 
       const user = await getAuthenticatedUser();
@@ -96,7 +98,7 @@ describe('API Auth Utilities', () => {
     it('should return null when session error occurs', async () => {
       mockGetSession.mockResolvedValue({
         data: { session: null },
-        error: { message: 'Session error' },
+        error: { message: 'Session error' }
       });
 
       const user = await getAuthenticatedUser();
@@ -110,11 +112,11 @@ describe('API Auth Utilities', () => {
           session: {
             user: {
               id: 'non-existent-supabase-id',
-              email: 'notfound@example.com',
-            },
-          },
+              email: 'notfound@example.com'
+            }
+          }
         },
-        error: null,
+        error: null
       });
 
       const user = await getAuthenticatedUser();
@@ -128,16 +130,18 @@ describe('API Auth Utilities', () => {
           session: {
             user: {
               id: testSupabaseAuthId,
-              email: 'apitest@example.com',
-            },
-          },
+              email: 'apitest@example.com'
+            }
+          }
         },
-        error: null,
+        error: null
       });
 
       // Mock prisma to throw an error
       const originalFindUnique = prisma.user.findUnique;
-      prisma.user.findUnique = jest.fn().mockRejectedValue(new Error('Database error'));
+      prisma.user.findUnique = jest
+        .fn()
+        .mockRejectedValue(new Error('Database error'));
 
       const user = await getAuthenticatedUser();
 
@@ -155,11 +159,11 @@ describe('API Auth Utilities', () => {
           session: {
             user: {
               id: testSupabaseAuthId,
-              email: 'apitest@example.com',
-            },
-          },
+              email: 'apitest@example.com'
+            }
+          }
         },
-        error: null,
+        error: null
       });
 
       const result = await requireAuth();
@@ -172,17 +176,17 @@ describe('API Auth Utilities', () => {
     it('should return error response when not authenticated', async () => {
       mockGetSession.mockResolvedValue({
         data: { session: null },
-        error: null,
+        error: null
       });
 
       const result = await requireAuth();
 
       expect(result.user).toBeNull();
       expect(result.error).toBeDefined();
-      
+
       const errorResponse = result.error as NextResponse;
       expect(errorResponse.status).toBe(401);
-      
+
       const errorData = await errorResponse.json();
       expect(errorData.error).toBe('Unauthorized');
     });
@@ -190,14 +194,14 @@ describe('API Auth Utilities', () => {
     it('should return error response when session error occurs', async () => {
       mockGetSession.mockResolvedValue({
         data: { session: null },
-        error: { message: 'Session error' },
+        error: { message: 'Session error' }
       });
 
       const result = await requireAuth();
 
       expect(result.user).toBeNull();
       expect(result.error).toBeDefined();
-      
+
       const errorResponse = result.error as NextResponse;
       expect(errorResponse.status).toBe(401);
     });
@@ -208,18 +212,18 @@ describe('API Auth Utilities', () => {
           session: {
             user: {
               id: 'non-existent-supabase-id',
-              email: 'notfound@example.com',
-            },
-          },
+              email: 'notfound@example.com'
+            }
+          }
         },
-        error: null,
+        error: null
       });
 
       const result = await requireAuth();
 
       expect(result.user).toBeNull();
       expect(result.error).toBeDefined();
-      
+
       const errorResponse = result.error as NextResponse;
       expect(errorResponse.status).toBe(401);
     });
@@ -230,7 +234,7 @@ describe('API Auth Utilities', () => {
     it('should soft delete a user by setting deletedAt', async () => {
       await UsersService.deleteUser(testUserId);
       const user = await prisma.user.findUnique({
-        where: { userId: testUserId },
+        where: { userId: testUserId }
       });
 
       expect(user).toBeDefined();
