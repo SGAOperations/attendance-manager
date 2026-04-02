@@ -16,6 +16,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   onEventCreated,
 }) => {
   // ─── States ────────────────────────────────────────────────────────────────
+  
   const { user } = useAuth();
   const [meetingId, setMeetingId] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -25,7 +26,10 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   const [currentEvent, setCurrentEvent] = useState<VotingEventApiData | null>(
     null,
   );
-  const [options, setOptions] = useState<string[]>(['Option 1']);
+  const [options, setOptions] = useState<string[]>([]);
+
+  // Fixed options for Secret Ballot
+  const fixedOptions = ['Abstain', 'No Confidence'];
 
   // ─── Functions ─────────────────────────────────────────────────────────────
   const addOption = () => {
@@ -103,7 +107,8 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           name,
           voteType,
           updatedBy: user.id,
-          options,
+          options:
+            voteType === 'SECRET_BALLOT' ? [...fixedOptions, ...options] : options,
         }),
       });
 
@@ -223,8 +228,22 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
               Options
             </label>
             <div className='space-y-2'>
+              {/* Shows two mandatory options */}
+              {fixedOptions.map((fixed, idx) => (
+                <div key={`fixed-${idx}`} className='relative'>
+                  <input
+                    type='text'
+                    value={fixed}
+                    readOnly
+                    disabled
+                    className='w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600'
+                  />
+                </div>
+              ))}
+
+              {/* User-added options */}
               {options.map((option, index) => (
-                <div key={index} className='relative'>
+                <div key={`user-${index}`} className='relative'>
                   <input
                     type='text'
                     value={option}
@@ -233,7 +252,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
                       newOptions[index] = e.target.value;
                       setOptions(newOptions);
                     }}
-                    className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] pr-8' // add padding for the x
+                    className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] pr-8'
                   />
                   <X
                     onClick={() => removeOption(option)}
