@@ -548,7 +548,7 @@ const MeetingsPage: React.FC = () => {
           attendedMeetings={attendedMeetings}
           missedMeetings={missedMeetings}
           upcomingMeetings={upcomingMeetingsList.length}
-          isAdmin={canManageMeetings}
+          canManageMeetings={canManageMeetings}
           setShowCreateMeetingModal={setShowCreateMeetingModal}
         />
 

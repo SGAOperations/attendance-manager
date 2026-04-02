@@ -1,13 +1,57 @@
-export const checkCanViewMemberStats = (role?: string) => role === 'EBOARD';
+// Shows: Sidebar with member stats
+export const checkCanViewMemberStats = (role?: string) => {
+  return role === 'EBOARD' || 
+         role === 'ADMIN' || 
+         role === 'SUPER_ADMIN' || 
+         role === 'SENATOR';
+};
 
-export const checkCanAccessAttendance = (role?: string) => role === 'EBOARD';
+// Shows: AttendancePage (all other roles see Access Denied)
+export const checkCanAccessAttendance = (role?: string) => {
+  return role === 'EBOARD' || 
+         role === 'MEMBER' || 
+         role === 'ADMIN' || 
+         role === 'SUPER_ADMIN' || 
+         role === 'SENATOR';
+};
 
-export const checkCanManageAttendance = (role?: string) => role === 'EBOARD';
+// Shows: Attendance Check + View Requests buttons in AttendancePage
+// Backend: PATCH /api/attendance/[attendanceId], DELETE /api/attendance/[attendanceId]
+export const checkCanManageAttendance = (role?: string) => {
+  return role === 'EBOARD' ||
+         role === 'ADMIN' ||
+         role === 'SUPER_ADMIN';
+};
 
-export const checkCanManageMeetings = (role?: string) => role === 'EBOARD';
+// Shows: Create Meeting button in MeetingStatisticsPanel
+// Backend: POST /api/meeting, DELETE /api/meeting/[id]
+export const checkCanManageMeetings = (role?: string) => {
+  return role === 'EBOARD' ||
+         role === 'ADMIN' ||
+         role === 'SUPER_ADMIN';
+};
 
-export const checkCanEditMeetings = (role?: string) => role === 'EBOARD';
+// Shows: Edit and delete buttons on individual meeting rows in MeetingHistoryPanel
+// Backend: PUT /api/meeting/[id]
+export const checkCanEditMeetings = (role?: string) => {
+  return role === 'EBOARD' ||
+         role === 'ADMIN' ||
+         role === 'SUPER_ADMIN';
+};
 
-export const checkCanEditProfile = (role?: string) => role === 'EBOARD';
+// Shows: Edit Profile button in ProfilePage
+export const checkCanEditProfile = (role?: string) => {
+  return role === 'EBOARD' || 
+         role === 'MEMBER' || 
+         role === 'ADMIN' || 
+         role === 'SUPER_ADMIN' || 
+         role === 'SENATOR';
+};
 
-export const checkCanManageVoting = (role?: string) => role === 'EBOARD';
+// Shows: Voting admin panel for creating and ending voting events
+// Backend: POST /api/voting-event, PUT /api/voting-event/[id]
+export const checkCanManageVoting = (role?: string) => {
+  return role === 'EBOARD' ||
+         role === 'ADMIN' ||
+         role === 'SUPER_ADMIN';
+};
