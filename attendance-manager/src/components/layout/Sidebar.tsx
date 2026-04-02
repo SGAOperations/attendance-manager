@@ -6,7 +6,7 @@ import { MeetingApiData, UserApiData, AttendanceApiData } from '@/types';
 interface SidebarProps {
   activeTab: 'dashboard' | 'meetings' | 'voting' | 'attendance' | 'profile';
   onTabChange: (
-    tab: 'dashboard' | 'meetings' | 'voting' | 'attendance' | 'profile'
+    tab: 'dashboard' | 'meetings' | 'voting' | 'attendance' | 'profile',
   ) => void;
 }
 
@@ -40,7 +40,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
-        console.error('Error loading sidebar data:', err);
       } finally {
         setLoading(false);
       }
@@ -53,20 +52,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const todaysMeetings = meetings.filter(m => {
+  const todaysMeetings = meetings.filter((m) => {
     const meetingDate = new Date(m.date);
     meetingDate.setHours(0, 0, 0, 0);
     return meetingDate.getTime() === today.getTime();
   }).length;
 
-  const pendingAttendance = meetings.filter(m => {
+  const pendingAttendance = meetings.filter((m) => {
     const meetingDate = new Date(m.date);
     if (meetingDate > today) {
       return false; // Only past meetings
     }
     return m.attendance.some(
       (a: AttendanceApiData) =>
-        a.userId === user?.id && a.status === 'UNEXCUSED_ABSENCE'
+        a.userId === user?.id && a.status === 'UNEXCUSED_ABSENCE',
     );
   }).length;
 
@@ -78,26 +77,26 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       id: 'dashboard' as const,
       label: 'Dashboard',
       icon: <LayoutDashboard className={iconClass} />,
-      adminOnly: false
+      adminOnly: false,
     },
     {
       id: 'meetings' as const,
       label: 'Meetings',
       icon: <Calendar className={iconClass} />,
-      adminOnly: false
+      adminOnly: false,
     },
     {
       id: 'voting' as const,
       label: 'Voting',
       icon: <Vote className={iconClass} />,
-      adminOnly: false
+      adminOnly: false,
     },
     {
       id: 'attendance' as const,
       label: 'Attendance',
       icon: <ClipboardList className={iconClass} />,
-      adminOnly: true
-    }
+      adminOnly: true,
+    },
   ];
 
   return (
@@ -108,7 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
             Navigation
           </h2>
           <nav className='space-y-2'>
-            {navItems.map(item => {
+            {navItems.map((item) => {
               // Skip admin-only items for non-admin users
               if (item.adminOnly && !isAdmin) {
                 return null;

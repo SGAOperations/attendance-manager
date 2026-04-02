@@ -11,7 +11,7 @@ export const RequestService = {
   }) {
     const attendance = await prisma.attendance.findUnique({
       where: { attendanceId: data.attendanceId },
-      include: { meeting: true }
+      include: { meeting: true },
     });
 
     if (!attendance) {
@@ -37,8 +37,8 @@ export const RequestService = {
         reason: data.reason.trim(),
         attendanceMode: data.attendanceMode,
         timeAdjustment: data.timeAdjustment || undefined,
-        isLate
-      }
+        isLate,
+      },
     });
   },
 
@@ -46,14 +46,14 @@ export const RequestService = {
   async getRequest(requestId: string) {
     return prisma.request.findUnique({
       where: { requestId },
-      include: { 
+      include: {
         attendance: {
           include: {
             meeting: true,
             user: true,
-          }
-        }
-      }, 
+          },
+        },
+      },
     });
   },
 
@@ -65,16 +65,16 @@ export const RequestService = {
           include: {
             meeting: true,
             user: true,
-          }
-        }
+          },
+        },
       },
       orderBy: {
         attendance: {
           meeting: {
-            date: 'desc'
-          }
-        }
-      }
+            date: 'desc',
+          },
+        },
+      },
     });
   },
 
@@ -85,18 +85,18 @@ export const RequestService = {
       reason?: string;
       attendanceMode?: AttendanceMode;
       timeAdjustment?: TimeAdjustment | null;
-    }
+    },
   ) {
     return prisma.request.update({
       where: { requestId },
-      data
+      data,
     });
   },
 
   // Delete request
   async deleteRequest(requestId: string) {
     return prisma.request.delete({
-      where: { requestId }
+      where: { requestId },
     });
-  }
+  },
 };

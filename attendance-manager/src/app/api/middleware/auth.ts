@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify, SignJWT } from 'jose';
 
+// eslint-disable-next-line
 export async function auth_middleware(request: NextRequest) {
   return await updateSession(request);
 }
 // TODO: Move to an ENV variable
+// eslint-disable-next-line
 const secretKey = 'secret';
 const key = new TextEncoder().encode(secretKey);
 

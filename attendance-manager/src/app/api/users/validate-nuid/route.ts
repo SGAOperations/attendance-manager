@@ -20,6 +20,6 @@ export async function GET(request: Request) {
   return UsersController.validateNuid({
     nuid: nuid || '',
     firstName: firstName || '',
-    lastName: lastName || ''
+    lastName: lastName || '',
   });
 }

@@ -3,14 +3,14 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ supabaseAuthId: string }> }
+  { params }: { params: Promise<{ supabaseAuthId: string }> },
 ) {
   try {
     const { supabaseAuthId } = await params;
-    
+
     const user = await prisma.user.findUnique({
       where: { supabaseAuthId },
-      include: { role: true }
+      include: { role: true },
     });
 
     if (!user) {
@@ -21,7 +21,7 @@ export async function GET(
   } catch {
     return NextResponse.json(
       { error: 'Failed to fetch user' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -30,17 +30,18 @@ const formatResultLabel = (result: string) => {
 
 const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
   events,
-  loading
+  loading,
 }) => {
   const endedEvents = events
-    .filter(e => e.deletedAt)
+    .filter((e) => e.deletedAt)
     .sort((a, b) => {
       const aDate = a.deletedAt ?? a.createdAt;
       const bDate = b.deletedAt ?? b.createdAt;
       return new Date(bDate).getTime() - new Date(aDate).getTime();
     });
   const [selectedVote, setSelectedVote] = useState<string>('');
-  const [showVotingResultModal, setShowVotingResultsModal] = useState<boolean>(false);
+  const [showVotingResultModal, setShowVotingResultsModal] =
+    useState<boolean>(false);
   return (
     <div className='mt-8 bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
       <div className='flex items-center justify-between mb-4'>
@@ -52,9 +53,7 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
       {loading ? (
         <p className='text-sm text-gray-500'>Loading vote results…</p>
       ) : endedEvents.length === 0 ? (
-        <p className='text-sm text-gray-500'>
-          No completed voting events yet.
-        </p>
+        <p className='text-sm text-gray-500'>No completed voting events yet.</p>
       ) : (
         <div className='overflow-x-auto'>
           <table className='w-full text-sm'>
@@ -75,22 +74,19 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
               </tr>
             </thead>
             <tbody>
-              {endedEvents.map(event => {
+              {endedEvents.map((event) => {
                 const records =
-                  (event.votingRecords || []).filter(r => !r.deletedAt) || [];
+                  (event.votingRecords || []).filter((r) => !r.deletedAt) || [];
                 const counts =
                   event.voteType === 'SECRET_BALLOT' && event.resultCounts
                     ? event.resultCounts
-                    : records.reduce<Record<string, number>>(
-                        (acc, record) => {
-                          acc[record.result] = (acc[record.result] || 0) + 1;
-                          return acc;
-                        },
-                        {}
-                      );
+                    : records.reduce<Record<string, number>>((acc, record) => {
+                        acc[record.result] = (acc[record.result] || 0) + 1;
+                        return acc;
+                      }, {});
                 const totalVotes = Object.values(counts).reduce(
                   (sum, n) => sum + n,
-                  0
+                  0,
                 );
 
                 return (
@@ -98,7 +94,7 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                     key={event.votingEventId}
                     className='border-b border-gray-100 hover:bg-gray-50'
                     onClick={() => {
-                      if(event.voteType !== 'SECRET_BALLOT') {
+                      if (event.voteType !== 'SECRET_BALLOT') {
                         setShowVotingResultsModal(true);
                         setSelectedVote(event.votingEventId);
                       }
@@ -181,14 +177,15 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
           </table>
         </div>
       )}
-      {
-        showVotingResultModal && (
-          <VotingResultsModal selectedVote={selectedVote} setShowVotingResultsModal={setShowVotingResultsModal} setSelectedVoting={setSelectedVote}/>
-        )
-      }
+      {showVotingResultModal && (
+        <VotingResultsModal
+          selectedVote={selectedVote}
+          setShowVotingResultsModal={setShowVotingResultsModal}
+          setSelectedVoting={setSelectedVote}
+        />
+      )}
     </div>
   );
 };
 
 export default VotingResultsPanel;
-

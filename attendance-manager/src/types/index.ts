@@ -31,6 +31,7 @@ export interface AttendanceRecord {
   attendanceRate: number;
 }
 
+// eslint-disable-next-line no-redeclare
 export interface MeetingApiData {
   meetingId: string;
   date: string;
@@ -50,6 +51,7 @@ export interface LoginCredentials {
 
 export interface AuthContextType {
   user: User | null;
+
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -168,7 +170,9 @@ export const AttendanceStatus = z.enum([
   'PENDING',
 ]);
 export const AttendanceMode = z.enum(['ONLINE', 'IN_PERSON']);
-export const TimeAdjustment = z.enum(['ARRIVING_LATE', 'LEAVING_EARLY']).optional();
+export const TimeAdjustment = z
+  .enum(['ARRIVING_LATE', 'LEAVING_EARLY'])
+  .optional();
 export const MeetingTypeEnum = z.enum(['REGULAR', 'FULL_BODY']);
 
 // Schemas
@@ -192,20 +196,25 @@ export const UserSchema: z.ZodType<any> = z.lazy(() =>
     updatedAt: z.date().describe('Last updated timestamp'),
     deletedAt: z.date().nullable().describe('Deletion timestamp, if deleted'),
     attendance: z.array(AttendanceSchema).describe('Attendances'),
-  })
+  }),
 );
 
 // Request schema
-export const RequestSchema: z.ZodType<any> = z.lazy((): z.ZodObject<any> => 
-  z.object({
-    attendanceId: z.string().describe('Attendance ID'),
-    requestId: z.string().describe('Request ID'),
-    reason: z.string().describe('Reason for request'),
-    attendanceMode: AttendanceMode.describe('Attendance mode: online or in-person'),
-    isLate: z.boolean().describe('Whether the user was late'),
-    timeAdjustment: TimeAdjustment.describe('Time adjustment, if any').nullable(),
-    attendance: AttendanceSchema.describe('Attendance'),
-  })
+export const RequestSchema: z.ZodType<any> = z.lazy(
+  (): z.ZodObject<any> =>
+    z.object({
+      attendanceId: z.string().describe('Attendance ID'),
+      requestId: z.string().describe('Request ID'),
+      reason: z.string().describe('Reason for request'),
+      attendanceMode: AttendanceMode.describe(
+        'Attendance mode: online or in-person',
+      ),
+      isLate: z.boolean().describe('Whether the user was late'),
+      timeAdjustment: TimeAdjustment.describe(
+        'Time adjustment, if any',
+      ).nullable(),
+      attendance: AttendanceSchema.describe('Attendance'),
+    }),
 );
 
 // Attendance schema
@@ -226,7 +235,7 @@ export const MeetingSchema = z.object({
   startTime: z.string().describe('Meeting Start Time'),
   endTime: z.string().describe('Meeting End Time'),
   type: MeetingTypeEnum.describe('Meeting Type'),
-  attendance: z.array(AttendanceSchema).describe('Attendances')
+  attendance: z.array(AttendanceSchema).describe('Attendances'),
 });
 
 export const AttendanceParams = z.object({
@@ -237,33 +246,41 @@ export const AttendanceResponse = z.object({
   attendanceId: z.string().describe('Attendance Id'),
   userId: z.string().describe('User Id'),
   meetingId: z.string().describe('Meeting Id'),
-  status: AttendanceStatus.describe('Status of the attendance')
+  status: AttendanceStatus.describe('Status of the attendance'),
 });
 
 export const PostAttendanceParams = z.object({
   userId: z.string().describe('User Id'),
   meetingId: z.string().describe('Meeting Id'),
-  status: AttendanceStatus.describe('Status of the attendance')
+  status: AttendanceStatus.describe('Status of the attendance'),
 });
 
 export const UpdateAttendanceRequestParams = z.object({
   requestId: z.string().describe('Request Id'),
-  status: AttendanceStatus.describe('Status of the attendance')
+  status: AttendanceStatus.describe('Status of the attendance'),
 });
 
 export const CreateAttendanceRequestParams = z.object({
   attendanceId: z.string().describe('Attendance Id'),
   reason: z.string().describe('Reason for the request'),
-  attendanceMode: AttendanceMode.describe('Attendance Mode, online or in-person'),
-  TimeAdjustment: TimeAdjustment.describe('Time Adjustment, arriving late or leaving early'),
+  attendanceMode: AttendanceMode.describe(
+    'Attendance Mode, online or in-person',
+  ),
+  timeAdjustment: TimeAdjustment.describe(
+    'Time Adjustment, arriving late or leaving early',
+  ),
 });
 
 export const CreateAttendanceRequestResponse = z.object({
   attendanceId: z.string().describe('Attendance Id'),
   requestId: z.string().describe('Request Id'),
   reason: z.string().describe('Reason for the request'),
-  attendanceMode: AttendanceMode.describe('Attendance Mode, online or in-person'),
-  TimeAdjustment: TimeAdjustment.describe('Time Adjustment, arriving late or leaving early'),
+  attendanceMode: AttendanceMode.describe(
+    'Attendance Mode, online or in-person',
+  ),
+  timeAdjustment: TimeAdjustment.describe(
+    'Time Adjustment, arriving late or leaving early',
+  ),
   isLate: z.boolean().describe('Is Late'),
 });
 
@@ -271,41 +288,45 @@ export const GetAttendanceMeetingParams = z.object({
   meetingId: z.string().describe('Meeting Id'),
 });
 
-export const GetMeetingAttendanceResponse = z.array(AttendanceSchema).describe(
-  'Array of attendance records for a specific meeting'
-);
+export const GetMeetingAttendanceResponse = z
+  .array(AttendanceSchema)
+  .describe('Array of attendance records for a specific meeting');
 
 export const GetUserAttendanceParams = z.object({
   userId: z.string().describe('User Id'),
 });
 
-export const GetUserAttendanceResponse = z.array(AttendanceSchema).describe(
-  'Array of attendance records for a specific user'
-);
+export const GetUserAttendanceResponse = z
+  .array(AttendanceSchema)
+  .describe('Array of attendance records for a specific user');
 
-export const GetRemainingAbscencesResponse = z.object(
-  {
-    regular: z.object({
-      used: z.number().describe('Number of regular absences used'),
-      allowed: z.number().describe('Number of regular absences allowed'),
-      remaining: z.number().describe('Number of regular absences remaining'),
-    }),
-    fullBody: z.object({
-      used: z.number().describe('Number of full body absences used'),
-      allowed: z.number().describe('Number of full body absences allowed'),
-      remaining: z.number().describe('Number of full body absences remaining'),
-    }),
-  }
-);
+export const GetRemainingAbscencesResponse = z.object({
+  regular: z.object({
+    used: z.number().describe('Number of regular absences used'),
+    allowed: z.number().describe('Number of regular absences allowed'),
+    remaining: z.number().describe('Number of regular absences remaining'),
+  }),
+  fullBody: z.object({
+    used: z.number().describe('Number of full body absences used'),
+    allowed: z.number().describe('Number of full body absences allowed'),
+    remaining: z.number().describe('Number of full body absences remaining'),
+  }),
+});
 
-export const GetUserRequestsResponse = z.array(z.object({
-    attendanceId: z.string().describe('Attendance ID'),
-    requestId: z.string().describe('Request ID'),
-    reason: z.string().describe('Reason for request'),
-    attendanceMode: AttendanceMode.describe('Attendance mode: online or in-person'),
-    isLate: z.boolean().describe('Whether the user was late'),
-    timeAdjustment: TimeAdjustment.describe('Time adjustment, if any').nullable(),
-    attendance: AttendanceSchema.describe('Attendance'),
-  })).describe(
-  'Array of requests for a specified user'
-);
+export const GetUserRequestsResponse = z
+  .array(
+    z.object({
+      attendanceId: z.string().describe('Attendance ID'),
+      requestId: z.string().describe('Request ID'),
+      reason: z.string().describe('Reason for request'),
+      attendanceMode: AttendanceMode.describe(
+        'Attendance mode: online or in-person',
+      ),
+      isLate: z.boolean().describe('Whether the user was late'),
+      timeAdjustment: TimeAdjustment.describe(
+        'Time adjustment, if any',
+      ).nullable(),
+      attendance: AttendanceSchema.describe('Attendance'),
+    }),
+  )
+  .describe('Array of requests for a specified user');

@@ -1,14 +1,25 @@
 'use client';
-import React, { createContext, useState } from 'react';
+// eslint-disable-next-line
+export const dynamic = 'force-dynamic';
+import React, { createContext, useEffect, useState } from 'react';
 import { User, LoginCredentials } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { AtSign, CircleAlert, CircleCheck, LoaderCircle, LockKeyhole, UserRound } from 'lucide-react';
+import {
+  AtSign,
+  CircleAlert,
+  CircleCheck,
+  LoaderCircle,
+  LockKeyhole,
+  UserRound,
+} from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase';
 
 const defaultUser: User = {
   id: '',
   email: '',
   name: '',
-  role: 'MEMBER'
+  role: 'MEMBER',
 };
 
 export const UserContext = createContext(defaultUser);
@@ -23,19 +34,23 @@ interface SignupCredentials {
 }
 
 const LoginPage: React.FC = () => {
-  // const router = useRouter();
   const { login, isLoading } = useAuth();
-  // const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line
   const [user, _setUser] = useState<User>({
     id: '',
     email: '',
     name: '',
-    role: 'MEMBER'
+    role: 'MEMBER',
   });
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isPasswordResetMode, setIsPasswordResetMode] = useState(false);
+  const [isPasswordResetRequestMode, setIsPasswordResetRequestMode] =
+    useState(false);
+  const searchParams = useSearchParams();
+  const supabase = createClient();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
-    password: ''
+    password: '',
   });
   const [signupCredentials, setSignupCredentials] = useState<SignupCredentials>(
     {
@@ -44,14 +59,73 @@ const LoginPage: React.FC = () => {
       email: '',
       nuid: '',
       password: '',
-      confirmPassword: ''
-    }
+      confirmPassword: '',
+    },
   );
   const [error, setError] = useState<string>('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (isPasswordResetMode) {
+      if (!signupCredentials.password || !signupCredentials.confirmPassword) {
+        setError('Please enter a new password');
+        return;
+      }
+
+      if (signupCredentials.password.length < 6) {
+        setError('Password must be at least 6 characters long');
+        return;
+      }
+
+      if (signupCredentials.password !== signupCredentials.confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: signupCredentials.password,
+        });
+
+        if (error) {
+          setError(error.message);
+          return;
+        }
+        alert('Password updated successfully!');
+        setIsPasswordResetMode(false);
+      } catch {
+        setError('Failed to update password');
+      }
+      return;
+    }
+    if (isPasswordResetRequestMode) {
+      if (!credentials.email) {
+        setError('Please fill in all fields');
+        return;
+      }
+
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(
+          credentials.email,
+          {
+            redirectTo: `${window.location.origin}/login?mode=reset`,
+          },
+        );
+
+        if (error) {
+          setError(error.message);
+          return;
+        }
+
+        alert('If an account exists, a reset email has been sent.');
+        setIsPasswordResetRequestMode(false);
+      } catch {
+        setError('Something went wrong. Please try again.');
+      }
+
+      return;
+    }
 
     if (isLoginMode) {
       // Login logic
@@ -61,9 +135,9 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        console.log('Logging in...');
-        await login(credentials);
-        // console.log('Logged in :)');
+        if (!isPasswordResetMode) {
+          await login(credentials);
+        }
       } catch (error) {
         setError('Login failed. Please try again.\n Error msg: ' + error);
       }
@@ -90,6 +164,7 @@ const LoginPage: React.FC = () => {
       }
 
       try {
+        // eslint-disable-next-line
         const { confirmPassword: _confirmPassword, ...safeCredentials } = signupCredentials;
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
@@ -97,27 +172,24 @@ const LoginPage: React.FC = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            ...safeCredentials
+            ...safeCredentials,
             // roleId will default to MEMBER in signup route
           }),
         });
 
-        console.log('here', response);
         if (!response.ok) {
           const errorData = await response.json();
-          setError(errorData.message || 'Signup failed. Please try again.');
+          setError(`Signup failed. ${errorData.error}`);
           return;
         }
-
+        // eslint-disable-next-line
         const result = await response.json();
-        console.log('User created:', result);
         alert(
-          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`
+          `Welcome ${signupCredentials.firstName} ${signupCredentials.lastName}! Check your email for a verification link.`,
         );
         setIsLoginMode(true);
         resetForms();
-      } catch (error) {
-        console.error('Login error:', error);
+      } catch {
         setError('Invalid email or password');
       }
     }
@@ -125,18 +197,28 @@ const LoginPage: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (isLoginMode) {
-      setCredentials(prev => ({
+    if (isLoginMode && !isPasswordResetMode) {
+      setCredentials((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     } else {
-      setSignupCredentials(prev => ({
+      setSignupCredentials((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
+
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+
+    if (mode === 'reset') {
+      setIsPasswordResetMode(true);
+    } else {
+      setIsPasswordResetMode(false);
+    }
+  }, [searchParams]);
 
   const resetForms = () => {
     setError('');
@@ -147,7 +229,7 @@ const LoginPage: React.FC = () => {
       email: '',
       nuid: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     });
   };
 
@@ -213,7 +295,7 @@ const LoginPage: React.FC = () => {
                     </label>
                     <div className='relative'>
                       <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                      <UserRound className='h-5 w-5 text-gray-400'/>
+                        <UserRound className='h-5 w-5 text-gray-400' />
                       </div>
                       <input
                         id='firstName'
@@ -237,7 +319,7 @@ const LoginPage: React.FC = () => {
                     </label>
                     <div className='relative'>
                       <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                        <UserRound className='h-5 w-5 text-gray-400'/>
+                        <UserRound className='h-5 w-5 text-gray-400' />
                       </div>
                       <input
                         id='lastName'
@@ -256,32 +338,36 @@ const LoginPage: React.FC = () => {
               )}
 
               {/* Email field */}
-              <div>
-                <label
-                  htmlFor='email'
-                  className='block text-sm font-medium text-white mb-2'
-                >
-                  Email Address
-                </label>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <AtSign className='h-5 w-5 text-gray-400'/>
+              {!isPasswordResetMode && (
+                <div>
+                  <label
+                    htmlFor='email'
+                    className='block text-sm font-medium text-white mb-2'
+                  >
+                    Email Address
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                      <AtSign className='h-5 w-5 text-gray-400' />
+                    </div>
+                    <input
+                      id='email'
+                      name='email'
+                      type='email'
+                      autoComplete='email'
+                      required
+                      className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
+                      placeholder='Enter your email'
+                      value={
+                        isLoginMode && !isPasswordResetMode
+                          ? credentials.email
+                          : signupCredentials.email
+                      }
+                      onChange={handleInputChange}
+                    />
                   </div>
-                  <input
-                    id='email'
-                    name='email'
-                    type='email'
-                    autoComplete='email'
-                    required
-                    className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
-                    placeholder='Enter your email'
-                    value={
-                      isLoginMode ? credentials.email : signupCredentials.email
-                    }
-                    onChange={handleInputChange}
-                  />
                 </div>
-              </div>
+              )}
 
               {!isLoginMode && (
                 <div>
@@ -293,7 +379,7 @@ const LoginPage: React.FC = () => {
                   </label>
                   <div className='relative'>
                     <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <CircleCheck className='h-5 w-5 text-gray-400'/>
+                      <CircleCheck className='h-5 w-5 text-gray-400' />
                     </div>
                     <input
                       id='nuid'
@@ -311,41 +397,45 @@ const LoginPage: React.FC = () => {
               )}
 
               {/* Password field */}
-              <div>
-                <label
-                  htmlFor='password'
-                  className='block text-sm font-medium text-white mb-2'
-                >
-                  Password
-                </label>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <LockKeyhole className='h-5 w-5 text-gray-400'/>
+              {!isPasswordResetRequestMode && (
+                <div>
+                  <label
+                    htmlFor='password'
+                    className='block text-sm font-medium text-white mb-2'
+                  >
+                    Password
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                      <LockKeyhole className='h-5 w-5 text-gray-400' />
+                    </div>
+                    <input
+                      id='password'
+                      name='password'
+                      type='password'
+                      autoComplete={
+                        isLoginMode ? 'current-password' : 'new-password'
+                      }
+                      required
+                      className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
+                      placeholder={
+                        isLoginMode
+                          ? 'Enter your password'
+                          : 'Create a password'
+                      }
+                      value={
+                        isLoginMode && !isPasswordResetMode
+                          ? credentials.password
+                          : signupCredentials.password
+                      }
+                      onChange={handleInputChange}
+                    />
                   </div>
-                  <input
-                    id='password'
-                    name='password'
-                    type='password'
-                    autoComplete={
-                      isLoginMode ? 'current-password' : 'new-password'
-                    }
-                    required
-                    className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
-                    placeholder={
-                      isLoginMode ? 'Enter your password' : 'Create a password'
-                    }
-                    value={
-                      isLoginMode
-                        ? credentials.password
-                        : signupCredentials.password
-                    }
-                    onChange={handleInputChange}
-                  />
                 </div>
-              </div>
+              )}
 
               {/* Confirm Password field - only for signup */}
-              {!isLoginMode && (
+              {(!isLoginMode || isPasswordResetMode) && (
                 <div>
                   <label
                     htmlFor='confirmPassword'
@@ -355,7 +445,7 @@ const LoginPage: React.FC = () => {
                   </label>
                   <div className='relative'>
                     <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <CircleCheck className='h-5 w-5 text-gray-400'/>
+                      <CircleCheck className='h-5 w-5 text-gray-400' />
                     </div>
                     <input
                       id='confirmPassword'
@@ -365,10 +455,31 @@ const LoginPage: React.FC = () => {
                       required={!isLoginMode}
                       className='block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl text-white bg-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors'
                       placeholder='Confirm your password'
-                      value={signupCredentials.confirmPassword}
+                      value={
+                        isLoginMode && !isPasswordResetMode
+                          ? credentials.password
+                          : signupCredentials.confirmPassword
+                      }
                       onChange={handleInputChange}
                     />
                   </div>
+                </div>
+              )}
+
+              {isLoginMode && (
+                <div>
+                  <label
+                    htmlFor='password'
+                    className='block text-sm font-medium text-white mb-2 flex items-center justify-center'
+                    style={{ cursor: 'pointer' }}
+                    onClick={() =>
+                      setIsPasswordResetRequestMode((prev) => !prev)
+                    }
+                  >
+                    {isPasswordResetRequestMode
+                      ? 'Exit Password Reset Mode'
+                      : 'Forgot your password? Click Here to Reset'}
+                  </label>
                 </div>
               )}
 
@@ -376,7 +487,7 @@ const LoginPage: React.FC = () => {
                 <div className='bg-red-900 border border-red-700 rounded-xl p-4'>
                   <div className='flex'>
                     <div className='flex-shrink-0'>
-                      <CircleAlert className='h-5 w-5 text-red-400'/>
+                      <CircleAlert className='h-5 w-5 text-red-400' />
                     </div>
                     <div className='ml-3'>
                       <p className='text-sm text-red-200'>{error}</p>
@@ -390,15 +501,14 @@ const LoginPage: React.FC = () => {
                   type='submit'
                   disabled={isLoading}
                   className='group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-[#C8102E] hover:bg-[#A8102E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C8102E] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl'
-                  onClick={() => {
-                    console.log('clicked');
-                  }}
                 >
                   {isLoading ? (
                     <div className='flex items-center'>
-                      <LoaderCircle className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                      <LoaderCircle className='animate-spin -ml-1 mr-3 h-5 w-5 text-white' />
                       {isLoginMode ? 'Signing in...' : 'Creating account...'}
                     </div>
+                  ) : isPasswordResetRequestMode || isPasswordResetMode ? (
+                    'Reset Password'
                   ) : isLoginMode ? (
                     'Sign In'
                   ) : (
