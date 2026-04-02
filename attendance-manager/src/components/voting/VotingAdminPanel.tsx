@@ -29,7 +29,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   const [options, setOptions] = useState<string[]>([]);
 
   // Fixed options for Secret Ballot
-  const FIXED_OPTIONS = ['Abstain', 'No Confidence'];
+  const fixedOptions = ['Abstain', 'No Confidence'];
 
   // ─── Functions ─────────────────────────────────────────────────────────────
   const addOption = () => {
@@ -108,7 +108,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           voteType,
           updatedBy: user.id,
           options:
-            voteType === 'SECRET_BALLOT' ? [...FIXED_OPTIONS, ...options] : options,
+            voteType === 'SECRET_BALLOT' ? [...fixedOptions, ...options] : options,
         }),
       });
 
@@ -229,7 +229,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
             </label>
             <div className='space-y-2'>
               {/* Shows two mandatory options */}
-              {FIXED_OPTIONS.map((fixed, idx) => (
+              {fixedOptions.map((fixed, idx) => (
                 <div key={`fixed-${idx}`} className='relative'>
                   <input
                     type='text'
