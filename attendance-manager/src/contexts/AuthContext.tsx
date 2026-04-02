@@ -100,7 +100,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (error) {
-        alert('Invalid email or password');
+        alert(`Error signing in: ${error}`);
         throw error;
       }
 
@@ -108,9 +108,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await loadUserProfile(data.user.id);
         router.push('/homepage');
       }
-      // eslint-disable-next-line no-useless-catch
     } catch (error) {
-      throw error;
+      alert(`Error signing in: ${error}`);
     } finally {
       setIsLoading(false);
     }
