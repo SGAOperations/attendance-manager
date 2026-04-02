@@ -131,36 +131,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-export async function PUT(request: Request) {
-  try {
-    const { email } = await request.json();
-
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
-    }
-
-    const supabase = await createServerSupabaseClient();
-
-    const origin = new URL(request.url).origin;
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${origin}/login?mode=reset`,
-    });
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    return NextResponse.json(
-      { message: 'Password reset email sent' },
-      { status: 200 },
-    );
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : 'Failed to send reset email',
-      },
-      { status: 500 },
-    );
-  }
-}

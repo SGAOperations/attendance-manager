@@ -34,7 +34,6 @@ interface SignupCredentials {
 }
 
 const LoginPage: React.FC = () => {
-  // const router = useRouter();
   const { login, isLoading } = useAuth();
   // eslint-disable-next-line
   const [user, _setUser] = useState<User>({
@@ -105,26 +104,22 @@ const LoginPage: React.FC = () => {
         setError('Please fill in all fields');
         return;
       }
+
       try {
-        const response = await fetch('/api/auth/signup', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
+        const { error } = await supabase.auth.resetPasswordForEmail(
+          credentials.email,
+          {
+            redirectTo: `${window.location.origin}/login?mode=reset`,
           },
-          body: JSON.stringify({
-            email: credentials.email,
-          }),
-        });
+        );
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          setError(data.error || 'Failed to send reset email');
+        if (error) {
+          setError(error.message);
           return;
         }
 
         alert('If an account exists, a reset email has been sent.');
-        setIsPasswordResetRequestMode(false); // exit reset mode
+        setIsPasswordResetRequestMode(false);
       } catch {
         setError('Something went wrong. Please try again.');
       }
@@ -217,24 +212,13 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     const mode = searchParams.get('mode');
-    const code = searchParams.get('code');
 
-    if (mode === 'reset' && code) {
+    if (mode === 'reset') {
       setIsPasswordResetMode(true);
-
-      // get session for resetting password
-      const exchange = async () => {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          setError(`Error exchanging code: ${error.message}`);
-        }
-      };
-
-      exchange();
     } else {
       setIsPasswordResetMode(false);
     }
-  }, [searchParams, supabase]);
+  }, [searchParams]);
 
   const resetForms = () => {
     setError('');
