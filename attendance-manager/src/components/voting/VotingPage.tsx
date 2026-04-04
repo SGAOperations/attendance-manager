@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   MeetingApiData,
   VotingEventWithRelations,
@@ -15,7 +15,7 @@ const VotingPage: React.FC = () => {
     useState<VotingEventWithRelations | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const refreshVotingData = useCallback(async () => {
+  const refreshVotingData = async () => {
     try {
       setEventsLoading(true);
       const [meetingsRes, eventsRes] = await Promise.all([
@@ -37,11 +37,10 @@ const VotingPage: React.FC = () => {
     } finally {
       setEventsLoading(false);
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    refreshVotingData();
-  }, [refreshVotingData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { refreshVotingData(); }, []);
 
   // Soft-delete handler: sets deletedAt on the vote and refreshes list
   const handleDeleteVotingEvent = async (votingEventId?: string | null) => {

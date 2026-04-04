@@ -24,9 +24,8 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   const [voteType, setVoteType] = useState<string>(VOTING_TYPES.ROLL_CALL.key);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentEvent, setCurrentEvent] = useState<VotingEventWithRelations | null>(
-    null,
-  );
+  const [currentEvent, setCurrentEvent] =
+    useState<VotingEventWithRelations | null>(null);
   const [options, setOptions] = useState<string[]>([]);
 
   // Fixed options for Secret Ballot
@@ -51,12 +50,13 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
 
   const effectiveCurrentEvent = currentEvent ?? activeEvent;
   const hasActiveEvent = !!(
-    effectiveCurrentEvent && !effectiveCurrentEvent.deletedAt && !effectiveCurrentEvent.endedAt
+    effectiveCurrentEvent &&
+    !effectiveCurrentEvent.deletedAt &&
+    !effectiveCurrentEvent.endedAt
   );
 
-  const activeVoteCounts = hasActiveEvent && activeEvent
-    ? getVoteCounts(activeEvent)
-    : null;
+  const activeVoteCounts =
+    hasActiveEvent && activeEvent ? getVoteCounts(activeEvent) : null;
   const activeTotalVotes = activeVoteCounts
     ? Object.values(activeVoteCounts).reduce((sum, n) => sum + n, 0)
     : 0;
@@ -322,7 +322,9 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           </h3>
           <p className='text-sm text-gray-600 mb-2'>
             Total votes received:{' '}
-            <span className='font-semibold text-gray-900'>{activeTotalVotes}</span>
+            <span className='font-semibold text-gray-900'>
+              {activeTotalVotes}
+            </span>
           </p>
           {activeTotalVotes > 0 && (
             <div className='flex flex-wrap gap-2'>
