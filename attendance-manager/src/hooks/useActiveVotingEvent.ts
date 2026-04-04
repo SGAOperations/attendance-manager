@@ -36,7 +36,7 @@ export function useActiveVotingEvent(
       }
       const events: VotingEventApiData[] = await res.json();
 
-      const activeEvents = events.filter((e) => !e.deletedAt);
+      const activeEvents = events.filter((e) => !e.deletedAt && !e.endedAt);
 
       if (activeEvents.length === 0) {
         setActiveEvent(null);

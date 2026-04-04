@@ -1346,6 +1346,39 @@ describe('PUT /api/voting-event/[id]', () => {
     expect(data.updatedAt).toBeDefined();
   });
 
+    it('should soft delete a voting event and update deletedAt', async () => {
+      const testVotingEvent = await VotingService.createVotingEvent({
+        meetingId: routeTestMeetingId,
+        name: 'Soft Delete Test',
+        voteType: 'YES_NO'
+      });
+
+      const { PUT } = await import('../../app/api/voting-event/[id]/route');
+      const requestBody = { deletedAt: new Date().toISOString() };
+      const req = new Request(
+        `http://localhost/api/voting-event/${testVotingEvent.votingEventId}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        }
+      );
+
+      const params = Promise.resolve({ id: testVotingEvent.votingEventId });
+      const response = await PUT(req, { params });
+
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data).toBeDefined();
+      expect(data.deletedAt).toBeDefined();
+
+      const reloaded = await VotingService.getVotingEventById(
+        testVotingEvent.votingEventId
+      );
+      expect(reloaded?.deletedAt).toBeDefined();
+
+      await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
+    });
   it('should allow admin to update voting event notes', async () => {
     const { PUT } = await import('../../app/api/voting-event/[id]/route');
     const requestBody = {

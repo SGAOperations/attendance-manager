@@ -13,6 +13,7 @@ type VotingEventWithRelations = VotingEventApiData & {
 interface VotingResultsPanelProps {
   events: VotingEventWithRelations[];
   loading: boolean;
+  setDeleteEvent: (event: VotingEventWithRelations | null) => void;
 }
 
 const formatResultLabel = (result: string) => {
@@ -31,12 +32,13 @@ const formatResultLabel = (result: string) => {
 const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
   events,
   loading,
+  setDeleteEvent,
 }) => {
   const endedEvents = events
-    .filter((e) => e.deletedAt)
+    .filter((e) => !e.deletedAt && !!e.endedAt)
     .sort((a, b) => {
-      const aDate = a.deletedAt ?? a.createdAt;
-      const bDate = b.deletedAt ?? b.createdAt;
+      const aDate = a.endedAt ?? a.deletedAt ?? a.createdAt;
+      const bDate = b.endedAt ?? b.deletedAt ?? b.createdAt;
       return new Date(bDate).getTime() - new Date(aDate).getTime();
     });
   const [selectedVote, setSelectedVote] = useState<string>('');
@@ -100,14 +102,18 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                       }
                     }}
                   >
-                    <td className='py-3 px-4 align-top'>
-                      <div className='text-gray-900 font-medium'>
-                        {event.meeting?.name ?? 'Unknown meeting'}
-                      </div>
-                      <div className='text-xs text-gray-500'>
-                        {event.meeting?.date
-                          ? event.meeting.date
-                          : new Date(event.createdAt).toLocaleDateString()}
+                    <td className='py-2 px-3 align-top'>
+                      <div className='flex items-start justify-between'>
+                        <div>
+                          <div className='text-gray-900 font-medium'>
+                            {event.meeting?.name ?? 'Unknown meeting'}
+                          </div>
+                          <div className='text-xs text-gray-500'>
+                            {event.meeting?.date
+                              ? event.meeting.date
+                              : new Date(event.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className='py-3 px-4 align-top'>
@@ -169,6 +175,18 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                             )}
                         </div>
                       )}
+                      {/* Delete button for past events */}
+                      <div className='ml-1 flex-shrink-0'>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteEvent(event);
+                          }}
+                          className='text-red-400 hover:text-red-600 text-xs font-medium'
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
