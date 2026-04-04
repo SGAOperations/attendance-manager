@@ -120,8 +120,21 @@ export const MeetingService = {
   },
 
   async deleteMeeting(meetingId: string) {
+    const events = await prisma.votingEvent.findMany({
+      where: { meetingId },
+      select: { votingEventId: true },
+    });
+
+    const eventIds = events.map((e) => e.votingEventId);
+    if (eventIds.length > 0) {
+      await prisma.votingRecord.deleteMany({
+        where: { votingEventId: { in: eventIds } },
+      });
+    }
+
     await prisma.votingEvent.deleteMany({ where: { meetingId } });
-    // Delete attendance records first to avoid foreign key constraint
+
+    // Delete attendance records
     await prisma.attendance.deleteMany({
       where: { meetingId },
     });

@@ -200,22 +200,27 @@ export const VotingService = {
         votingRecords: true,
       },
     });
-    const withNames = await attachVoterNamesToVotingEvent(event);
-    return formatVotingEventForApi(withNames);
+
+    if (!event) return null;
+
+    // For ROLL_CALL: attach user names
+    const withUsers = await attachVoterNamesToVotingEvent(event);
+
+    // Always format for API: aggregates for SECRET_BALLOT, etc.
+    return formatVotingEventForApi(withUsers);
   },
 
   async getVotingEventsByVoteType(voteType: string) {
     const events = await prisma.votingEvent.findMany({
       where: { voteType },
-      include: {
-        meeting: true,
-        votingRecords: true,
-      },
+      include: { meeting: true, votingRecords: true },
     });
-    const withNames = await Promise.all(
+
+    const eventsWithUsers = await Promise.all(
       events.map((e) => attachVoterNamesToVotingEvent(e)),
     );
-    return withNames.map((e) => formatVotingEventForApi(e)!);
+
+    return eventsWithUsers.map((e) => formatVotingEventForApi(e)!);
   },
 
   async createVotingEvent(data: {
@@ -267,9 +272,26 @@ export const VotingService = {
     });
   },
 
+  // Add deletedAt time
   async deleteVotingEvent(votingEventId: string) {
-    return prisma.votingEvent.delete({
+    return prisma.votingEvent.update({
       where: { votingEventId },
+      data: { deletedAt: new Date() },
     });
+  },
+
+  // Add endedAt time
+  async endVotingEvent(votingEventId: string, updatedBy?: string) {
+    const event = await prisma.votingEvent.update({
+      where: { votingEventId },
+      data: { endedAt: new Date(), updatedBy },
+      include: {
+        meeting: true,
+        votingRecords: true,
+      },
+    });
+
+    const withUsers = await attachVoterNamesToVotingEvent(event);
+    return formatVotingEventForApi(withUsers);
   },
 };

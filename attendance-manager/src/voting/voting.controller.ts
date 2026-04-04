@@ -151,6 +151,7 @@ export const VotingController = {
       'options',
       'updatedBy',
       'deletedAt',
+      'end',
     ];
     const updateKeys = Object.keys(updates);
     const hasValidUpdate = updateKeys.some((key) =>
@@ -230,7 +231,16 @@ export const VotingController = {
       );
     }
 
+    // End voting event
     try {
+      if (updates.end === true) {
+        const ended = await VotingService.endVotingEvent(
+          params.votingEventId,
+          updates.updatedBy,
+        );
+        return NextResponse.json(ended);
+      }
+
       const updatedVotingEvent = await VotingService.updateVotingEvent(
         params.votingEventId,
         updates,
