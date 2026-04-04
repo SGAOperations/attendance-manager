@@ -56,7 +56,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
 
   const effectiveCurrentEvent = currentEvent ?? activeEvent ?? null;
   const hasActiveEvent = !!(
-    effectiveCurrentEvent && !effectiveCurrentEvent.deletedAt
+    effectiveCurrentEvent && !effectiveCurrentEvent.deletedAt && !effectiveCurrentEvent.endedAt
   );
 
   const activeVoteCounts = hasActiveEvent && effectiveCurrentEvent

@@ -15,7 +15,7 @@ interface UseActiveVotingEventResult {
 /**
  * Polls the backend for the currently active voting event
  * "active" is defined as the most recently created VotingEvent
- * with deletedAt === null
+ * with deletedAt === null and endedAt === null
  */
 export function useActiveVotingEvent(
   options: UseActiveVotingEventOptions = {},
