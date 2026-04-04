@@ -20,7 +20,7 @@ interface UseActiveVotingEventResult {
 export function useActiveVotingEvent(
   options: UseActiveVotingEventOptions = {},
 ): UseActiveVotingEventResult {
-  const { pollIntervalMs = 10000 } = options;
+  const { pollIntervalMs = 3000 } = options;
   const [activeEvent, setActiveEvent] = useState<VotingEventWithRelations | null>(
     null,
   );
@@ -30,20 +30,18 @@ export function useActiveVotingEvent(
   const fetchActiveEvent = async () => {
     try {
       setError(null);
-      const res = await fetch('/api/voting-event');
+      const res = await fetch('/api/voting-event/active');
       if (!res.ok) {
-        throw new Error(`Failed to fetch voting events (${res.status})`);
+        throw new Error(`Failed to fetch active voting event (${res.status})`);
       }
       const events: VotingEventWithRelations[] = await res.json();
 
-      const activeEvents = events.filter((e) => !e.deletedAt && !e.endedAt);
-
-      if (activeEvents.length === 0) {
+      if (events.length === 0) {
         setActiveEvent(null);
         return;
       }
 
-      const sorted = [...activeEvents].sort(
+      const sorted = [...events].sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );

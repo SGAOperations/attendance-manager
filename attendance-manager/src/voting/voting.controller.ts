@@ -21,6 +21,11 @@ function normalizeCreateOptionsForSecretBallot(
 }
 
 export const VotingController = {
+  async getActiveVotingEvents() {
+    const votingEvents = await VotingService.getActiveVotingEvents();
+    return NextResponse.json(votingEvents);
+  },
+
   async getAllVotingEvents() {
     const votingEvents = await VotingService.getAllVotingEvents();
     return NextResponse.json(votingEvents);
