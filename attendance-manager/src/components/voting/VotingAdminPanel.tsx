@@ -47,14 +47,9 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   };
 
   // ─── Hooks ─────────────────────────────────────────────────────────────────
-  const {
-    activeEvent,
-    // eslint-disable-next-line
-    loading: activeEventLoading,
-    refresh: refreshActiveEvent,
-  } = useActiveVotingEvent();
+  const { activeEvent, refresh: refreshActiveEvent } = useActiveVotingEvent();
 
-  const effectiveCurrentEvent = currentEvent ?? activeEvent ?? null;
+  const effectiveCurrentEvent = currentEvent ?? activeEvent;
   const hasActiveEvent = !!(
     effectiveCurrentEvent && !effectiveCurrentEvent.deletedAt && !effectiveCurrentEvent.endedAt
   );

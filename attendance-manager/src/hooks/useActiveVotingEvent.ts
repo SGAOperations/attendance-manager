@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { VotingEventWithRelations } from '@/types';
 
 interface UseActiveVotingEventOptions {
@@ -27,7 +27,7 @@ export function useActiveVotingEvent(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActiveEvent = async () => {
+  const fetchActiveEvent = useCallback(async () => {
     try {
       setError(null);
       const res = await fetch('/api/voting-event/active');
@@ -52,19 +52,17 @@ export function useActiveVotingEvent(
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchActiveEvent();
 
-    const id = window.setInterval(() => {
-      fetchActiveEvent();
-    }, pollIntervalMs);
+    const id = window.setInterval(fetchActiveEvent, pollIntervalMs);
 
     return () => {
       window.clearInterval(id);
     };
-  }, [pollIntervalMs]);
+  }, [fetchActiveEvent, pollIntervalMs]);
 
   return {
     activeEvent,
