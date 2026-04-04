@@ -139,6 +139,7 @@ export interface VotingEventApiData {
   options: string[];
   createdAt: string;
   updatedAt?: string | null;
+  endedAt?: string | null;
   deletedAt?: string | null;
   resultCounts?: Record<string, number>;
   votePassed?: boolean | null;

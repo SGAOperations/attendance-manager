@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE IF EXISTS "VotingEvent"
+ADD COLUMN IF NOT EXISTS "endedAt" TIMESTAMP(3);

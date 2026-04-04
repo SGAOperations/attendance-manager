@@ -16,7 +16,6 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   onEventCreated,
 }) => {
   // ─── States ────────────────────────────────────────────────────────────────
-  
   const { user } = useAuth();
   const [meetingId, setMeetingId] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -108,7 +107,9 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           voteType,
           updatedBy: user.id,
           options:
-            voteType === 'SECRET_BALLOT' ? [...fixedOptions, ...options] : options,
+            voteType === 'SECRET_BALLOT'
+              ? [...fixedOptions, ...options]
+              : options,
         }),
       });
 
@@ -133,7 +134,10 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   };
 
   const handleEnd = async () => {
-    if (!effectiveCurrentEvent) return;
+    if (!effectiveCurrentEvent) {
+      setError('No active event');
+      return;
+    }
 
     setSubmitting(true);
     setError(null);
@@ -143,13 +147,8 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
         `/api/voting-event/${effectiveCurrentEvent.votingEventId}`,
         {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            deletedAt: new Date().toISOString(),
-            updatedBy: user?.id,
-          }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ end: true, updatedBy: user?.id }),
         },
       );
 
@@ -162,9 +161,9 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
       setCurrentEvent(updated);
       await refreshActiveEvent();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
+      setCurrentEvent(null);
       setSubmitting(false);
     }
   };
@@ -243,7 +242,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
 
               {/* User-added options */}
               {options.map((option, index) => (
-                <div key={`user-${index}`} className='relative'>
+                <div key={index} className='relative'>
                   <input
                     type='text'
                     value={option}
@@ -252,7 +251,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
                       newOptions[index] = e.target.value;
                       setOptions(newOptions);
                     }}
-                    className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] pr-8'
+                    className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] pr-8' // add padding for the x
                   />
                   <X
                     onClick={() => removeOption(option)}
