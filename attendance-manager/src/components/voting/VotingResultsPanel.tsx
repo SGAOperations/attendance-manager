@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { VotingEventWithRelations } from '@/types';
+import { getVoteCounts } from '@/utils/voting_utils';
 import VotingResultsModal from './VotingResultsModal';
 
 interface VotingResultsPanelProps {
@@ -69,15 +70,7 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
             </thead>
             <tbody>
               {endedEvents.map((event) => {
-                const records =
-                  (event.votingRecords || []).filter((r) => !r.deletedAt) || [];
-                const counts =
-                  event.voteType === 'SECRET_BALLOT' && event.resultCounts
-                    ? event.resultCounts
-                    : records.reduce<Record<string, number>>((acc, record) => {
-                        acc[record.result] = (acc[record.result] || 0) + 1;
-                        return acc;
-                      }, {});
+                const counts = getVoteCounts(event);
                 const totalVotes = Object.values(counts).reduce(
                   (sum, n) => sum + n,
                   0,
