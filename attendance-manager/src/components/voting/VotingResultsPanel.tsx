@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
-import { VotingEventApiData, VotingRecordApiData } from '@/types';
+import { VotingEventWithRelations } from '@/types';
 import VotingResultsModal from './VotingResultsModal';
-
-type VotingEventWithRelations = VotingEventApiData & {
-  meeting?: {
-    name: string;
-    date: string;
-  };
-  votingRecords?: VotingRecordApiData[];
-};
 
 interface VotingResultsPanelProps {
   events: VotingEventWithRelations[];

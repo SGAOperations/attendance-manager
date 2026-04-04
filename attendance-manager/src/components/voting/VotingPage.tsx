@@ -1,20 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
   MeetingApiData,
-  VotingEventApiData,
-  VotingRecordApiData,
+  VotingEventWithRelations,
 } from '@/types';
 import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
 import VotingResultsPanel from '@/components/voting/VotingResultsPanel';
 import DeleteVotingModal from '@/components/voting/DeleteVotingModal';
-
-type VotingEventWithRelations = VotingEventApiData & {
-  meeting?: {
-    name: string;
-    date: string;
-  };
-  votingRecords?: VotingRecordApiData[];
-};
 
 const VotingPage: React.FC = () => {
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);

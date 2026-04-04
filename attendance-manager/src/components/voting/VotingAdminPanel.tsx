@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { MeetingApiData, VotingEventApiData } from '@/types';
+import { MeetingApiData, VotingEventWithRelations } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveVotingEvent } from '@/hooks/useActiveVotingEvent';
 import { X } from 'lucide-react';
@@ -8,7 +8,7 @@ import { VOTING_TYPES } from '@/utils/consts';
 interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
 
-  onEventCreated?: (event: VotingEventApiData) => void;
+  onEventCreated?: (event: VotingEventWithRelations) => void;
 }
 
 const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
@@ -16,13 +16,14 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   onEventCreated,
 }) => {
   // ─── States ────────────────────────────────────────────────────────────────
+
   const { user } = useAuth();
   const [meetingId, setMeetingId] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [voteType, setVoteType] = useState<string>(VOTING_TYPES.ROLL_CALL.key);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentEvent, setCurrentEvent] = useState<VotingEventApiData | null>(
+  const [currentEvent, setCurrentEvent] = useState<VotingEventWithRelations | null>(
     null,
   );
   const [options, setOptions] = useState<string[]>([]);
@@ -118,7 +119,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
         throw new Error(data.error || 'Failed to create voting event');
       }
 
-      const event: VotingEventApiData = await res.json();
+      const event: VotingEventWithRelations = await res.json();
       setCurrentEvent(event);
       if (onEventCreated) {
         onEventCreated(event);
@@ -157,7 +158,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
         throw new Error(data.error || 'Failed to end voting event');
       }
 
-      const updated: VotingEventApiData = await res.json();
+      const updated: VotingEventWithRelations = await res.json();
       setCurrentEvent(updated);
       await refreshActiveEvent();
     } catch (err) {
@@ -310,6 +311,49 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
           )}
         </div>
       </form>
+
+      {hasActiveEvent &&
+        effectiveCurrentEvent &&
+        (() => {
+          const counts =
+            effectiveCurrentEvent.voteType === 'SECRET_BALLOT'
+              ? (effectiveCurrentEvent.resultCounts ?? {})
+              : (effectiveCurrentEvent.votingRecords ?? [])
+                  .filter((r) => !r.deletedAt)
+                  .reduce<Record<string, number>>((acc, r) => {
+                    acc[r.result] = (acc[r.result] || 0) + 1;
+                    return acc;
+                  }, {});
+          const totalVotes = Object.values(counts).reduce(
+            (sum, n) => sum + n,
+            0,
+          );
+          return (
+            <div className='mt-4 bg-gray-50 rounded-xl border border-gray-200 p-4'>
+              <h3 className='text-sm font-semibold text-gray-800 mb-3'>
+                Ongoing Vote Progress
+              </h3>
+              <p className='text-sm text-gray-600 mb-2'>
+                Total votes received:{' '}
+                <span className='font-semibold text-gray-900'>
+                  {totalVotes}
+                </span>
+              </p>
+              {totalVotes > 0 && (
+                <div className='flex flex-wrap gap-2'>
+                  {Object.entries(counts).map(([key, value]) => (
+                    <span
+                      key={key}
+                      className='inline-flex items-center rounded-full bg-white border border-gray-200 px-2 py-1 text-xs font-medium text-gray-700'
+                    >
+                      {key}: {value}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
     </div>
   );
 };

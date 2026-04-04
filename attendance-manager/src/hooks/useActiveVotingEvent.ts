@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { VotingEventApiData } from '@/types';
+import { VotingEventWithRelations } from '@/types';
 
 interface UseActiveVotingEventOptions {
   pollIntervalMs?: number;
 }
 
 interface UseActiveVotingEventResult {
-  activeEvent: VotingEventApiData | null;
+  activeEvent: VotingEventWithRelations | null;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -21,7 +21,7 @@ export function useActiveVotingEvent(
   options: UseActiveVotingEventOptions = {},
 ): UseActiveVotingEventResult {
   const { pollIntervalMs = 10000 } = options;
-  const [activeEvent, setActiveEvent] = useState<VotingEventApiData | null>(
+  const [activeEvent, setActiveEvent] = useState<VotingEventWithRelations | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ export function useActiveVotingEvent(
       if (!res.ok) {
         throw new Error(`Failed to fetch voting events (${res.status})`);
       }
-      const events: VotingEventApiData[] = await res.json();
+      const events: VotingEventWithRelations[] = await res.json();
 
       const activeEvents = events.filter((e) => !e.deletedAt && !e.endedAt);
 

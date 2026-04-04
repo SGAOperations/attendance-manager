@@ -147,6 +147,14 @@ export interface VotingEventApiData {
   winningResult?: string | null;
 }
 
+export type VotingEventWithRelations = VotingEventApiData & {
+  meeting?: {
+    name: string;
+    date: string;
+  };
+  votingRecords?: VotingRecordApiData[];
+};
+
 export interface VotingRecordApiData {
   votingRecordId: string;
   votingEventId: string;
