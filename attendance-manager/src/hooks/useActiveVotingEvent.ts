@@ -32,7 +32,8 @@ export function useActiveVotingEvent(
       setError(null);
       const res = await fetch('/api/voting-event/active');
       if (!res.ok) {
-        throw new Error(`Failed to fetch active voting event (${res.status})`);
+        setError('Failed to load active voting events.');
+        return;
       }
       const events: VotingEventWithRelations[] = await res.json();
 
@@ -41,9 +42,8 @@ export function useActiveVotingEvent(
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
       setActiveEvents(sorted);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      setError(message);
+    } catch {
+      setError('Failed to load active voting events.');
     } finally {
       setLoading(false);
     }

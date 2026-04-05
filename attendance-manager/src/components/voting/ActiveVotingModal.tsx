@@ -52,17 +52,14 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to submit vote');
+        setError('Failed to submit vote.');
+        return;
       }
 
       setHasVoted(true);
-      if (onVoted) {
-        onVoted();
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      setError(message);
+      onVoted?.();
+    } catch {
+      setError('Failed to submit vote.');
     } finally {
       setSubmitting(false);
     }
@@ -70,7 +67,7 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4 relative'>
+      <div className='bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4'>
         <div className='flex items-start justify-between mb-2'>
           <h2 className='text-xl font-semibold text-gray-900'>Active Vote</h2>
           <button
@@ -136,7 +133,7 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
             </p>
           )}
 
-          <div className='flex justify-end space-x-2 pt-2'>
+          <div className='flex justify-end pt-2'>
             <button
               type='submit'
               disabled={submitting}

@@ -36,20 +36,27 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
     const unfetchedIds = [
       ...new Set(activeEvents.map((e) => e.meetingId)),
     ].filter((mid) => !(mid in eligibleCounts));
-
     if (unfetchedIds.length === 0) return;
 
-    unfetchedIds.forEach(async (mid) => {
-      try {
-        const res = await fetch(`/api/attendance/meeting/${mid}`);
-        if (!res.ok) return;
-        const records: { status: string }[] = await res.json();
-        const count = records.filter((r) => r.status === 'PRESENT').length;
-        setEligibleCounts((prev) => ({ ...prev, [mid]: count }));
-      } catch {
-        // eligible count is best-effort; silently ignore
+    (async () => {
+      const settled = await Promise.allSettled(
+        unfetchedIds.map(async (mid) => {
+          const res = await fetch(`/api/attendance/meeting/${mid}`);
+          if (!res.ok) throw new Error();
+          const records: { status: string }[] = await res.json();
+          return [
+            mid,
+            records.filter((r) => r.status === 'PRESENT').length,
+          ] as [string, number];
+        }),
+      );
+      const updates = Object.fromEntries(
+        settled.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : [])),
+      );
+      if (Object.keys(updates).length > 0) {
+        setEligibleCounts((prev) => ({ ...prev, ...updates }));
       }
-    });
+    })();
   }, [activeEvents, eligibleCounts]);
 
   if (!user || user.role !== 'EBOARD') return null;
@@ -63,15 +70,18 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
         body: JSON.stringify({ end: true, updatedBy: user.id }),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to end voting event');
+        setEndErrors((prev) => ({
+          ...prev,
+          [votingEventId]: 'Failed to end voting event.',
+        }));
+        return;
       }
       await refreshActiveEvent();
       await onVotingEventsMutated?.();
-    } catch (err) {
+    } catch {
       setEndErrors((prev) => ({
         ...prev,
-        [votingEventId]: err instanceof Error ? err.message : 'Unknown error',
+        [votingEventId]: 'Failed to end voting event.',
       }));
     }
   };

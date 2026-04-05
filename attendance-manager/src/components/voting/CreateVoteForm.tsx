@@ -65,16 +65,16 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to create voting event');
+        setError('Failed to create voting event.');
+        return;
       }
 
       await onCreated();
       setMeetingId('');
       setName('');
       setOptions([]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+    } catch {
+      setError('Failed to create voting event.');
     } finally {
       setIsSubmitting(false);
     }
