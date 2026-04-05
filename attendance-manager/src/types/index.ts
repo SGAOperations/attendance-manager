@@ -130,6 +130,20 @@ export interface RequestForm {
 
 // Voting
 
+export interface VotingRecordApiData {
+  votingRecordId: string;
+  votingEventId: string;
+  userId: string;
+  result: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+  } | null;
+  createdAt: string;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
+}
+
 export interface VotingEventApiData {
   votingEventId: string;
   meetingId: string;
@@ -147,19 +161,13 @@ export interface VotingEventApiData {
   winningResult?: string | null;
 }
 
-export interface VotingRecordApiData {
-  votingRecordId: string;
-  votingEventId: string;
-  userId: string;
-  result: string;
-  user?: {
-    firstName: string;
-    lastName: string;
-  } | null;
-  createdAt: string;
-  updatedAt?: string | null;
-  deletedAt?: string | null;
-}
+export type VotingEventWithRelations = VotingEventApiData & {
+  meeting?: {
+    name: string;
+    date: string;
+  };
+  votingRecords?: VotingRecordApiData[];
+};
 
 // Swagger Docs Types
 

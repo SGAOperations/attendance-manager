@@ -1,20 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  MeetingApiData,
-  VotingEventApiData,
-  VotingRecordApiData,
-} from '@/types';
+import { MeetingApiData, VotingEventWithRelations } from '@/types';
 import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
 import VotingResultsPanel from '@/components/voting/VotingResultsPanel';
 import DeleteVotingModal from '@/components/voting/DeleteVotingModal';
-
-type VotingEventWithRelations = VotingEventApiData & {
-  meeting?: {
-    name: string;
-    date: string;
-  };
-  votingRecords?: VotingRecordApiData[];
-};
 
 const VotingPage: React.FC = () => {
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
@@ -24,34 +12,6 @@ const VotingPage: React.FC = () => {
     useState<VotingEventWithRelations | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [meetingsRes, eventsRes] = await Promise.all([
-          fetch('/api/meeting'),
-          fetch('/api/voting-event'),
-        ]);
-
-        if (meetingsRes.ok) {
-          const meetingsData: MeetingApiData[] = await meetingsRes.json();
-          setMeetings(meetingsData);
-        }
-
-        if (eventsRes.ok) {
-          const eventsData: VotingEventWithRelations[] = await eventsRes.json();
-          setEvents(eventsData);
-        }
-      } catch {
-        /* 'Error loading user profile:', error */
-      } finally {
-        setEventsLoading(false);
-      }
-    };
-
-    load();
-  }, []);
-
-  // Refresh voting data
   const refreshVotingData = async () => {
     try {
       setEventsLoading(true);
@@ -75,6 +35,10 @@ const VotingPage: React.FC = () => {
       setEventsLoading(false);
     }
   };
+
+  useEffect(() => {
+    refreshVotingData();
+  }, []);
 
   // Soft-delete handler: sets deletedAt on the vote and refreshes list
   const handleDeleteVotingEvent = async (votingEventId?: string | null) => {

@@ -48,14 +48,16 @@ describe('API Auth Utilities', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockSupabaseClient = {
       auth: {
         getSession: mockGetSession,
       },
     };
 
-    (createServerSupabaseClient as jest.Mock).mockResolvedValue(mockSupabaseClient);
+    (createServerSupabaseClient as jest.Mock).mockResolvedValue(
+      mockSupabaseClient,
+    );
   });
 
   describe('getAuthenticatedUser', () => {
@@ -137,7 +139,9 @@ describe('API Auth Utilities', () => {
 
       // Mock prisma to throw an error
       const originalFindUnique = prisma.user.findUnique;
-      prisma.user.findUnique = jest.fn().mockRejectedValue(new Error('Database error'));
+      prisma.user.findUnique = jest
+        .fn()
+        .mockRejectedValue(new Error('Database error'));
 
       const user = await getAuthenticatedUser();
 
@@ -179,10 +183,10 @@ describe('API Auth Utilities', () => {
 
       expect(result.user).toBeNull();
       expect(result.error).toBeDefined();
-      
+
       const errorResponse = result.error as NextResponse;
       expect(errorResponse.status).toBe(401);
-      
+
       const errorData = await errorResponse.json();
       expect(errorData.error).toBe('Unauthorized');
     });
@@ -197,7 +201,7 @@ describe('API Auth Utilities', () => {
 
       expect(result.user).toBeNull();
       expect(result.error).toBeDefined();
-      
+
       const errorResponse = result.error as NextResponse;
       expect(errorResponse.status).toBe(401);
     });
@@ -219,7 +223,7 @@ describe('API Auth Utilities', () => {
 
       expect(result.user).toBeNull();
       expect(result.error).toBeDefined();
-      
+
       const errorResponse = result.error as NextResponse;
       expect(errorResponse.status).toBe(401);
     });
@@ -240,7 +244,7 @@ describe('API Auth Utilities', () => {
 
     it('should not return soft deleted user from getAllUsers', async () => {
       const users = await UsersService.getAllUsers();
-      const deletedUser = users.find(u => u.userId === testUserId);
+      const deletedUser = users.find((u) => u.userId === testUserId);
 
       expect(deletedUser).toBeUndefined();
     });

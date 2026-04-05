@@ -88,7 +88,7 @@ export const AttendanceService = {
     return prisma.attendance.upsert({
       where: {
         // eslint-disable-next-line
-        userId_meetingId: { userId, meetingId }
+        userId_meetingId: { userId, meetingId },
       },
       update: {
         status,

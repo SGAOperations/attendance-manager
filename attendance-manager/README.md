@@ -53,7 +53,9 @@ The second you pull from main, in order to be up to date with any database chang
 npx prisma db pull
 
 ```
+
 Followed by:
+
 ```sh
 npx prisma generate
 ```
@@ -64,16 +66,20 @@ First, ensure that Docker is running. Easiest way to do this is with the Docker 
 
 Next, run the commands:
 
-1. 
+1.
+
 ```sh
 npx prisma generate
 ```
-2. 
+
+2.
+
 ```sh
 npx supabase start
 ```
 
 Next, update your .env file with
+
 ```sh
 DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 DIRECT_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
@@ -82,16 +88,19 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="What was outputted in your Authentication Keys/Pu
 ```
 
 Next, start the application
+
 ```sh
 npm run dev
 ```
 
 Finally, run:
+
 ```sh
 npx prisma migrate dev --name 'name of migration'
 ```
 
 Optionally, to confirm the db is up, run and ensure it works with
+
 ```sh
 run npx prisma studio
 ```
@@ -131,10 +140,11 @@ npx prettier "**/*.{js,jsx,ts,tsx,json,css,md}" --write
 ```
 
 ### Swagger Docs
+
 You can view all of our REST endpoints by simply going to [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
 To generate new Swagger Docs, run
 
 ```bash
-npx next-openapi-gen generate  
+npx next-openapi-gen generate
 ```

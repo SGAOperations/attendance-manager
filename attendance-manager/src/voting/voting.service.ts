@@ -179,6 +179,14 @@ async function attachVoterNamesToVotingEvent<
 }
 
 export const VotingService = {
+  async getActiveVotingEvents() {
+    const events = await prisma.votingEvent.findMany({
+      where: { deletedAt: null, endedAt: null },
+      include: { meeting: true, votingRecords: true },
+    });
+    return events.map((e) => formatVotingEventForApi(e)!);
+  },
+
   async getAllVotingEvents() {
     const events = await prisma.votingEvent.findMany({
       include: {
