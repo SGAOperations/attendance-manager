@@ -1,53 +1,117 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MeetingApiData, VotingEventWithRelations } from '@/types';
 import { getVoteCounts } from '@/utils/voting_utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveVotingEvent } from '@/hooks/useActiveVotingEvent';
 import { X } from 'lucide-react';
-import { VOTING_TYPES } from '@/utils/consts';
+import { VOTING_TYPES, YES_NO_OPTIONS } from '@/utils/consts';
 
 const FIXED_OPTIONS = ['Abstain', 'No Confidence'] as const;
 
 const optionRank = (o: string) =>
   o === 'Abstain' ? 2 : o === 'No Confidence' ? 1 : 0;
 
+const optionColors = new Map([
+  ['Yes', '#bbf7d0'],
+  ['No', '#fecaca'],
+  ['Abstain', '#e5e7eb'],
+  ['No Confidence', '#fde68a'],
+]);
+const FALLBACK_COLORS = ['#bfdbfe', '#ddd6fe', '#fbcfe8', '#99f6e4', '#fed7aa'];
+
+const getOptionColor = (opt: string, idx: number): string =>
+  optionColors.get(opt) ?? FALLBACK_COLORS[idx % FALLBACK_COLORS.length];
+
+// ─── VoteBreakdown ────────────────────────────────────────────────────────────
+
+interface VoteBreakdownProps {
+  event: VotingEventWithRelations;
+  eligible: number;
+  voteCounts: Record<string, number>;
+  totalVotes: number;
+}
+
+const VoteBreakdown: React.FC<VoteBreakdownProps> = ({
+  event,
+  eligible,
+  voteCounts,
+  totalVotes,
+}) => {
+  const opts =
+    event.options.length > 0
+      ? [...event.options].sort((a, b) => optionRank(a) - optionRank(b))
+      : Object.values(YES_NO_OPTIONS);
+
+  if (opts.length === 0) return null;
+
+  // Bar widths are out of eligible (gray remainder = not yet voted).
+  // Falls back to totalVotes if eligible is unavailable or stale.
+  const barDenom = Math.max(eligible, totalVotes);
+
+  return (
+    <div className='mt-4 pt-4 border-t border-gray-200'>
+      <p className='font-medium text-gray-900 mb-3'>
+        Total Votes Cast: {totalVotes}/{eligible > 0 ? eligible : '—'}
+        {eligible > 0 && (
+          <span className='ml-1'>
+            ({Math.round((Math.min(totalVotes, eligible) / eligible) * 100)}%)
+          </span>
+        )}
+      </p>
+      <div className='h-10 w-full rounded-xl overflow-hidden flex bg-gray-200'>
+        {opts.map((opt, idx) => {
+          const count = voteCounts[opt] ?? 0;
+          const barPct = barDenom > 0 ? (count / barDenom) * 100 : 0;
+          const labelPct =
+            totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+          return (
+            <div
+              key={opt}
+              className='h-full flex items-center justify-center overflow-hidden transition-all duration-500'
+              style={{
+                width: `${barPct}%`,
+                backgroundColor: getOptionColor(opt, idx),
+              }}
+              title={`${opt}: ${count} (${labelPct}%)`}
+            >
+              {barPct >= 8 && (
+                <span className='text-sm font-medium text-gray-800 whitespace-nowrap px-2 truncate'>
+                  {opt} · {count} · {labelPct}%
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ─── VotingAdminPanel ─────────────────────────────────────────────────────────
+
 interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
-  onEventCreated?: (event: VotingEventWithRelations) => void;
   onVotingEventsMutated?: () => void | Promise<void>;
 }
 
 const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   meetings,
-  onEventCreated,
   onVotingEventsMutated,
 }) => {
-  // ─── States ────────────────────────────────────────────────────────────────
   const { user } = useAuth();
   const [meetingId, setMeetingId] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [voteType, setVoteType] = useState<string>(VOTING_TYPES.ROLL_CALL.key);
   const [submitting, setSubmitting] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [endErrors, setEndErrors] = useState<Record<string, string>>({});
+  const [endErrors, setEndErrors] = useState<Record<string, string | null>>({});
   const [pendingEvent, setPendingEvent] =
     useState<VotingEventWithRelations | null>(null);
   const [options, setOptions] = useState<string[]>([]);
+  const [eligibleCounts, setEligibleCounts] = useState<Record<string, number>>(
+    {},
+  );
 
-  // ─── Functions ─────────────────────────────────────────────────────────────
-  const addOption = () => {
-    setOptions((prev) => {
-      const count = prev.filter((o) => o.startsWith('Option')).length;
-      const newOption = count === 0 ? 'Option' : `Option ${count + 1}`;
-      return [...prev, newOption];
-    });
-  };
-
-  const removeOption = (option: string) => {
-    setOptions((prev) => prev.filter((o) => o !== option));
-  };
-
-  // ─── Hooks ─────────────────────────────────────────────────────────────────
   const {
     activeEvents,
     loading: activeEventLoading,
@@ -78,13 +142,46 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
       if (!/^\d{4}-\d{2}-\d{2}$/.test(meetingDateStr)) return true;
       return meetingDateStr >= todayStr;
     });
-    if (upcoming.length > 0) return upcoming;
-    return meetings;
+    return upcoming.length > 0 ? upcoming : meetings;
   }, [meetings]);
+
+  // Fetch eligible voter counts for any meeting not yet loaded.
+  // eligibleCounts in deps is intentional: after each fetch completes the
+  // effect re-runs, the filter finds no new IDs, and exits immediately.
+  useEffect(() => {
+    const unfetchedIds = [
+      ...new Set(displayedActiveEvents.map((e) => e.meetingId)),
+    ].filter((mid) => !(mid in eligibleCounts));
+
+    if (unfetchedIds.length === 0) return;
+
+    unfetchedIds.forEach(async (mid) => {
+      try {
+        const res = await fetch(`/api/attendance/meeting/${mid}`);
+        if (!res.ok) return;
+        const records: { status: string }[] = await res.json();
+        const count = records.filter((r) => r.status === 'PRESENT').length;
+        setEligibleCounts((prev) => ({ ...prev, [mid]: count }));
+      } catch {
+        // eligible count is best-effort; silently ignore
+      }
+    });
+  }, [displayedActiveEvents, eligibleCounts]);
 
   if (!user || user.role !== 'EBOARD') {
     return null;
   }
+
+  const addOption = () => {
+    setOptions((prev) => {
+      const count = prev.filter((o) => o.startsWith('Option')).length;
+      return [...prev, count === 0 ? 'Option' : `Option ${count + 1}`];
+    });
+  };
+
+  const removeOption = (index: number) => {
+    setOptions((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,9 +216,6 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
 
       const event: VotingEventWithRelations = await res.json();
       setPendingEvent(event);
-      if (onEventCreated) {
-        onEventCreated(event);
-      }
       await onVotingEventsMutated?.();
       setMeetingId('');
       setName('');
@@ -134,13 +228,13 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   };
 
   const handleEnd = async (votingEventId: string) => {
-    setEndErrors((prev) => ({ ...prev, [votingEventId]: '' }));
+    setEndErrors((prev) => ({ ...prev, [votingEventId]: null }));
 
     try {
       const res = await fetch(`/api/voting-event/${votingEventId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ end: true, updatedBy: user?.id }),
+        body: JSON.stringify({ end: true, updatedBy: user.id }),
       });
 
       if (!res.ok) {
@@ -200,17 +294,17 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
               >
                 <div className='flex items-start justify-between gap-2'>
                   <div className='min-w-0'>
-                    <span className='font-medium text-gray-900'>
+                    <div className='font-medium text-gray-900'>
                       {event.name}
-                    </span>
-                    <span className='ml-2 text-gray-400'>
+                    </div>
+                    <div className='text-sm text-gray-400 mt-0.5'>
                       {[
                         voteTypeLabel,
                         meeting && `${meeting.date} · ${meeting.name}`,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
-                    </span>
+                    </div>
                   </div>
                   <button
                     type='button'
@@ -220,52 +314,12 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
                     Close Vote
                   </button>
                 </div>
-                {(() => {
-                  const opts =
-                    event.options.length > 0
-                      ? [...event.options].sort(
-                          (a, b) => optionRank(a) - optionRank(b),
-                        )
-                      : Object.keys(voteCounts);
-                  if (opts.length === 0) return null;
-                  return (
-                    <div className='mt-4 pt-4 border-t border-gray-200'>
-                      <p className='text-xs font-medium text-gray-500 mb-3'>
-                        {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'} cast
-                      </p>
-                      <div className='space-y-2.5'>
-                        {opts.map((opt) => {
-                          const count = voteCounts[opt] ?? 0;
-                          const pct =
-                            totalVotes > 0
-                              ? Math.round((count / totalVotes) * 100)
-                              : 0;
-                          return (
-                            <div key={opt}>
-                              <div className='flex items-center justify-between mb-1'>
-                                <span className='text-xs text-gray-600'>
-                                  {opt}
-                                </span>
-                                <span className='text-xs font-semibold text-gray-900'>
-                                  {count}{' '}
-                                  <span className='font-normal text-gray-400'>
-                                    {pct}%
-                                  </span>
-                                </span>
-                              </div>
-                              <div className='h-2 w-full rounded-full bg-gray-200'>
-                                <div
-                                  className='h-2 rounded-full bg-[#C8102E] transition-all duration-500'
-                                  style={{ width: `${pct}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })()}
+                <VoteBreakdown
+                  event={event}
+                  eligible={eligibleCounts[event.meetingId] ?? 0}
+                  voteCounts={voteCounts}
+                  totalVotes={totalVotes}
+                />
                 {endError && (
                   <p className='mt-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2'>
                     {endError}
@@ -358,7 +412,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
                       className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] pr-8'
                     />
                     <X
-                      onClick={() => removeOption(option)}
+                      onClick={() => removeOption(index)}
                       className='absolute right-2 top-1/2 -translate-y-1/2 text-red-500 text-sm hover:bg-red-50 rounded px-1'
                     />
                   </div>
