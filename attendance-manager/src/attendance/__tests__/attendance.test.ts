@@ -33,8 +33,8 @@ describe('AttendanceController', () => {
         firstName: 'Test',
         lastName: 'User',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     testUserId = user.userId;
 
@@ -47,8 +47,8 @@ describe('AttendanceController', () => {
         firstName: 'Test2',
         lastName: 'User2',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     testUser2Id = user2.userId;
 
@@ -60,8 +60,8 @@ describe('AttendanceController', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     testMeetingId = meeting.meetingId;
 
@@ -72,8 +72,8 @@ describe('AttendanceController', () => {
         startTime: '9:00',
         endTime: '10:00',
         notes: 'Test notes 2',
-        type: 'FULL_BODY'
-      }
+        type: 'FULL_BODY',
+      },
     });
     testMeeting2Id = meeting2.meetingId;
 
@@ -84,8 +84,8 @@ describe('AttendanceController', () => {
         startTime: '11:00',
         endTime: '12:00',
         notes: 'Test notes 3',
-        type: 'FULL_BODY'
-      }
+        type: 'FULL_BODY',
+      },
     });
     testMeeting3Id = meeting3.meetingId;
 
@@ -98,8 +98,8 @@ describe('AttendanceController', () => {
         firstName: 'Test3',
         lastName: 'User3',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     testUser3Id = user3.userId;
 
@@ -109,8 +109,8 @@ describe('AttendanceController', () => {
         userId: testUserId,
         meetingId: testMeetingId,
         status: 'EXCUSED_ABSENCE',
-        request: {}
-      }
+        request: {},
+      },
     });
     testAttendanceId = attendance.attendanceId;
 
@@ -119,8 +119,8 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser2Id,
         meetingId: testMeeting2Id,
-        status: 'PRESENT'
-      }
+        status: 'PRESENT',
+      },
     });
 
     // Create a request for user
@@ -129,14 +129,14 @@ describe('AttendanceController', () => {
         attendanceId: testAttendanceId,
         reason: 'Initial test reason',
         attendanceMode: 'ONLINE',
-        timeAdjustment: 'ARRIVING_LATE'
-      }
+        timeAdjustment: 'ARRIVING_LATE',
+      },
     });
   });
 
   afterAll(async () => {
     const requests = await prisma.request.findMany({
-      where: { attendanceId: testAttendanceId }
+      where: { attendanceId: testAttendanceId },
     });
     for (const req of requests) {
       await RequestService.deleteRequest(req.requestId);
@@ -160,9 +160,8 @@ describe('AttendanceController', () => {
     expect(attendance.length).toBe(1);
     expect(attendance[0].userId).toBe(testUserId);
 
-    const attendance2 = await AttendanceController.getUserAttendance(
-      testUser2Id
-    );
+    const attendance2 =
+      await AttendanceController.getUserAttendance(testUser2Id);
     expect(attendance2).toBeDefined();
     expect(attendance2.length).toBe(1);
     expect(attendance2[0].userId).toBe(testUser2Id);
@@ -176,16 +175,14 @@ describe('AttendanceController', () => {
   });
 
   it('should get attendance by meetingId', async () => {
-    const attendance = await AttendanceController.getMeetingAttendance(
-      testMeetingId
-    );
+    const attendance =
+      await AttendanceController.getMeetingAttendance(testMeetingId);
     expect(attendance).toBeDefined();
     expect(attendance.length).toBe(1);
     expect(attendance[0].meetingId).toBe(testMeetingId);
 
-    const attendance2 = await AttendanceController.getMeetingAttendance(
-      testMeeting2Id
-    );
+    const attendance2 =
+      await AttendanceController.getMeetingAttendance(testMeeting2Id);
     expect(attendance2).toBeDefined();
     expect(attendance2.length).toBe(1);
     expect(attendance2[0].meetingId).toBe(testMeeting2Id);
@@ -195,15 +192,14 @@ describe('AttendanceController', () => {
     const data = {
       userId: testUserId,
       meetingId: testMeeting2Id,
-      status: 'PRESENT'
+      status: 'PRESENT',
     };
     const newAttendance = await AttendanceController.createAttendance(data);
     expect(newAttendance).toBeDefined();
     expect(newAttendance.status).toBe('PRESENT');
 
-    const attendance2 = await AttendanceController.getMeetingAttendance(
-      testMeeting2Id
-    );
+    const attendance2 =
+      await AttendanceController.getMeetingAttendance(testMeeting2Id);
     expect(attendance2).toBeDefined();
     expect(attendance2.length).toBe(2);
     await AttendanceService.deleteAttendance(newAttendance.attendanceId);
@@ -213,7 +209,7 @@ describe('AttendanceController', () => {
     const updateData = { status: 'UNEXCUSED_ABSENCE' };
     const updated = await AttendanceController.updateAttendance(
       testAttendanceId,
-      updateData
+      updateData,
     );
     expect(updated).toBeDefined();
     expect(updated.status).toBe('UNEXCUSED_ABSENCE');
@@ -222,8 +218,8 @@ describe('AttendanceController', () => {
   it('should throw error for invalid status update', async () => {
     await expect(
       AttendanceController.updateAttendance(testAttendanceId, {
-        status: 'INVALID_STATUS'
-      })
+        status: 'INVALID_STATUS',
+      }),
     ).rejects.toThrow('Invalid attendance status');
   });
 
@@ -233,21 +229,21 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser2Id,
         meetingId: testMeetingId,
-        status: 'PRESENT'
-      }
+        status: 'PRESENT',
+      },
     });
 
     await AttendanceController.deleteAttendance(attendance.attendanceId);
 
     const deleted = await prisma.attendance.findUnique({
-      where: { attendanceId: attendance.attendanceId }
+      where: { attendanceId: attendance.attendanceId },
     });
     expect(deleted).toBeNull();
   });
 
   it('should throw error if requestId does not exist', async () => {
     await expect(
-      AttendanceController.updateAttendanceStatus('nonexistent-id', 'PRESENT')
+      AttendanceController.updateAttendanceStatus('nonexistent-id', 'PRESENT'),
     ).rejects.toThrow('Request or related attendance record not found');
   });
 
@@ -257,19 +253,19 @@ describe('AttendanceController', () => {
       data: {
         userId: testUserId,
         meetingId: testMeeting3Id,
-        status: 'PRESENT'
-      }
+        status: 'PRESENT',
+      },
     });
     const request = await prisma.request.create({
       data: {
         attendanceId: attendance.attendanceId,
         reason: 'Test invalid status',
-        attendanceMode: 'IN_PERSON'
-      }
+        attendanceMode: 'IN_PERSON',
+      },
     });
 
     await expect(
-      AttendanceController.updateAttendanceStatus(request.requestId, 'INVALID')
+      AttendanceController.updateAttendanceStatus(request.requestId, 'INVALID'),
     ).rejects.toThrow('Invalid attendance status');
     await RequestService.deleteRequest(request.requestId);
     await AttendanceService.deleteAttendance(attendance.attendanceId);
@@ -281,28 +277,28 @@ describe('AttendanceController', () => {
       data: {
         userId: testUser3Id,
         meetingId: testMeetingId,
-        status: 'PRESENT'
-      }
+        status: 'PRESENT',
+      },
     });
 
     const request = await prisma.request.create({
       data: {
         attendanceId: attendance.attendanceId,
         reason: 'Test update status',
-        attendanceMode: 'ONLINE'
-      }
+        attendanceMode: 'ONLINE',
+      },
     });
 
     const updatedAttendance = await AttendanceController.updateAttendanceStatus(
       request.requestId,
-      'EXCUSED_ABSENCE'
+      'EXCUSED_ABSENCE',
     );
 
     expect(updatedAttendance).toBeDefined();
     expect(updatedAttendance.status).toBe('EXCUSED_ABSENCE');
 
     const updated = await prisma.attendance.findUnique({
-      where: { attendanceId: attendance.attendanceId }
+      where: { attendanceId: attendance.attendanceId },
     });
 
     expect(updated?.status).toBe('EXCUSED_ABSENCE');
@@ -344,8 +340,8 @@ describe('getRemainingUnexcusedAbsences', () => {
         firstName: 'Test4',
         lastName: 'User4',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     testUser4Id = user4.userId;
 
@@ -358,8 +354,8 @@ describe('getRemainingUnexcusedAbsences', () => {
         firstName: 'Test5',
         lastName: 'User5',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     testUser5Id = user5.userId;
 
@@ -371,8 +367,8 @@ describe('getRemainingUnexcusedAbsences', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     regularMeeting1Id = regular1.meetingId;
 
@@ -383,8 +379,8 @@ describe('getRemainingUnexcusedAbsences', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     regularMeeting2Id = regular2.meetingId;
 
@@ -395,8 +391,8 @@ describe('getRemainingUnexcusedAbsences', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     regularMeeting3Id = regular3.meetingId;
 
@@ -407,8 +403,8 @@ describe('getRemainingUnexcusedAbsences', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     regularMeeting4Id = regular4.meetingId;
 
@@ -420,8 +416,8 @@ describe('getRemainingUnexcusedAbsences', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'FULL_BODY'
-      }
+        type: 'FULL_BODY',
+      },
     });
     fullBodyMeeting1Id = fullBody1.meetingId;
 
@@ -432,8 +428,8 @@ describe('getRemainingUnexcusedAbsences', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'FULL_BODY'
-      }
+        type: 'FULL_BODY',
+      },
     });
     fullBodyMeeting2Id = fullBody2.meetingId;
   });
@@ -461,9 +457,8 @@ describe('getRemainingUnexcusedAbsences', () => {
   });
 
   it('should return full allowance when user has no unexcused absences', async () => {
-    const result = await AttendanceController.getRemainingUnexcusedAbsences(
-      testUser4Id
-    );
+    const result =
+      await AttendanceController.getRemainingUnexcusedAbsences(testUser4Id);
 
     expect(result).toBeDefined();
     expect(result.regular.used).toBe(0);
@@ -480,8 +475,8 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser4Id,
         meetingId: regularMeeting1Id,
-        status: 'UNEXCUSED_ABSENCE'
-      }
+        status: 'UNEXCUSED_ABSENCE',
+      },
     });
     testRequest1Id = atten1.attendanceId;
 
@@ -489,14 +484,13 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser4Id,
         meetingId: regularMeeting2Id,
-        status: 'UNEXCUSED_ABSENCE'
-      }
+        status: 'UNEXCUSED_ABSENCE',
+      },
     });
     testRequest2Id = atten2.attendanceId;
 
-    const result = await AttendanceController.getRemainingUnexcusedAbsences(
-      testUser4Id
-    );
+    const result =
+      await AttendanceController.getRemainingUnexcusedAbsences(testUser4Id);
 
     expect(result.regular.used).toBe(2);
     expect(result.regular.allowed).toBe(2);
@@ -511,13 +505,12 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser4Id,
         meetingId: fullBodyMeeting1Id,
-        status: 'UNEXCUSED_ABSENCE'
-      }
+        status: 'UNEXCUSED_ABSENCE',
+      },
     });
     testRequest3Id = atten1.attendanceId;
-    const result = await AttendanceController.getRemainingUnexcusedAbsences(
-      testUser4Id
-    );
+    const result =
+      await AttendanceController.getRemainingUnexcusedAbsences(testUser4Id);
 
     expect(result.fullBody.used).toBe(1);
     expect(result.fullBody.allowed).toBe(0);
@@ -533,14 +526,13 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser4Id,
         meetingId: regularMeeting3Id,
-        status: 'UNEXCUSED_ABSENCE'
-      }
+        status: 'UNEXCUSED_ABSENCE',
+      },
     });
     testRequest4Id = atten1.attendanceId;
 
-    const result = await AttendanceController.getRemainingUnexcusedAbsences(
-      testUser4Id
-    );
+    const result =
+      await AttendanceController.getRemainingUnexcusedAbsences(testUser4Id);
 
     expect(result.regular.used).toBe(3);
     expect(result.regular.allowed).toBe(2);
@@ -555,8 +547,8 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser4Id,
         meetingId: regularMeeting4Id,
-        status: 'UNEXCUSED_ABSENCE'
-      }
+        status: 'UNEXCUSED_ABSENCE',
+      },
     });
     testRequest5Id = atten1.attendanceId;
 
@@ -565,14 +557,13 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser4Id,
         meetingId: fullBodyMeeting2Id,
-        status: 'UNEXCUSED_ABSENCE'
-      }
+        status: 'UNEXCUSED_ABSENCE',
+      },
     });
     testRequest6Id = atten2.attendanceId;
 
-    const result = await AttendanceController.getRemainingUnexcusedAbsences(
-      testUser4Id
-    );
+    const result =
+      await AttendanceController.getRemainingUnexcusedAbsences(testUser4Id);
 
     expect(result.regular.used).toBe(4);
     expect(result.regular.allowed).toBe(2);
@@ -588,8 +579,8 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser5Id,
         meetingId: regularMeeting1Id,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
     testRequest7Id = atten1.attendanceId;
 
@@ -597,8 +588,8 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser5Id,
         meetingId: regularMeeting2Id,
-        status: 'PRESENT'
-      }
+        status: 'PRESENT',
+      },
     });
     testRequest8Id = atten2.attendanceId;
 
@@ -607,14 +598,13 @@ describe('getRemainingUnexcusedAbsences', () => {
       data: {
         userId: testUser5Id,
         meetingId: regularMeeting3Id,
-        status: 'UNEXCUSED_ABSENCE'
-      }
+        status: 'UNEXCUSED_ABSENCE',
+      },
     });
     testRequest9Id = atten3.attendanceId;
 
-    const result = await AttendanceController.getRemainingUnexcusedAbsences(
-      testUser5Id
-    );
+    const result =
+      await AttendanceController.getRemainingUnexcusedAbsences(testUser5Id);
 
     expect(result.regular.used).toBe(1);
     expect(result.regular.allowed).toBe(2);
@@ -625,15 +615,15 @@ describe('getRemainingUnexcusedAbsences', () => {
 
   it('should throw error for invalid userId', async () => {
     await expect(
-      AttendanceController.getRemainingUnexcusedAbsences('')
+      AttendanceController.getRemainingUnexcusedAbsences(''),
     ).rejects.toThrow('Invalid or missing userId');
 
     await expect(
-      AttendanceController.getRemainingUnexcusedAbsences(null as any)
+      AttendanceController.getRemainingUnexcusedAbsences(null as any),
     ).rejects.toThrow('Invalid or missing userId');
 
     await expect(
-      AttendanceController.getRemainingUnexcusedAbsences(123 as any)
+      AttendanceController.getRemainingUnexcusedAbsences(123 as any),
     ).rejects.toThrow('Invalid or missing userId');
   });
 });

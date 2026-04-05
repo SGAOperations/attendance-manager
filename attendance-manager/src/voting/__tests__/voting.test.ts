@@ -13,10 +13,12 @@ jest.setTimeout(20000);
 describe('computeVotePassedFromCounts', () => {
   it('Yes beats No using display labels; YES/NO uppercase supported', () => {
     expect(
-      computeVotePassedFromCounts(
-        { Yes: 2, No: 1 },
-        ['Yes', 'No', 'Abstain', 'No Confidence']
-      )
+      computeVotePassedFromCounts({ Yes: 2, No: 1 }, [
+        'Yes',
+        'No',
+        'Abstain',
+        'No Confidence',
+      ]),
     ).toBe(true);
     expect(computeVotePassedFromCounts({ YES: 1, NO: 2 }, [])).toBe(false);
   });
@@ -71,8 +73,8 @@ describe('VotingService', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     testMeetingId = meeting.meetingId;
 
@@ -83,8 +85,8 @@ describe('VotingService', () => {
         startTime: '9:00',
         endTime: '10:00',
         notes: 'Test notes 2',
-        type: 'FULL_BODY'
-      }
+        type: 'FULL_BODY',
+      },
     });
     testMeeting2Id = meeting2.meetingId;
 
@@ -93,7 +95,7 @@ describe('VotingService', () => {
       meetingId: testMeetingId,
       name: 'Test Voting Event',
       voteType: 'YES_NO',
-      updatedBy: 'test-user'
+      updatedBy: 'test-user',
     });
     testVotingEventId = votingEvent.votingEventId;
   });
@@ -102,9 +104,9 @@ describe('VotingService', () => {
     await prisma.votingEvent.deleteMany({
       where: {
         meetingId: {
-          in: [testMeetingId, testMeeting2Id]
-        }
-      }
+          in: [testMeetingId, testMeeting2Id],
+        },
+      },
     });
     await MeetingService.deleteMeeting(testMeetingId);
     await MeetingService.deleteMeeting(testMeeting2Id);
@@ -115,7 +117,7 @@ describe('VotingService', () => {
       meetingId: testMeetingId,
       name: 'New Test Voting Event',
       voteType: 'APPROVAL',
-      updatedBy: 'test-user-2'
+      updatedBy: 'test-user-2',
     });
 
     expect(newVotingEvent).toBeDefined();
@@ -135,9 +137,8 @@ describe('VotingService', () => {
   });
 
   it('should fetch a voting event by id', async () => {
-    const fetchedVotingEvent = await VotingService.getVotingEventById(
-      testVotingEventId
-    );
+    const fetchedVotingEvent =
+      await VotingService.getVotingEventById(testVotingEventId);
     expect(fetchedVotingEvent?.votingEventId).toBe(testVotingEventId);
     expect(fetchedVotingEvent?.name).toBe('Test Voting Event');
   });
@@ -147,15 +148,14 @@ describe('VotingService', () => {
     await VotingService.createVotingEvent({
       meetingId: testMeeting2Id,
       name: 'Another YES_NO Event',
-      voteType: 'YES_NO'
+      voteType: 'YES_NO',
     });
 
-    const votingEvents = await VotingService.getVotingEventsByVoteType(
-      'YES_NO'
-    );
+    const votingEvents =
+      await VotingService.getVotingEventsByVoteType('YES_NO');
     expect(Array.isArray(votingEvents)).toBe(true);
     expect(votingEvents.length).toBeGreaterThanOrEqual(2);
-    votingEvents.forEach(event => {
+    votingEvents.forEach((event) => {
       expect(event.voteType).toBe('YES_NO');
     });
   });
@@ -165,8 +165,8 @@ describe('VotingService', () => {
       testVotingEventId,
       {
         name: 'Updated Voting Event Name',
-        voteType: 'APPROVAL'
-      }
+        voteType: 'APPROVAL',
+      },
     );
 
     expect(updatedVotingEvent.name).toBe('Updated Voting Event Name');
@@ -176,9 +176,8 @@ describe('VotingService', () => {
   });
 
   it('should include meeting and votingRecords in responses', async () => {
-    const votingEvent = await VotingService.getVotingEventById(
-      testVotingEventId
-    );
+    const votingEvent =
+      await VotingService.getVotingEventById(testVotingEventId);
     expect(votingEvent?.meeting).toBeDefined();
     expect(votingEvent?.meeting.meetingId).toBe(testMeetingId);
     expect(votingEvent?.votingRecords).toBeDefined();
@@ -200,8 +199,8 @@ describe('VotingController', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     testMeetingId = meeting.meetingId;
 
@@ -212,8 +211,8 @@ describe('VotingController', () => {
         startTime: '9:00',
         endTime: '10:00',
         notes: 'Test notes 2',
-        type: 'FULL_BODY'
-      }
+        type: 'FULL_BODY',
+      },
     });
     testMeeting2Id = meeting2.meetingId;
   });
@@ -222,9 +221,9 @@ describe('VotingController', () => {
     await prisma.votingEvent.deleteMany({
       where: {
         meetingId: {
-          in: [testMeetingId, testMeeting2Id]
-        }
-      }
+          in: [testMeetingId, testMeeting2Id],
+        },
+      },
     });
     await MeetingService.deleteMeeting(testMeetingId);
     await MeetingService.deleteMeeting(testMeeting2Id);
@@ -236,7 +235,7 @@ describe('VotingController', () => {
       const testVotingEvent = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'GET ALL Test Event',
-        voteType: 'YES_NO'
+        voteType: 'YES_NO',
       });
 
       const response = await VotingController.getAllVotingEvents();
@@ -253,11 +252,11 @@ describe('VotingController', () => {
       const testVotingEvent = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'GET SINGULAR Test Event',
-        voteType: 'APPROVAL'
+        voteType: 'APPROVAL',
       });
 
       const response = await VotingController.getVotingEvent({
-        votingEventId: testVotingEvent.votingEventId
+        votingEventId: testVotingEvent.votingEventId,
       });
 
       expect(response).toBeDefined();
@@ -269,7 +268,7 @@ describe('VotingController', () => {
 
     it('should return 404 for non-existent voting event', async () => {
       const response = await VotingController.getVotingEvent({
-        votingEventId: 'non-existent-id-12345'
+        votingEventId: 'non-existent-id-12345',
       });
 
       expect(response.status).toBe(404);
@@ -284,17 +283,17 @@ describe('VotingController', () => {
       const votingEvent1 = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'Type Test Event 1',
-        voteType: 'MULTIPLE_CHOICE'
+        voteType: 'MULTIPLE_CHOICE',
       });
 
       const votingEvent2 = await VotingService.createVotingEvent({
         meetingId: testMeeting2Id,
         name: 'Type Test Event 2',
-        voteType: 'MULTIPLE_CHOICE'
+        voteType: 'MULTIPLE_CHOICE',
       });
 
       const response = await VotingController.getVotingEventsByVoteType({
-        voteType: 'MULTIPLE_CHOICE'
+        voteType: 'MULTIPLE_CHOICE',
       });
 
       expect(response).toBeDefined();
@@ -309,7 +308,7 @@ describe('VotingController', () => {
 
     it('should return empty array for non-existent vote type', async () => {
       const response = await VotingController.getVotingEventsByVoteType({
-        voteType: 'NON_EXISTENT_TYPE'
+        voteType: 'NON_EXISTENT_TYPE',
       });
 
       expect(response).toBeDefined();
@@ -325,11 +324,11 @@ describe('VotingController', () => {
         meetingId: testMeetingId,
         name: 'POST Test Event',
         voteType: 'YES_NO',
-        updatedBy: 'test-user'
+        updatedBy: 'test-user',
       };
 
       const mockRequest = {
-        json: async () => createData
+        json: async () => createData,
       } as Request;
 
       const response = await VotingController.createVotingEvent(mockRequest);
@@ -347,12 +346,12 @@ describe('VotingController', () => {
 
     it('should reject missing required fields', async () => {
       const createData = {
-        name: 'Incomplete Event'
+        name: 'Incomplete Event',
         // Missing meetingId and voteType
       };
 
       const mockRequest = {
-        json: async () => createData
+        json: async () => createData,
       } as Request;
 
       const response = await VotingController.createVotingEvent(mockRequest);
@@ -366,11 +365,11 @@ describe('VotingController', () => {
       const createData = {
         meetingId: 123, // Should be string
         name: 'Invalid Types Event',
-        voteType: 'YES_NO'
+        voteType: 'YES_NO',
       };
 
       const mockRequest = {
-        json: async () => createData
+        json: async () => createData,
       } as Request;
 
       const response = await VotingController.createVotingEvent(mockRequest);
@@ -384,12 +383,12 @@ describe('VotingController', () => {
       const createData = {
         meetingId: testMeetingId,
         name: 'Optional UpdatedBy Event',
-        voteType: 'APPROVAL'
+        voteType: 'APPROVAL',
         // updatedBy is optional
       };
 
       const mockRequest = {
-        json: async () => createData
+        json: async () => createData,
       } as Request;
 
       const response = await VotingController.createVotingEvent(mockRequest);
@@ -407,21 +406,21 @@ describe('VotingController', () => {
       const testVotingEvent = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'PUT Test Event',
-        voteType: 'YES_NO'
+        voteType: 'YES_NO',
       });
 
       const updateData = {
         name: 'Updated PUT Test Event',
         voteType: 'APPROVAL',
-        updatedBy: 'test-updater'
+        updatedBy: 'test-updater',
       };
 
       const mockRequest = {
-        json: async () => updateData
+        json: async () => updateData,
       } as Request;
 
       const response = await VotingController.updateVotingEvent(mockRequest, {
-        votingEventId: testVotingEvent.votingEventId
+        votingEventId: testVotingEvent.votingEventId,
       });
 
       expect(response).toBeDefined();
@@ -437,20 +436,20 @@ describe('VotingController', () => {
       const testVotingEvent = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'Partial Update Test',
-        voteType: 'YES_NO'
+        voteType: 'YES_NO',
       });
 
       // Update only the name
       const updateData = {
-        name: 'Partially Updated Name'
+        name: 'Partially Updated Name',
       };
 
       const mockRequest = {
-        json: async () => updateData
+        json: async () => updateData,
       } as Request;
 
       const response = await VotingController.updateVotingEvent(mockRequest, {
-        votingEventId: testVotingEvent.votingEventId
+        votingEventId: testVotingEvent.votingEventId,
       });
 
       expect(response).toBeDefined();
@@ -463,15 +462,15 @@ describe('VotingController', () => {
 
     it('should return 404 for non-existent voting event', async () => {
       const updateData = {
-        name: 'Non-existent Event'
+        name: 'Non-existent Event',
       };
 
       const mockRequest = {
-        json: async () => updateData
+        json: async () => updateData,
       } as Request;
 
       const response = await VotingController.updateVotingEvent(mockRequest, {
-        votingEventId: 'non-existent-id-12345'
+        votingEventId: 'non-existent-id-12345',
       });
 
       expect(response.status).toBe(404);
@@ -483,17 +482,17 @@ describe('VotingController', () => {
       const testVotingEvent = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'Empty Body Test',
-        voteType: 'YES_NO'
+        voteType: 'YES_NO',
       });
 
       const updateData = {};
 
       const mockRequest = {
-        json: async () => updateData
+        json: async () => updateData,
       } as Request;
 
       const response = await VotingController.updateVotingEvent(mockRequest, {
-        votingEventId: testVotingEvent.votingEventId
+        votingEventId: testVotingEvent.votingEventId,
       });
 
       expect(response.status).toBe(400);
@@ -505,20 +504,20 @@ describe('VotingController', () => {
       const testVotingEvent = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'Invalid Types Update Test',
-        voteType: 'YES_NO'
+        voteType: 'YES_NO',
       });
 
       const updateData = {
         name: 123, // Should be string
-        voteType: 'APPROVAL'
+        voteType: 'APPROVAL',
       };
 
       const mockRequest = {
-        json: async () => updateData
+        json: async () => updateData,
       } as Request;
 
       const response = await VotingController.updateVotingEvent(mockRequest, {
-        votingEventId: testVotingEvent.votingEventId
+        votingEventId: testVotingEvent.votingEventId,
       });
 
       expect(response.status).toBe(400);
@@ -531,19 +530,19 @@ describe('VotingController', () => {
       const testVotingEvent = await VotingService.createVotingEvent({
         meetingId: testMeetingId,
         name: 'Soft Delete Test',
-        voteType: 'YES_NO'
+        voteType: 'YES_NO',
       });
 
       const updateData = {
-        deletedAt: new Date()
+        deletedAt: new Date(),
       };
 
       const mockRequest = {
-        json: async () => updateData
+        json: async () => updateData,
       } as Request;
 
       const response = await VotingController.updateVotingEvent(mockRequest, {
-        votingEventId: testVotingEvent.votingEventId
+        votingEventId: testVotingEvent.votingEventId,
       });
 
       expect(response).toBeDefined();
@@ -567,8 +566,8 @@ describe('GET /api/voting-event', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = meeting.meetingId;
 
@@ -576,7 +575,7 @@ describe('GET /api/voting-event', () => {
     const votingEvent = await VotingService.createVotingEvent({
       meetingId: routeTestMeetingId,
       name: 'Route Test Event',
-      voteType: 'YES_NO'
+      voteType: 'YES_NO',
     });
     routeTestVotingEventId = votingEvent.votingEventId;
   });
@@ -596,7 +595,7 @@ describe('GET /api/voting-event', () => {
     expect(Array.isArray(data)).toBe(true);
     expect(data.length).toBeGreaterThan(0);
     expect(
-      data.some((event: any) => event.votingEventId === routeTestVotingEventId)
+      data.some((event: any) => event.votingEventId === routeTestVotingEventId),
     ).toBe(true);
   });
 });
@@ -614,8 +613,8 @@ describe('GET /api/voting-event/[id]', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = meeting.meetingId;
 
@@ -623,7 +622,7 @@ describe('GET /api/voting-event/[id]', () => {
     const votingEvent = await VotingService.createVotingEvent({
       meetingId: routeTestMeetingId,
       name: 'Route Test Event',
-      voteType: 'YES_NO'
+      voteType: 'YES_NO',
     });
     routeTestVotingEventId = votingEvent.votingEventId;
   });
@@ -636,7 +635,7 @@ describe('GET /api/voting-event/[id]', () => {
   it('should fetch voting event by id successfully', async () => {
     const { GET } = await import('../../app/api/voting-event/[id]/route');
     const req = new Request(
-      `http://localhost/api/voting-event/${routeTestVotingEventId}`
+      `http://localhost/api/voting-event/${routeTestVotingEventId}`,
     );
 
     const params = Promise.resolve({ id: routeTestVotingEventId });
@@ -655,7 +654,7 @@ describe('GET /api/voting-event/[id]', () => {
   it('should return 404 when voting event is not found', async () => {
     const { GET } = await import('../../app/api/voting-event/[id]/route');
     const req = new Request(
-      'http://localhost/api/voting-event/non-existent-id'
+      'http://localhost/api/voting-event/non-existent-id',
     );
 
     const params = Promise.resolve({ id: 'non-existent-id' });
@@ -725,7 +724,7 @@ describe('ROLL_CALL results include voter names', () => {
         meetingId: testMeetingId,
         name: 'Roll Call Vote',
         voteType: 'ROLL_CALL',
-        deletedAt: new Date(), 
+        deletedAt: new Date(),
       },
     });
     votingEventId = votingEvent.votingEventId;
@@ -750,14 +749,18 @@ describe('ROLL_CALL results include voter names', () => {
     await prisma.votingRecord.deleteMany({ where: { votingEventId } });
     await prisma.votingEvent.deleteMany({ where: { votingEventId } });
     await prisma.meeting.deleteMany({ where: { meetingId: testMeetingId } });
-    await prisma.user.deleteMany({ where: { userId: { in: [user1Id, user2Id] } } });
+    await prisma.user.deleteMany({
+      where: { userId: { in: [user1Id, user2Id] } },
+    });
     await prisma.role.deleteMany({ where: { roleId: testRoleId } });
   });
 
   // concluded ROLL_CALL returns each voter's name and result
   it('returns votingRecords with user first/last names', async () => {
     const { GET } = await import('../../app/api/voting-event/[id]/route');
-    const req = new Request(`http://localhost/api/voting-event/${votingEventId}`);
+    const req = new Request(
+      `http://localhost/api/voting-event/${votingEventId}`,
+    );
     const params = Promise.resolve({ id: votingEventId });
 
     const response = await GET(req, { params });
@@ -783,16 +786,22 @@ describe('ROLL_CALL results include voter names', () => {
     expect(record2.user.lastName).toBe('CallTwo');
   });
 
-  // same enrichment as GET [id], but via getAllVotingEvents() 
+  // same enrichment as GET [id], but via getAllVotingEvents()
   it('getAllVotingEvents returns votingRecords with user first/last names for ROLL_CALL', async () => {
     const events = await VotingService.getAllVotingEvents();
-    const data = events.find((e) => e != null && e.votingEventId === votingEventId);
+    const data = events.find(
+      (e) => e != null && e.votingEventId === votingEventId,
+    );
     expect(data).toBeDefined();
     expect(data!.voteType).toBe('ROLL_CALL');
     expect(Array.isArray(data!.votingRecords)).toBe(true);
 
-    const record1 = data!.votingRecords.find((r: any) => r.userId === user1Id) as any;
-    const record2 = data!.votingRecords.find((r: any) => r.userId === user2Id) as any;
+    const record1 = data!.votingRecords.find(
+      (r: any) => r.userId === user1Id,
+    ) as any;
+    const record2 = data!.votingRecords.find(
+      (r: any) => r.userId === user2Id,
+    ) as any;
 
     expect(record1).toBeDefined();
     expect(record1.result).toBe('YES');
@@ -828,7 +837,7 @@ describe('ROLL_CALL results include voter names', () => {
 
     const { GET } = await import('../../app/api/voting-event/[id]/route');
     const req = new Request(
-      `http://localhost/api/voting-event/${nonRollCallEvent.votingEventId}`
+      `http://localhost/api/voting-event/${nonRollCallEvent.votingEventId}`,
     );
     const params = Promise.resolve({ id: nonRollCallEvent.votingEventId });
     const response = await GET(req, { params });
@@ -868,7 +877,7 @@ describe('ROLL_CALL results include voter names', () => {
 
     const { GET } = await import('../../app/api/voting-event/[id]/route');
     const req = new Request(
-      `http://localhost/api/voting-event/${missingUserEvent.votingEventId}`
+      `http://localhost/api/voting-event/${missingUserEvent.votingEventId}`,
     );
     const params = Promise.resolve({ id: missingUserEvent.votingEventId });
     const response = await GET(req, { params });
@@ -995,7 +1004,7 @@ describe('Secret ballot results (aggregates only)', () => {
   it('GET /api/voting-event/[id] returns resultCounts, votePassed, notes — no votingRecords', async () => {
     const { GET } = await import('../../app/api/voting-event/[id]/route');
     const req = new Request(
-      `http://localhost/api/voting-event/${secretVotingEventId}`
+      `http://localhost/api/voting-event/${secretVotingEventId}`,
     );
     const params = Promise.resolve({ id: secretVotingEventId });
     const response = await GET(req, { params });
@@ -1014,7 +1023,7 @@ describe('Secret ballot results (aggregates only)', () => {
   it('getAllVotingEvents omits votingRecords for secret ballot with aggregates', async () => {
     const events = await VotingService.getAllVotingEvents();
     const row = events.find(
-      (e) => e != null && e.votingEventId === secretVotingEventId
+      (e) => e != null && e.votingEventId === secretVotingEventId,
     );
     expect(row).toBeDefined();
     expect((row as any).resultCounts).toEqual({ Yes: 2, No: 1 });
@@ -1025,11 +1034,10 @@ describe('Secret ballot results (aggregates only)', () => {
   });
 
   it('GET /api/voting-event/by-type returns aggregates only for SECRET_BALLOT', async () => {
-    const { GET } = await import(
-      '../../app/api/voting-event/by-type/[voteType]/route'
-    );
+    const { GET } =
+      await import('../../app/api/voting-event/by-type/[voteType]/route');
     const req = new Request(
-      `http://localhost/api/voting-event/by-type/${VOTING_TYPES.SECRET_BALLOT.key}`
+      `http://localhost/api/voting-event/by-type/${VOTING_TYPES.SECRET_BALLOT.key}`,
     );
     const params = Promise.resolve({
       voteType: VOTING_TYPES.SECRET_BALLOT.key,
@@ -1062,8 +1070,8 @@ describe('GET /api/voting-event/by-type/[voteType]', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = meeting.meetingId;
 
@@ -1074,8 +1082,8 @@ describe('GET /api/voting-event/by-type/[voteType]', () => {
         startTime: '9:00',
         endTime: '10:00',
         notes: 'Test notes 2',
-        type: 'FULL_BODY'
-      }
+        type: 'FULL_BODY',
+      },
     });
     routeTestMeeting2Id = meeting2.meetingId;
 
@@ -1083,14 +1091,14 @@ describe('GET /api/voting-event/by-type/[voteType]', () => {
     const votingEvent1 = await VotingService.createVotingEvent({
       meetingId: routeTestMeetingId,
       name: 'Route Type Test Event 1',
-      voteType: 'APPROVAL'
+      voteType: 'APPROVAL',
     });
     routeTestVotingEvent1Id = votingEvent1.votingEventId;
 
     const votingEvent2 = await VotingService.createVotingEvent({
       meetingId: routeTestMeeting2Id,
       name: 'Route Type Test Event 2',
-      voteType: 'APPROVAL'
+      voteType: 'APPROVAL',
     });
     routeTestVotingEvent2Id = votingEvent2.votingEventId;
   });
@@ -1103,11 +1111,10 @@ describe('GET /api/voting-event/by-type/[voteType]', () => {
   });
 
   it('should fetch voting events by vote type successfully', async () => {
-    const { GET } = await import(
-      '../../app/api/voting-event/by-type/[voteType]/route'
-    );
+    const { GET } =
+      await import('../../app/api/voting-event/by-type/[voteType]/route');
     const req = new Request(
-      'http://localhost/api/voting-event/by-type/APPROVAL'
+      'http://localhost/api/voting-event/by-type/APPROVAL',
     );
 
     const params = Promise.resolve({ voteType: 'APPROVAL' });
@@ -1123,11 +1130,10 @@ describe('GET /api/voting-event/by-type/[voteType]', () => {
   });
 
   it('should return empty array for non-existent vote type', async () => {
-    const { GET } = await import(
-      '../../app/api/voting-event/by-type/[voteType]/route'
-    );
+    const { GET } =
+      await import('../../app/api/voting-event/by-type/[voteType]/route');
     const req = new Request(
-      'http://localhost/api/voting-event/by-type/NON_EXISTENT_TYPE'
+      'http://localhost/api/voting-event/by-type/NON_EXISTENT_TYPE',
     );
 
     const params = Promise.resolve({ voteType: 'NON_EXISTENT_TYPE' });
@@ -1152,8 +1158,8 @@ describe('POST /api/voting-event', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = meeting.meetingId;
   });
@@ -1168,13 +1174,13 @@ describe('POST /api/voting-event', () => {
       meetingId: routeTestMeetingId,
       name: 'POST Route Test Event',
       voteType: 'YES_NO',
-      updatedBy: 'test-user'
+      updatedBy: 'test-user',
     };
 
     const req = new Request('http://localhost/api/voting-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const response = await POST(req);
@@ -1203,7 +1209,7 @@ describe('POST /api/voting-event', () => {
     const req = new Request('http://localhost/api/voting-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const response = await POST(req);
@@ -1221,13 +1227,13 @@ describe('POST /api/voting-event', () => {
       name: 'POST Secret Ballot Defaults',
       voteType: VOTING_TYPES.SECRET_BALLOT.key,
       options: ['Candidate 1', 'Candidate 2'],
-      updatedBy: 'test-user'
+      updatedBy: 'test-user',
     };
 
     const req = new Request('http://localhost/api/voting-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const response = await POST(req);
@@ -1235,7 +1241,12 @@ describe('POST /api/voting-event', () => {
 
     expect(response.status).toBe(201);
     expect(data.options).toEqual(
-      expect.arrayContaining(['Candidate 1', 'Candidate 2', 'No Confidence', 'Abstain'])
+      expect.arrayContaining([
+        'Candidate 1',
+        'Candidate 2',
+        'No Confidence',
+        'Abstain',
+      ]),
     );
     await VotingService.deleteVotingEvent(data.votingEventId);
   });
@@ -1247,13 +1258,13 @@ describe('POST /api/voting-event', () => {
       name: 'POST Route Invalid Options',
       voteType: VOTING_TYPES.SECRET_BALLOT.key,
       options: ['Candidate 1', 123],
-      updatedBy: 'test-user'
+      updatedBy: 'test-user',
     };
 
     const req = new Request('http://localhost/api/voting-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const response = await POST(req);
@@ -1266,14 +1277,14 @@ describe('POST /api/voting-event', () => {
   it('should return 400 when required fields are missing', async () => {
     const { POST } = await import('../../app/api/voting-event/route');
     const requestBody = {
-      name: 'Incomplete Event'
+      name: 'Incomplete Event',
       // Missing meetingId and voteType
     };
 
     const req = new Request('http://localhost/api/voting-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const response = await POST(req);
@@ -1297,8 +1308,8 @@ describe('PUT /api/voting-event/[id]', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = meeting.meetingId;
 
@@ -1306,7 +1317,7 @@ describe('PUT /api/voting-event/[id]', () => {
     const votingEvent = await VotingService.createVotingEvent({
       meetingId: routeTestMeetingId,
       name: 'PUT Route Test Event',
-      voteType: 'YES_NO'
+      voteType: 'YES_NO',
     });
     routeTestVotingEventId = votingEvent.votingEventId;
   });
@@ -1321,7 +1332,7 @@ describe('PUT /api/voting-event/[id]', () => {
     const requestBody = {
       name: 'Updated PUT Route Test Event',
       voteType: 'APPROVAL',
-      updatedBy: 'test-updater'
+      updatedBy: 'test-updater',
     };
 
     const req = new Request(
@@ -1329,8 +1340,8 @@ describe('PUT /api/voting-event/[id]', () => {
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ id: routeTestVotingEventId });
@@ -1346,44 +1357,44 @@ describe('PUT /api/voting-event/[id]', () => {
     expect(data.updatedAt).toBeDefined();
   });
 
-    it('should soft delete a voting event and update deletedAt', async () => {
-      const testVotingEvent = await VotingService.createVotingEvent({
-        meetingId: routeTestMeetingId,
-        name: 'Soft Delete Test',
-        voteType: 'YES_NO'
-      });
-
-      const { PUT } = await import('../../app/api/voting-event/[id]/route');
-      const requestBody = { deletedAt: new Date().toISOString() };
-      const req = new Request(
-        `http://localhost/api/voting-event/${testVotingEvent.votingEventId}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
-        }
-      );
-
-      const params = Promise.resolve({ id: testVotingEvent.votingEventId });
-      const response = await PUT(req, { params });
-
-      expect(response.status).toBe(200);
-      const data = await response.json();
-      expect(data).toBeDefined();
-      expect(data.deletedAt).toBeDefined();
-
-      const reloaded = await VotingService.getVotingEventById(
-        testVotingEvent.votingEventId
-      );
-      expect(reloaded?.deletedAt).toBeDefined();
-
-      await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
+  it('should soft delete a voting event and update deletedAt', async () => {
+    const testVotingEvent = await VotingService.createVotingEvent({
+      meetingId: routeTestMeetingId,
+      name: 'Soft Delete Test',
+      voteType: 'YES_NO',
     });
+
+    const { PUT } = await import('../../app/api/voting-event/[id]/route');
+    const requestBody = { deletedAt: new Date().toISOString() };
+    const req = new Request(
+      `http://localhost/api/voting-event/${testVotingEvent.votingEventId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      },
+    );
+
+    const params = Promise.resolve({ id: testVotingEvent.votingEventId });
+    const response = await PUT(req, { params });
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toBeDefined();
+    expect(data.deletedAt).toBeDefined();
+
+    const reloaded = await VotingService.getVotingEventById(
+      testVotingEvent.votingEventId,
+    );
+    expect(reloaded?.deletedAt).toBeDefined();
+
+    await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
+  });
   it('should allow admin to update voting event notes', async () => {
     const { PUT } = await import('../../app/api/voting-event/[id]/route');
     const requestBody = {
       notes: 'Updated notes from PUT test',
-      updatedBy: 'test-updater'
+      updatedBy: 'test-updater',
     };
 
     const req = new Request(
@@ -1391,8 +1402,8 @@ describe('PUT /api/voting-event/[id]', () => {
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ id: routeTestVotingEventId });
@@ -1406,7 +1417,7 @@ describe('PUT /api/voting-event/[id]', () => {
   it('should return 404 when voting event is not found', async () => {
     const { PUT } = await import('../../app/api/voting-event/[id]/route');
     const requestBody = {
-      name: 'Non-existent Event'
+      name: 'Non-existent Event',
     };
 
     const req = new Request(
@@ -1414,8 +1425,8 @@ describe('PUT /api/voting-event/[id]', () => {
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ id: 'non-existent-id' });

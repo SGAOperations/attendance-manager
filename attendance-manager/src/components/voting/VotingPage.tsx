@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  MeetingApiData,
-  VotingEventWithRelations,
-} from '@/types';
+import { MeetingApiData, VotingEventWithRelations } from '@/types';
 import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
 import VotingResultsPanel from '@/components/voting/VotingResultsPanel';
 import DeleteVotingModal from '@/components/voting/DeleteVotingModal';
@@ -39,8 +36,9 @@ const VotingPage: React.FC = () => {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { refreshVotingData(); }, []);
+  useEffect(() => {
+    refreshVotingData();
+  }, []);
 
   // Soft-delete handler: sets deletedAt on the vote and refreshes list
   const handleDeleteVotingEvent = async (votingEventId?: string | null) => {

@@ -21,9 +21,8 @@ export function useActiveVotingEvent(
   options: UseActiveVotingEventOptions = {},
 ): UseActiveVotingEventResult {
   const { pollIntervalMs = 3000 } = options;
-  const [activeEvent, setActiveEvent] = useState<VotingEventWithRelations | null>(
-    null,
-  );
+  const [activeEvent, setActiveEvent] =
+    useState<VotingEventWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
