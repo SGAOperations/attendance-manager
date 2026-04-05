@@ -220,30 +220,52 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
                     Close Vote
                   </button>
                 </div>
-                <div className='mt-4 pt-4 border-t border-gray-200 flex items-center gap-2 flex-wrap'>
-                  <span className='font-semibold text-gray-900'>
-                    {totalVotes} total
-                  </span>
-                  {(() => {
-                    const opts =
-                      event.voteType === VOTING_TYPES.SECRET_BALLOT.key
-                        ? [...event.options].sort(
-                            (a, b) => optionRank(a) - optionRank(b),
-                          )
-                        : Object.keys(voteCounts);
-                    return opts.map((opt) => (
-                      <span
-                        key={opt}
-                        className='inline-flex items-center gap-1 rounded-md bg-gray-200 px-2 py-0.5 text-xs text-gray-600'
-                      >
-                        {opt}
-                        <span className='font-semibold text-gray-900'>
-                          {voteCounts[opt] ?? 0}
-                        </span>
-                      </span>
-                    ));
-                  })()}
-                </div>
+                {(() => {
+                  const opts =
+                    event.options.length > 0
+                      ? [...event.options].sort(
+                          (a, b) => optionRank(a) - optionRank(b),
+                        )
+                      : Object.keys(voteCounts);
+                  if (opts.length === 0) return null;
+                  return (
+                    <div className='mt-4 pt-4 border-t border-gray-200'>
+                      <p className='text-xs font-medium text-gray-500 mb-3'>
+                        {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'} cast
+                      </p>
+                      <div className='space-y-2.5'>
+                        {opts.map((opt) => {
+                          const count = voteCounts[opt] ?? 0;
+                          const pct =
+                            totalVotes > 0
+                              ? Math.round((count / totalVotes) * 100)
+                              : 0;
+                          return (
+                            <div key={opt}>
+                              <div className='flex items-center justify-between mb-1'>
+                                <span className='text-xs text-gray-600'>
+                                  {opt}
+                                </span>
+                                <span className='text-xs font-semibold text-gray-900'>
+                                  {count}{' '}
+                                  <span className='font-normal text-gray-400'>
+                                    {pct}%
+                                  </span>
+                                </span>
+                              </div>
+                              <div className='h-2 w-full rounded-full bg-gray-200'>
+                                <div
+                                  className='h-2 rounded-full bg-[#C8102E] transition-all duration-500'
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
                 {endError && (
                   <p className='mt-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2'>
                     {endError}
