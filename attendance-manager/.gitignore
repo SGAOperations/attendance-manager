@@ -45,4 +45,4 @@ next-env.d.ts
 # Supabase local dev files
 supabase/.branches/
 supabase/.local/
-.supabase/
+.supabase/supabase/.temp/

@@ -17,7 +17,7 @@ describe('VotingRecordService', () => {
   beforeAll(async () => {
     // Create test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' }
+      data: { roleType: 'MEMBER' },
     });
     testRoleId = role.roleId;
 
@@ -31,8 +31,8 @@ describe('VotingRecordService', () => {
         firstName: 'Test',
         lastName: 'User',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     testUserId = user.userId;
 
@@ -44,8 +44,8 @@ describe('VotingRecordService', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     testMeetingId = meeting.meetingId;
 
@@ -54,8 +54,8 @@ describe('VotingRecordService', () => {
       data: {
         meetingId: testMeetingId,
         name: 'Test Voting Event',
-        voteType: 'YES_NO'
-      }
+        voteType: 'YES_NO',
+      },
     });
     testVotingEventId = votingEvent.votingEventId;
 
@@ -65,8 +65,8 @@ describe('VotingRecordService', () => {
         votingEventId: testVotingEventId,
         userId: testUserId,
         result: 'YES',
-        updatedBy: 'test-user'
-      }
+        updatedBy: 'test-user',
+      },
     });
     testVotingRecordId = votingRecord.votingRecordId;
   });
@@ -84,7 +84,7 @@ describe('VotingRecordService', () => {
       votingEventId: testVotingEventId,
       userId: testUserId,
       result: 'NO',
-      updatedBy: 'test-user-2'
+      updatedBy: 'test-user-2',
     });
 
     expect(newVotingRecord).toBeDefined();
@@ -96,7 +96,7 @@ describe('VotingRecordService', () => {
     expect(newVotingRecord.createdAt).toBeDefined();
     expect(newVotingRecord.updatedAt).toBeDefined();
     await VotingRecordService.deleteVotingRecord(
-      newVotingRecord.votingRecordId
+      newVotingRecord.votingRecordId,
     );
   });
 
@@ -111,15 +111,16 @@ describe('VotingRecordService', () => {
     const votingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: testVotingEventId,
       userId: testUserId,
-      result: 'ABSTAIN'
+      result: 'ABSTAIN',
     });
 
-    const votingRecords = await VotingRecordService.getVotingRecordsByVotingEvent(
-      testVotingEventId
-    );
+    const votingRecords =
+      await VotingRecordService.getVotingRecordsByVotingEvent(
+        testVotingEventId,
+      );
     expect(Array.isArray(votingRecords)).toBe(true);
     expect(votingRecords.length).toBeGreaterThanOrEqual(2);
-    votingRecords.forEach(record => {
+    votingRecords.forEach((record) => {
       expect(record.votingEventId).toBe(testVotingEventId);
     });
     await VotingRecordService.deleteVotingRecord(votingRecord.votingRecordId);
@@ -145,7 +146,7 @@ describe('VotingRecordController', () => {
   beforeAll(async () => {
     // Create test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' }
+      data: { roleType: 'MEMBER' },
     });
     testRoleId = role.roleId;
 
@@ -159,8 +160,8 @@ describe('VotingRecordController', () => {
         firstName: 'Test2',
         lastName: 'User2',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     testUserId = user.userId;
 
@@ -172,8 +173,8 @@ describe('VotingRecordController', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     testMeetingId = meeting.meetingId;
 
@@ -182,8 +183,8 @@ describe('VotingRecordController', () => {
       data: {
         meetingId: testMeetingId,
         name: 'Controller Test Voting Event',
-        voteType: 'YES_NO'
-      }
+        voteType: 'YES_NO',
+      },
     });
     testVotingEventId = votingEvent.votingEventId;
 
@@ -191,7 +192,7 @@ describe('VotingRecordController', () => {
     const votingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: testVotingEventId,
       userId: testUserId,
-      result: 'YES'
+      result: 'YES',
     });
     testVotingRecordId = votingRecord.votingRecordId;
   });
@@ -220,14 +221,13 @@ describe('VotingRecordController', () => {
       const votingRecord = await VotingRecordService.createVotingRecord({
         votingEventId: testVotingEventId,
         userId: testUserId,
-        result: 'NO'
+        result: 'NO',
       });
 
-      const response = await VotingRecordController.getVotingRecordsByVotingEvent(
-        {
-          votingEventId: testVotingEventId
-        }
-      );
+      const response =
+        await VotingRecordController.getVotingRecordsByVotingEvent({
+          votingEventId: testVotingEventId,
+        });
 
       expect(response).toBeDefined();
       const responseData = await response.json();
@@ -240,11 +240,10 @@ describe('VotingRecordController', () => {
     });
 
     it('should return empty array for non-existent voting event', async () => {
-      const response = await VotingRecordController.getVotingRecordsByVotingEvent(
-        {
-          votingEventId: 'non-existent-voting-event-id'
-        }
-      );
+      const response =
+        await VotingRecordController.getVotingRecordsByVotingEvent({
+          votingEventId: 'non-existent-voting-event-id',
+        });
 
       expect(response).toBeDefined();
       const responseData = await response.json();
@@ -259,16 +258,15 @@ describe('VotingRecordController', () => {
         votingEventId: testVotingEventId,
         userId: testUserId,
         result: 'YES',
-        updatedBy: 'test-user'
+        updatedBy: 'test-user',
       };
 
       const mockRequest = {
-        json: async () => createData
+        json: async () => createData,
       } as Request;
 
-      const response = await VotingRecordController.createVotingRecord(
-        mockRequest
-      );
+      const response =
+        await VotingRecordController.createVotingRecord(mockRequest);
 
       expect(response.status).toBe(201);
       const responseData = await response.json();
@@ -282,17 +280,16 @@ describe('VotingRecordController', () => {
 
     it('should reject missing required fields', async () => {
       const createData = {
-        result: 'YES'
+        result: 'YES',
         // Missing votingEventId and userId
       };
 
       const mockRequest = {
-        json: async () => createData
+        json: async () => createData,
       } as Request;
 
-      const response = await VotingRecordController.createVotingRecord(
-        mockRequest
-      );
+      const response =
+        await VotingRecordController.createVotingRecord(mockRequest);
 
       expect(response.status).toBe(400);
       const responseData = await response.json();
@@ -303,16 +300,15 @@ describe('VotingRecordController', () => {
       const createData = {
         votingEventId: 123, // Should be string
         userId: testUserId,
-        result: 'YES'
+        result: 'YES',
       };
 
       const mockRequest = {
-        json: async () => createData
+        json: async () => createData,
       } as Request;
 
-      const response = await VotingRecordController.createVotingRecord(
-        mockRequest
-      );
+      const response =
+        await VotingRecordController.createVotingRecord(mockRequest);
 
       expect(response.status).toBe(400);
       const responseData = await response.json();
@@ -323,17 +319,16 @@ describe('VotingRecordController', () => {
       const createData = {
         votingEventId: testVotingEventId,
         userId: testUserId,
-        result: 'NO'
+        result: 'NO',
         // updatedBy is optional
       };
 
       const mockRequest = {
-        json: async () => createData
+        json: async () => createData,
       } as Request;
 
-      const response = await VotingRecordController.createVotingRecord(
-        mockRequest
-      );
+      const response =
+        await VotingRecordController.createVotingRecord(mockRequest);
 
       expect(response.status).toBe(201);
       const responseData = await response.json();
@@ -353,7 +348,7 @@ describe('GET /api/voting-record', () => {
   beforeAll(async () => {
     // Create test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' }
+      data: { roleType: 'MEMBER' },
     });
     routeRoleId = role.roleId;
 
@@ -367,8 +362,8 @@ describe('GET /api/voting-record', () => {
         firstName: 'Test3',
         lastName: 'User3',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     routeTestUserId = user.userId;
 
@@ -380,8 +375,8 @@ describe('GET /api/voting-record', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = meeting.meetingId;
 
@@ -390,8 +385,8 @@ describe('GET /api/voting-record', () => {
       data: {
         meetingId: routeTestMeetingId,
         name: 'Route Test Voting Event',
-        voteType: 'YES_NO'
-      }
+        voteType: 'YES_NO',
+      },
     });
     routeTestVotingEventId = votingEvent.votingEventId;
 
@@ -399,7 +394,7 @@ describe('GET /api/voting-record', () => {
     const votingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: routeTestVotingEventId,
       userId: routeTestUserId,
-      result: 'YES'
+      result: 'YES',
     });
     routeTestVotingRecordId = votingRecord.votingRecordId;
   });
@@ -436,7 +431,7 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
   beforeAll(async () => {
     // Create test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' }
+      data: { roleType: 'MEMBER' },
     });
     routeTestRoleId = role.roleId;
     // Create test user
@@ -449,8 +444,8 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
         firstName: 'Test4',
         lastName: 'User4',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     routeTestUserId = user.userId;
 
@@ -462,8 +457,8 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = meeting.meetingId;
 
@@ -472,8 +467,8 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
       data: {
         meetingId: routeTestMeetingId,
         name: 'Route Test Voting Event 1',
-        voteType: 'YES_NO'
-      }
+        voteType: 'YES_NO',
+      },
     });
     routeTestVotingEventId = votingEvent.votingEventId;
 
@@ -481,8 +476,8 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
       data: {
         meetingId: routeTestMeetingId,
         name: 'Route Test Voting Event 2',
-        voteType: 'APPROVAL'
-      }
+        voteType: 'APPROVAL',
+      },
     });
     routeTestVotingEvent2Id = votingEvent2.votingEventId;
 
@@ -490,14 +485,14 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
     const votingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: routeTestVotingEventId,
       userId: routeTestUserId,
-      result: 'YES'
+      result: 'YES',
     });
     routeTestVotingRecordId = votingRecord.votingRecordId;
 
     const votingRecord2 = await VotingRecordService.createVotingRecord({
       votingEventId: routeTestVotingEventId,
       userId: routeTestUserId,
-      result: 'NO'
+      result: 'NO',
     });
     routeTestVotingRecord2Id = votingRecord2.votingRecordId;
   });
@@ -513,11 +508,10 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
   });
 
   it('should fetch voting records by voting event successfully', async () => {
-    const { GET } = await import(
-      '../../app/api/voting-record/by-voting-event/[votingEventId]/route'
-    );
+    const { GET } =
+      await import('../../app/api/voting-record/by-voting-event/[votingEventId]/route');
     const req = new Request(
-      `http://localhost/api/voting-record/by-voting-event/${routeTestVotingEventId}`
+      `http://localhost/api/voting-record/by-voting-event/${routeTestVotingEventId}`,
     );
 
     const params = Promise.resolve({ votingEventId: routeTestVotingEventId });
@@ -533,11 +527,10 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
   });
 
   it('should return empty array for non-existent voting event', async () => {
-    const { GET } = await import(
-      '../../app/api/voting-record/by-voting-event/[votingEventId]/route'
-    );
+    const { GET } =
+      await import('../../app/api/voting-record/by-voting-event/[votingEventId]/route');
     const req = new Request(
-      'http://localhost/api/voting-record/by-voting-event/non-existent-id'
+      'http://localhost/api/voting-record/by-voting-event/non-existent-id',
     );
 
     const params = Promise.resolve({ votingEventId: 'non-existent-id' });
@@ -566,11 +559,10 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
       },
     });
 
-    const { GET } = await import(
-      '../../app/api/voting-record/by-voting-event/[votingEventId]/route'
-    );
+    const { GET } =
+      await import('../../app/api/voting-record/by-voting-event/[votingEventId]/route');
     const req = new Request(
-      `http://localhost/api/voting-record/by-voting-event/${secretEvent.votingEventId}`
+      `http://localhost/api/voting-record/by-voting-event/${secretEvent.votingEventId}`,
     );
     const params = Promise.resolve({
       votingEventId: secretEvent.votingEventId,
@@ -599,7 +591,7 @@ describe('POST /api/voting-record', () => {
   beforeAll(async () => {
     // Create test role
     const role = await prisma.role.create({
-      data: { roleType: 'MEMBER' }
+      data: { roleType: 'MEMBER' },
     });
     routeTestRoleId = role.roleId;
 
@@ -613,8 +605,8 @@ describe('POST /api/voting-record', () => {
         firstName: 'Test5',
         lastName: 'User5',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     routeTestUserId = user.userId;
 
@@ -626,8 +618,8 @@ describe('POST /api/voting-record', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Test notes',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = meeting.meetingId;
 
@@ -636,31 +628,31 @@ describe('POST /api/voting-record', () => {
       data: {
         meetingId: routeTestMeetingId,
         name: 'Route Test Voting Event',
-        voteType: 'YES_NO'
-      }
+        voteType: 'YES_NO',
+      },
     });
     routeTestVotingEventId = votingEvent.votingEventId;
   });
 
   afterAll(async () => {
     await prisma.votingRecord.deleteMany({
-      where: { votingEventId: routeTestVotingEventId }
+      where: { votingEventId: routeTestVotingEventId },
     });
 
     await prisma.votingEvent.deleteMany({
-      where: { votingEventId: routeTestVotingEventId }
+      where: { votingEventId: routeTestVotingEventId },
     });
 
     await prisma.meeting.deleteMany({
-      where: { meetingId: routeTestMeetingId }
+      where: { meetingId: routeTestMeetingId },
     });
 
     await prisma.user.deleteMany({
-      where: { userId: routeTestUserId }
+      where: { userId: routeTestUserId },
     });
 
     await prisma.role.deleteMany({
-      where: { roleId: routeTestRoleId }
+      where: { roleId: routeTestRoleId },
     });
   });
 
@@ -670,13 +662,13 @@ describe('POST /api/voting-record', () => {
       votingEventId: routeTestVotingEventId,
       userId: routeTestUserId,
       result: 'YES',
-      updatedBy: 'test-user'
+      updatedBy: 'test-user',
     };
 
     const req = new Request('http://localhost/api/voting-record', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const response = await POST(req);
@@ -694,14 +686,14 @@ describe('POST /api/voting-record', () => {
   it('should return 400 when required fields are missing', async () => {
     const { POST } = await import('../../app/api/voting-record/route');
     const requestBody = {
-      result: 'YES'
+      result: 'YES',
       // Missing votingEventId and userId
     };
 
     const req = new Request('http://localhost/api/voting-record', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const response = await POST(req);
