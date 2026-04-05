@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { MeetingApiData } from '@/types';
-import { VOTING_TYPES } from '@/utils/consts';
+import { votingTypes, VoteType } from '@/utils/consts';
+import { getVoteTypeLabel } from '@/utils/voting_utils';
 import { X } from 'lucide-react';
 
 const FIXED_OPTIONS = ['Abstain', 'No Confidence'] as const;
@@ -19,29 +20,12 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
   // Form fields
   const [meetingId, setMeetingId] = useState('');
   const [name, setName] = useState('');
-  const [voteType, setVoteType] = useState(VOTING_TYPES.ROLL_CALL.key);
+  const [voteType, setVoteType] = useState<VoteType>(votingTypes.rollCall);
   const [options, setOptions] = useState<string[]>([]);
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const meetingsForDropdown = useMemo(() => {
-    const today = new Date();
-    const todayStr =
-      today.getFullYear() +
-      '-' +
-      String(today.getMonth() + 1).padStart(2, '0') +
-      '-' +
-      String(today.getDate()).padStart(2, '0');
-    const upcoming = meetings.filter((m) => {
-      const raw = (m.date && String(m.date).trim()) || '';
-      const meetingDateStr = raw.slice(0, 10);
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(meetingDateStr)) return true;
-      return meetingDateStr >= todayStr;
-    });
-    return upcoming.length > 0 ? upcoming : meetings;
-  }, [meetings]);
 
   const addOption = () => {
     setOptions((prev) => {
@@ -74,7 +58,7 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
           voteType,
           updatedBy: userId,
           options:
-            voteType === VOTING_TYPES.SECRET_BALLOT.key
+            voteType === votingTypes.secretBallot
               ? [...FIXED_OPTIONS, ...options]
               : options,
         }),
@@ -108,7 +92,7 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
           className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary'
         >
           <option value=''>Select a meeting</option>
-          {meetingsForDropdown.map((m) => (
+          {meetings.map((m) => (
             <option key={m.meetingId} value={m.meetingId}>
               {m.date} — {m.name}
             </option>
@@ -135,18 +119,18 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
         </label>
         <select
           value={voteType}
-          onChange={(e) => setVoteType(e.target.value)}
+          onChange={(e) => setVoteType(e.target.value as VoteType)}
           className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary'
         >
-          {Object.values(VOTING_TYPES).map((type) => (
-            <option key={type.key} value={type.key}>
-              {type.value}
+          {Object.values(votingTypes).map((key) => (
+            <option key={key} value={key}>
+              {getVoteTypeLabel(key)}
             </option>
           ))}
         </select>
       </div>
 
-      {voteType === VOTING_TYPES.SECRET_BALLOT.key && (
+      {voteType === votingTypes.secretBallot && (
         <div>
           <label className='block text-sm font-medium text-gray-700 mb-1'>
             Options

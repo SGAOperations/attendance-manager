@@ -33,6 +33,20 @@ export const MeetingService = {
     });
   },
 
+  async getUpcomingMeetings() {
+    const today = new Date().toISOString().slice(0, 10);
+    const upcoming = await prisma.meeting.findMany({
+      where: { deletedAt: null, date: { gte: today } },
+      orderBy: { date: 'asc' },
+    });
+    if (upcoming.length > 0) return upcoming;
+    // Fallback: no upcoming meetings, return all so the dropdown is never empty
+    return prisma.meeting.findMany({
+      where: { deletedAt: null },
+      orderBy: { date: 'desc' },
+    });
+  },
+
   async getAllMeetingByDate() {
     const meetings = await prisma.meeting.findMany({
       where: {

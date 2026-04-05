@@ -1,7 +1,7 @@
 import { prisma } from '../lib/prisma';
-import { VOTING_TYPES } from '../utils/consts';
+import { votingTypes } from '../utils/consts';
 
-const SECRET_BALLOT = VOTING_TYPES.SECRET_BALLOT.key;
+const SECRET_BALLOT = votingTypes.secretBallot;
 
 export function computeVotePassedFromCounts(
   counts: Record<string, number>,

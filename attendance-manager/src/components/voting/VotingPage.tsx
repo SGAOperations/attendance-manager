@@ -18,7 +18,7 @@ const VotingPage: React.FC = () => {
     setEventsLoading(true);
     try {
       const [meetingsRes, eventsRes] = await Promise.all([
-        fetch('/api/meeting'),
+        fetch('/api/meeting/upcoming'),
         fetch('/api/voting-event'),
       ]);
 

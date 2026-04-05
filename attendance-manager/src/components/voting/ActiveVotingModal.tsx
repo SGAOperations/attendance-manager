@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { VotingEventApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { YES_NO_OPTIONS } from '@/utils/consts';
+import { yesNoOptions } from '@/utils/consts';
 
 interface ActiveVotingModalProps {
   event: VotingEventApiData;
@@ -95,7 +95,7 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
               Please select your vote:
             </legend>
             {event.voteType === 'ROLL_CALL' ? (
-              Object.values(YES_NO_OPTIONS).map((option) => (
+              Object.values(yesNoOptions).map((option) => (
                 <label
                   key={option}
                   className='flex items-center space-x-2 text-sm text-gray-800'

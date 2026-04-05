@@ -1,6 +1,6 @@
 import React from 'react';
 import { VotingEventWithRelations } from '@/types';
-import { YES_NO_OPTIONS } from '@/utils/consts';
+import { yesNoOptions } from '@/utils/consts';
 import { Vote } from 'lucide-react';
 
 const optionRank = (o: string) =>
@@ -40,7 +40,7 @@ const VoteBreakdown: React.FC<VoteBreakdownProps> = ({
   const opts =
     event.options.length > 0
       ? [...event.options].sort((a, b) => optionRank(a) - optionRank(b))
-      : Object.values(YES_NO_OPTIONS);
+      : Object.values(yesNoOptions);
 
   if (opts.length === 0) return null;
 
