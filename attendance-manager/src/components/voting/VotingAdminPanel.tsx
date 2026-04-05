@@ -1,18 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { MeetingApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveVotingEvent } from '@/hooks/useActiveVotingEvent';
 import ActiveVoteCard from './ActiveVoteCard';
 import CreateVoteForm from './CreateVoteForm';
-
-async function fetchEligibleCount(
-  meetingId: string,
-): Promise<[string, number] | null> {
-  const res = await fetch(`/api/attendance/meeting/${meetingId}`);
-  if (!res.ok) return null;
-  const records: { status: string }[] = await res.json();
-  return [meetingId, records.filter((r) => r.status === 'PRESENT').length];
-}
 
 interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
@@ -24,13 +15,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   onVotingEventsMutated,
 }) => {
   const { user } = useAuth();
-
-  // Per-event end errors
   const [endErrors, setEndErrors] = useState<Record<string, string | null>>({});
-  // Eligible voter counts keyed by meetingId
-  const [eligibleCounts, setEligibleCounts] = useState<Record<string, number>>(
-    {},
-  );
 
   const {
     activeEvents,
@@ -38,28 +23,10 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
     refresh: refreshActiveEvent,
   } = useActiveVotingEvent();
 
-  // Fetch eligible voter counts for any meeting not yet loaded.
-  // eligibleCounts in deps is intentional: after each fetch completes the
-  // effect re-runs, the filter finds no new IDs, and exits immediately.
-  useEffect(() => {
-    const unfetchedIds = [
-      ...new Set(activeEvents.map((e) => e.meetingId)),
-    ].filter((mid) => !(mid in eligibleCounts));
-    if (unfetchedIds.length === 0) return;
-
-    Promise.allSettled(unfetchedIds.map(fetchEligibleCount)).then((settled) => {
-      const updates = Object.fromEntries(
-        settled.flatMap((r) =>
-          r.status === 'fulfilled' && r.value ? [r.value] : [],
-        ),
-      );
-      if (Object.keys(updates).length > 0) {
-        setEligibleCounts((prev) => ({ ...prev, ...updates }));
-      }
-    });
-  }, [activeEvents, eligibleCounts]);
-
   if (!user || user.role !== 'EBOARD') return null;
+
+  const meetingEligibleCount = (meetingId: string) =>
+    meetings.find((m) => m.meetingId === meetingId)?.eligibleCount ?? 0;
 
   const handleEnd = async (votingEventId: string) => {
     setEndErrors((prev) => ({ ...prev, [votingEventId]: null }));
@@ -110,7 +77,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
             <ActiveVoteCard
               key={event.votingEventId}
               event={event}
-              eligible={eligibleCounts[event.meetingId] ?? 0}
+              eligible={meetingEligibleCount(event.meetingId)}
               onEnd={handleEnd}
               endError={endErrors[event.votingEventId]}
             />

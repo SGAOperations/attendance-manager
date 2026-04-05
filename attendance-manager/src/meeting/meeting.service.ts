@@ -35,16 +35,33 @@ export const MeetingService = {
 
   async getUpcomingMeetings() {
     const today = new Date().toISOString().slice(0, 10);
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const include = {
+      _count: {
+        select: { attendance: { where: { status: 'PRESENT' as const } } },
+      },
+    };
+    const toResult = (m: {
+      _count: { attendance: number };
+      [key: string]: unknown;
+    }) => {
+      const { _count, ...rest } = m;
+      return { ...rest, eligibleCount: _count.attendance };
+    };
+    /* eslint-enable @typescript-eslint/naming-convention */
     const upcoming = await prisma.meeting.findMany({
       where: { deletedAt: null, date: { gte: today } },
       orderBy: { date: 'asc' },
+      include,
     });
-    if (upcoming.length > 0) return upcoming;
+    if (upcoming.length > 0) return upcoming.map(toResult);
     // Fallback: no upcoming meetings, return all so the dropdown is never empty
-    return prisma.meeting.findMany({
+    const all = await prisma.meeting.findMany({
       where: { deletedAt: null },
       orderBy: { date: 'desc' },
+      include,
     });
+    return all.map(toResult);
   },
 
   async getAllMeetingByDate() {
