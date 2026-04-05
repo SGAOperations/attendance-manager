@@ -1,19 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { VotingEventApiData, VotingRecordApiData } from '@/types';
+import { VotingEventWithRelations } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { VOTING_TYPES } from '@/utils/consts';
 import { formatResultLabel } from './votingDisplayUtils';
 import EditVotingRecordsModal from './EditVotingRecordsModal';
-
-type VotingEventWithRelations = VotingEventApiData & {
-  meeting?: {
-    name: string;
-    date: string;
-  };
-  votingRecords?: VotingRecordApiData[];
-};
 
 interface OngoingVotingPanelProps {
   events: VotingEventWithRelations[];
@@ -34,7 +26,7 @@ const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
   }
 
   const ongoingEvents = events
-    .filter((e) => !e.deletedAt)
+    .filter((e) => !e.deletedAt && !e.endedAt)
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -87,7 +79,8 @@ const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
                   (sum, n) => sum + n,
                   0,
                 );
-                const isSecret = event.voteType === VOTING_TYPES.SECRET_BALLOT.key;
+                const isSecret =
+                  event.voteType === VOTING_TYPES.SECRET_BALLOT.key;
 
                 return (
                   <tr
@@ -146,12 +139,10 @@ const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
                       ) : (
                         <button
                           type='button'
-                          onClick={() =>
-                            setEditEventId(event.votingEventId)
-                          }
+                          onClick={() => setEditEventId(event.votingEventId)}
                           className='rounded-lg bg-[#C8102E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#A8102E]'
                         >
-                          Edit voting records
+                          Edit Voting Records
                         </button>
                       )}
                     </td>
