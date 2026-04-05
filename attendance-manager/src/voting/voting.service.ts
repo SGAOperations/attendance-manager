@@ -187,8 +187,10 @@ export const VotingService = {
     return events.map((e) => formatVotingEventForApi(e)!);
   },
 
-  async getAllVotingEvents() {
+  async getAllVotingEvents({ isEboard }: { isEboard: boolean }) {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const events = await prisma.votingEvent.findMany({
+      where: isEboard ? undefined : { endedAt: { lte: oneHourAgo } },
       include: {
         meeting: true,
         votingRecords: true,

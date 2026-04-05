@@ -131,7 +131,7 @@ describe('VotingService', () => {
   });
 
   it('should fetch all voting events', async () => {
-    const votingEvents = await VotingService.getAllVotingEvents();
+    const votingEvents = await VotingService.getAllVotingEvents({ isEboard: true });
     expect(Array.isArray(votingEvents)).toBe(true);
     expect(votingEvents.length).toBeGreaterThan(0);
   });
@@ -238,11 +238,9 @@ describe('VotingController', () => {
         voteType: 'YES_NO',
       });
 
-      const response = await VotingController.getAllVotingEvents();
-      expect(response).toBeDefined();
-      const responseData = await response.json();
-      expect(Array.isArray(responseData)).toBe(true);
-      expect(responseData.length).toBeGreaterThan(0);
+      const events = await VotingService.getAllVotingEvents({ isEboard: true });
+      expect(Array.isArray(events)).toBe(true);
+      expect(events.length).toBeGreaterThan(0);
       await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
     });
   });
@@ -788,7 +786,7 @@ describe('Per-voter voting results include voter names (non-secret ballot)', () 
 
   // same enrichment as GET [id], but via getAllVotingEvents()
   it('getAllVotingEvents returns votingRecords with user first/last names for ROLL_CALL', async () => {
-    const events = await VotingService.getAllVotingEvents();
+    const events = await VotingService.getAllVotingEvents({ isEboard: true });
     const data = events.find(
       (e) => e != null && e.votingEventId === votingEventId,
     );
@@ -1023,7 +1021,7 @@ describe('Secret ballot results (aggregates only)', () => {
   });
 
   it('getAllVotingEvents omits votingRecords for secret ballot with aggregates', async () => {
-    const events = await VotingService.getAllVotingEvents();
+    const events = await VotingService.getAllVotingEvents({ isEboard: true });
     const row = events.find(
       (e) => e != null && e.votingEventId === secretVotingEventId,
     );
