@@ -227,43 +227,30 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
                       {voteTypeLabel}
                     </span>
                   </div>
-                  <div className='flex items-start gap-2'>
+                  <div className='flex items-center gap-2 flex-wrap'>
                     <span className='w-20 shrink-0 text-gray-400'>Votes</span>
-                    <div className='flex-1'>
-                      <div className='mb-1 font-medium text-gray-900'>
-                        {totalVotes} total
-                      </div>
-                      {(() => {
-                        const rows =
-                          event.voteType === VOTING_TYPES.SECRET_BALLOT.key
-                            ? [...event.options].sort(
-                                (a, b) => optionRank(a) - optionRank(b),
-                              )
-                            : Object.keys(voteCounts);
-                        if (rows.length === 0) return null;
-                        return (
-                          <table className='w-full text-xs border-separate border-spacing-0 rounded-lg overflow-hidden border border-gray-200'>
-                            <tbody>
-                              {rows.map((opt, i) => (
-                                <tr
-                                  key={opt}
-                                  className={
-                                    i % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                                  }
-                                >
-                                  <td className='px-3 py-1.5 text-gray-600'>
-                                    {opt}
-                                  </td>
-                                  <td className='px-3 py-1.5 text-right font-semibold text-gray-900 w-12'>
-                                    {voteCounts[opt] ?? 0}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        );
-                      })()}
-                    </div>
+                    <span className='font-semibold text-gray-900'>
+                      {totalVotes} total
+                    </span>
+                    {(() => {
+                      const opts =
+                        event.voteType === VOTING_TYPES.SECRET_BALLOT.key
+                          ? [...event.options].sort(
+                              (a, b) => optionRank(a) - optionRank(b),
+                            )
+                          : Object.keys(voteCounts);
+                      return opts.map((opt) => (
+                        <span
+                          key={opt}
+                          className='inline-flex items-center gap-1 rounded-md bg-gray-200 px-2 py-0.5 text-xs text-gray-600'
+                        >
+                          {opt}
+                          <span className='font-semibold text-gray-900'>
+                            {voteCounts[opt] ?? 0}
+                          </span>
+                        </span>
+                      ));
+                    })()}
                   </div>
                 </div>
                 {endError && (
