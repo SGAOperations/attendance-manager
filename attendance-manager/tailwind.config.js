@@ -8,7 +8,25 @@ module.exports = {
     './contexts/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#C8102E',
+          dark: '#A8102E',
+        },
+        vote: {
+          yes: '#bbf7d0',
+          no: '#fecaca',
+          abstain: '#e5e7eb',
+          'no-confidence': '#fde68a',
+          f1: '#bfdbfe',
+          f2: '#ddd6fe',
+          f3: '#fbcfe8',
+          f4: '#99f6e4',
+          f5: '#fed7aa',
+        },
+      },
+    },
   },
   plugins: [],
 };
