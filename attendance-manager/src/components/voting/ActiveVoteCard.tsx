@@ -21,6 +21,7 @@ const ActiveVoteCard: React.FC<ActiveVoteCardProps> = ({
   const voteTypeLabel = getVoteTypeLabel(event.voteType);
   const voteCounts = getVoteCounts(event);
   const totalVotes = Object.values(voteCounts).reduce((sum, n) => sum + n, 0);
+
   return (
     <div className='rounded-xl border border-gray-100 bg-gray-50 p-5 text-sm'>
       <div className='flex items-start justify-between gap-2'>

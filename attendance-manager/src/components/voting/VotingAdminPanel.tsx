@@ -5,6 +5,15 @@ import { useActiveVotingEvent } from '@/hooks/useActiveVotingEvent';
 import ActiveVoteCard from './ActiveVoteCard';
 import CreateVoteForm from './CreateVoteForm';
 
+async function fetchEligibleCount(
+  meetingId: string,
+): Promise<[string, number] | null> {
+  const res = await fetch(`/api/attendance/meeting/${meetingId}`);
+  if (!res.ok) return null;
+  const records: { status: string }[] = await res.json();
+  return [meetingId, records.filter((r) => r.status === 'PRESENT').length];
+}
+
 interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
   onVotingEventsMutated?: () => void | Promise<void>;
@@ -38,25 +47,16 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
     ].filter((mid) => !(mid in eligibleCounts));
     if (unfetchedIds.length === 0) return;
 
-    (async () => {
-      const settled = await Promise.allSettled(
-        unfetchedIds.map(async (mid) => {
-          const res = await fetch(`/api/attendance/meeting/${mid}`);
-          if (!res.ok) throw new Error();
-          const records: { status: string }[] = await res.json();
-          return [
-            mid,
-            records.filter((r) => r.status === 'PRESENT').length,
-          ] as [string, number];
-        }),
-      );
+    Promise.allSettled(unfetchedIds.map(fetchEligibleCount)).then((settled) => {
       const updates = Object.fromEntries(
-        settled.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : [])),
+        settled.flatMap((r) =>
+          r.status === 'fulfilled' && r.value ? [r.value] : [],
+        ),
       );
       if (Object.keys(updates).length > 0) {
         setEligibleCounts((prev) => ({ ...prev, ...updates }));
       }
-    })();
+    });
   }, [activeEvents, eligibleCounts]);
 
   if (!user || user.role !== 'EBOARD') return null;
