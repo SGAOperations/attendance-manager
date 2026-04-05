@@ -896,10 +896,7 @@ describe('PATCH /api/voting-record/[votingRecordId]', () => {
     await UsersService.deleteRole(patchRoleId);
   });
 
-  it('should update a voting record via PATCH route', async () => {
-    const { PATCH } = await import(
-      '../../app/api/voting-record/[votingRecordId]/route'
-    );
+  it('should update a voting record', async () => {
     const req = new Request(
       `http://localhost/api/voting-record/${patchRecordId}`,
       {
@@ -911,8 +908,8 @@ describe('PATCH /api/voting-record/[votingRecordId]', () => {
         }),
       },
     );
-    const response = await PATCH(req, {
-      params: Promise.resolve({ votingRecordId: patchRecordId }),
+    const response = await VotingRecordController.updateVotingRecord(req, {
+      votingRecordId: patchRecordId,
     });
     const data = await response.json();
 
@@ -928,9 +925,10 @@ describe('PATCH /api/voting-record/[votingRecordId]', () => {
         body: JSON.stringify({ result: 'YES' }),
       },
     );
-    const restoreRes = await PATCH(restoreReq, {
-      params: Promise.resolve({ votingRecordId: patchRecordId }),
-    });
+    const restoreRes = await VotingRecordController.updateVotingRecord(
+      restoreReq,
+      { votingRecordId: patchRecordId },
+    );
     expect(restoreRes.status).toBe(200);
   });
 });
