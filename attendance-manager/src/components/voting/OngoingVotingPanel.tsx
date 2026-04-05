@@ -1,42 +1,49 @@
 'use client';
 
-import React, { useState } from 'react';
-import { VotingEventWithRelations } from '@/types';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { VOTING_TYPES } from '@/utils/consts';
+import { getVoteCounts } from '@/utils/voting_utils';
+import { useActiveVotingEvents } from '@/hooks/useActiveVotingEvents';
 import { formatResultLabel } from './votingDisplayUtils';
 import EditVotingRecordsModal from './EditVotingRecordsModal';
 
 interface OngoingVotingPanelProps {
-  events: VotingEventWithRelations[];
-  loading: boolean;
-  onRefresh: () => void;
+  refreshTrigger?: number;
 }
 
 const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
-  events,
-  loading,
-  onRefresh,
+  refreshTrigger = 0,
 }) => {
   const { user } = useAuth();
+  const {
+    events: ongoingEvents,
+    loading,
+    error,
+    refresh,
+  } = useActiveVotingEvents();
   const [editEventId, setEditEventId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (refreshTrigger === 0) return;
+    void refresh();
+  }, [refreshTrigger, refresh]);
 
   if (!user || user.role !== 'EBOARD') {
     return null;
   }
-
-  const ongoingEvents = events
-    .filter((e) => !e.deletedAt && !e.endedAt)
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
 
   return (
     <div className='mt-8 bg-white rounded-2xl shadow-lg p-6 border border-gray-100'>
       <div className='flex items-center justify-between mb-4'>
         <h2 className='text-lg font-semibold text-gray-900'>Ongoing Voting</h2>
       </div>
+
+      {error && (
+        <p className='mb-3 text-sm text-red-600' role='alert'>
+          {error}
+        </p>
+      )}
 
       {loading ? (
         <p className='text-sm text-gray-500'>Loading ongoing votes…</p>
@@ -66,16 +73,8 @@ const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
             </thead>
             <tbody>
               {ongoingEvents.map((event) => {
-                const records =
-                  (event.votingRecords || []).filter((r) => !r.deletedAt) || [];
-                const counts = records.reduce<Record<string, number>>(
-                  (acc, record) => {
-                    acc[record.result] = (acc[record.result] || 0) + 1;
-                    return acc;
-                  },
-                  {},
-                );
-                const totalVotes = Object.values(counts).reduce(
+                const voteCounts = getVoteCounts(event);
+                const totalVotes = Object.values(voteCounts).reduce(
                   (sum, n) => sum + n,
                   0,
                 );
@@ -114,7 +113,7 @@ const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
                         </span>
                       ) : (
                         <div className='flex flex-wrap gap-2 items-center'>
-                          {Object.entries(counts).map(([key, value]) => (
+                          {Object.entries(voteCounts).map(([key, value]) => (
                             <span
                               key={key}
                               className='inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700'
@@ -159,7 +158,7 @@ const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
           votingEventId={editEventId}
           onClose={() => setEditEventId(null)}
           onSaved={() => {
-            onRefresh();
+            void refresh();
           }}
         />
       )}

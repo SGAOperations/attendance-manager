@@ -12,6 +12,7 @@ const VotingPage: React.FC = () => {
   const [deleteEvent, setDeleteEvent] =
     useState<VotingEventWithRelations | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [ongoingRefreshTrigger, setOngoingRefreshTrigger] = useState(0);
 
   const loadMeetingsAndEvents = useCallback(async () => {
     setEventsLoading(true);
@@ -30,6 +31,7 @@ const VotingPage: React.FC = () => {
         const eventsData: VotingEventWithRelations[] = await eventsRes.json();
         setEvents(eventsData);
       }
+      setOngoingRefreshTrigger((n) => n + 1);
     } catch (error) {
       globalThis.console?.error('Failed to load meetings and events', error);
     } finally {
@@ -79,11 +81,7 @@ const VotingPage: React.FC = () => {
         meetings={meetings}
         onVotingEventsMutated={loadMeetingsAndEvents}
       />
-      <OngoingVotingPanel
-        events={events}
-        loading={eventsLoading}
-        onRefresh={loadMeetingsAndEvents}
-      />
+      <OngoingVotingPanel refreshTrigger={ongoingRefreshTrigger} />
       <VotingResultsPanel
         events={events}
         loading={eventsLoading}
