@@ -666,7 +666,7 @@ describe('GET /api/voting-event/[id]', () => {
   });
 });
 
-describe('ROLL_CALL results include voter names', () => {
+describe('Per-voter voting results include voter names (non-secret ballot)', () => {
   let testMeetingId: string;
   let testRoleId: string;
   let user1Id: string;
@@ -816,8 +816,8 @@ describe('ROLL_CALL results include voter names', () => {
     expect(record2.user.lastName).toBe('CallTwo');
   });
 
-  // non-ROLL_CALL events should not receive user name data
-  it('does not inject user names for non-ROLL_CALL events', async () => {
+  // YES_NO and other non-secret types get voter names (e.g. admin edit modal, results UI)
+  it('returns votingRecords with user first/last names for YES_NO events', async () => {
     const nonRollCallEvent = await prisma.votingEvent.create({
       data: {
         meetingId: testMeetingId,
@@ -846,7 +846,9 @@ describe('ROLL_CALL results include voter names', () => {
     expect(response.status).toBe(200);
     expect(data.voteType).toBe('YES_NO');
     expect(Array.isArray(data.votingRecords)).toBe(true);
-    expect(data.votingRecords[0]).not.toHaveProperty('user');
+    expect(data.votingRecords[0].user).toBeDefined();
+    expect(data.votingRecords[0].user.firstName).toBe('Roll');
+    expect(data.votingRecords[0].user.lastName).toBe('CallOne');
 
     await prisma.votingRecord.deleteMany({
       where: { votingEventId: nonRollCallEvent.votingEventId },

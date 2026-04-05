@@ -138,7 +138,7 @@ async function attachVoterNamesToVotingEvent<
   T extends { voteType: string; votingRecords?: any[] },
 >(event: T | null): Promise<T | null> {
   if (!event) return event;
-  if (event.voteType !== 'ROLL_CALL') return event;
+  if (event.voteType === SECRET_BALLOT) return event;
   if (!event.votingRecords || event.votingRecords.length === 0) return event;
 
   const userIds = Array.from(

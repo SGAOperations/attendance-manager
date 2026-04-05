@@ -134,6 +134,24 @@ describe('VotingRecordService', () => {
     expect(firstRecord.votingEvent.meeting).toBeDefined();
     expect(firstRecord.votingEvent.meeting.meetingId).toBeDefined();
   });
+
+  it('should update a voting record', async () => {
+    const updated = await VotingRecordService.updateVotingRecord({
+      votingRecordId: testVotingRecordId,
+      result: 'NO',
+      updatedBy: 'admin-user',
+    });
+    expect(updated.result).toBe('NO');
+    expect(updated.updatedBy).toBe('admin-user');
+    expect(updated.votingEvent).toBeDefined();
+    expect(updated.votingEvent.meeting).toBeDefined();
+
+    const restored = await VotingRecordService.updateVotingRecord({
+      votingRecordId: testVotingRecordId,
+      result: 'YES',
+    });
+    expect(restored.result).toBe('YES');
+  });
 });
 
 describe('VotingRecordController', () => {
@@ -334,6 +352,116 @@ describe('VotingRecordController', () => {
       const responseData = await response.json();
       expect(responseData.updatedBy).toBeNull();
       await VotingRecordService.deleteVotingRecord(responseData.votingRecordId);
+    });
+  });
+
+  describe('PATCH updateVotingRecord', () => {
+    it('should update result for an ongoing event', async () => {
+      const mockRequest = {
+        json: async () => ({ result: 'NO', updatedBy: 'admin' }),
+      } as Request;
+
+      const response = await VotingRecordController.updateVotingRecord(
+        mockRequest,
+        { votingRecordId: testVotingRecordId },
+      );
+      expect(response.status).toBe(200);
+      const responseData = await response.json();
+      expect(responseData.result).toBe('NO');
+
+      const restoreRequest = {
+        json: async () => ({ result: 'YES' }),
+      } as Request;
+      const restore = await VotingRecordController.updateVotingRecord(
+        restoreRequest,
+        { votingRecordId: testVotingRecordId },
+      );
+      expect(restore.status).toBe(200);
+      const restored = await restore.json();
+      expect(restored.result).toBe('YES');
+    });
+
+    it('should return 404 for non-existent voting record', async () => {
+      const mockRequest = {
+        json: async () => ({ result: 'NO' }),
+      } as Request;
+      const response = await VotingRecordController.updateVotingRecord(
+        mockRequest,
+        { votingRecordId: '00000000-0000-0000-0000-000000000000' },
+      );
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 400 when voting event is completed', async () => {
+      await prisma.votingEvent.update({
+        where: { votingEventId: testVotingEventId },
+        data: { deletedAt: new Date() },
+      });
+      try {
+        const mockRequest = {
+          json: async () => ({ result: 'NO' }),
+        } as Request;
+        const response = await VotingRecordController.updateVotingRecord(
+          mockRequest,
+          { votingRecordId: testVotingRecordId },
+        );
+        expect(response.status).toBe(400);
+        const responseData = await response.json();
+        expect(responseData.error).toContain('completed');
+      } finally {
+        await prisma.votingEvent.update({
+          where: { votingEventId: testVotingEventId },
+          data: { deletedAt: null },
+        });
+      }
+    });
+
+    it('should return 403 for secret ballot event', async () => {
+      const event = await prisma.votingEvent.create({
+        data: {
+          meetingId: testMeetingId,
+          name: 'Secret ballot patch test',
+          voteType: 'SECRET_BALLOT',
+          options: ['Yes', 'No'],
+        },
+      });
+      const rec = await VotingRecordService.createVotingRecord({
+        votingEventId: event.votingEventId,
+        userId: testUserId,
+        result: 'Yes',
+      });
+      const mockRequest = {
+        json: async () => ({ result: 'No' }),
+      } as Request;
+      const response = await VotingRecordController.updateVotingRecord(
+        mockRequest,
+        { votingRecordId: rec.votingRecordId },
+      );
+      expect(response.status).toBe(403);
+      await VotingRecordService.deleteVotingRecord(rec.votingRecordId);
+      await VotingService.deleteVotingEvent(event.votingEventId);
+    });
+
+    it('should return 400 for invalid result', async () => {
+      const mockRequest = {
+        json: async () => ({ result: 'NOT_A_VALID_VOTE' }),
+      } as Request;
+      const response = await VotingRecordController.updateVotingRecord(
+        mockRequest,
+        { votingRecordId: testVotingRecordId },
+      );
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 400 when result is missing', async () => {
+      const mockRequest = {
+        json: async () => ({}),
+      } as Request;
+      const response = await VotingRecordController.updateVotingRecord(
+        mockRequest,
+        { votingRecordId: testVotingRecordId },
+      );
+      expect(response.status).toBe(400);
     });
   });
 });
@@ -701,5 +829,108 @@ describe('POST /api/voting-record', () => {
 
     expect(response.status).toBe(400);
     expect(data.error).toContain('Missing required fields');
+  });
+});
+
+describe('PATCH /api/voting-record/[votingRecordId]', () => {
+  let patchMeetingId: string;
+  let patchEventId: string;
+  let patchUserId: string;
+  let patchRecordId: string;
+  let patchRoleId: string;
+
+  beforeAll(async () => {
+    const role = await prisma.role.create({
+      data: { roleType: 'MEMBER' },
+    });
+    patchRoleId = role.roleId;
+
+    const user = await prisma.user.create({
+      data: {
+        userId: 'test-voting-record-user-patch-route',
+        supabaseAuthId: 'test-supabase-auth-id-patch-route',
+        nuid: '001234599',
+        email: 'votingrecordpatchroute@example.com',
+        firstName: 'Patch',
+        lastName: 'Route',
+        roleId: role.roleId,
+        password: null,
+      },
+    });
+    patchUserId = user.userId;
+
+    const meeting = await prisma.meeting.create({
+      data: {
+        name: 'PATCH Route Meeting',
+        date: '2025-08-04',
+        startTime: '10:00',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: 'REGULAR',
+      },
+    });
+    patchMeetingId = meeting.meetingId;
+
+    const votingEvent = await prisma.votingEvent.create({
+      data: {
+        meetingId: patchMeetingId,
+        name: 'PATCH Route Voting Event',
+        voteType: 'YES_NO',
+      },
+    });
+    patchEventId = votingEvent.votingEventId;
+
+    const votingRecord = await VotingRecordService.createVotingRecord({
+      votingEventId: patchEventId,
+      userId: patchUserId,
+      result: 'YES',
+    });
+    patchRecordId = votingRecord.votingRecordId;
+  });
+
+  afterAll(async () => {
+    await VotingRecordService.deleteVotingRecord(patchRecordId);
+    await VotingService.deleteVotingEvent(patchEventId);
+    await MeetingService.deleteMeeting(patchMeetingId);
+    await UsersService.deleteUser(patchUserId);
+    await UsersService.deleteRole(patchRoleId);
+  });
+
+  it('should update a voting record via PATCH route', async () => {
+    const { PATCH } = await import(
+      '../../app/api/voting-record/[votingRecordId]/route'
+    );
+    const req = new Request(
+      `http://localhost/api/voting-record/${patchRecordId}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          result: 'ABSTAIN',
+          updatedBy: 'route-patch-tester',
+        }),
+      },
+    );
+    const response = await PATCH(req, {
+      params: Promise.resolve({ votingRecordId: patchRecordId }),
+    });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.result).toBe('ABSTAIN');
+    expect(data.updatedBy).toBe('route-patch-tester');
+
+    const restoreReq = new Request(
+      `http://localhost/api/voting-record/${patchRecordId}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ result: 'YES' }),
+      },
+    );
+    const restoreRes = await PATCH(restoreReq, {
+      params: Promise.resolve({ votingRecordId: patchRecordId }),
+    });
+    expect(restoreRes.status).toBe(200);
   });
 });

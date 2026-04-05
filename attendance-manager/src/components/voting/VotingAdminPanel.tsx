@@ -10,11 +10,13 @@ interface VotingAdminPanelProps {
   meetings: MeetingApiData[];
 
   onEventCreated?: (event: VotingEventWithRelations) => void;
+  onVotingEventsMutated?: () => void | Promise<void>;
 }
 
 const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
   meetings,
   onEventCreated,
+  onVotingEventsMutated,
 }) => {
   // ─── States ────────────────────────────────────────────────────────────────
 
@@ -127,6 +129,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
       if (onEventCreated) {
         onEventCreated(event);
       }
+      await onVotingEventsMutated?.();
       setName('');
       setOptions([]);
     } catch (err) {
@@ -164,6 +167,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
       const updated: VotingEventWithRelations = await res.json();
       setCurrentEvent(updated);
       await refreshActiveEvent();
+      await onVotingEventsMutated?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
