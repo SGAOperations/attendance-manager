@@ -35,20 +35,22 @@ export const MeetingService = {
 
   async getUpcomingMeetings() {
     const today = new Date().toISOString().slice(0, 10);
-    /* eslint-disable @typescript-eslint/naming-convention */
     const include = {
-      _count: {
-        select: { attendance: { where: { status: 'PRESENT' as const } } },
+      attendance: {
+        where: { status: 'PRESENT' as const },
+        select: { attendanceId: true },
       },
     };
-    const toResult = (m: {
-      _count: { attendance: number };
+    const toResult = ({
+      attendance,
+      ...m
+    }: {
+      attendance: unknown[];
       [key: string]: unknown;
-    }) => {
-      const { _count, ...rest } = m;
-      return { ...rest, eligibleCount: _count.attendance };
-    };
-    /* eslint-enable @typescript-eslint/naming-convention */
+    }) => ({
+      ...m,
+      eligibleCount: attendance.length,
+    });
     const upcoming = await prisma.meeting.findMany({
       where: { deletedAt: null, date: { gte: today } },
       orderBy: { date: 'asc' },
