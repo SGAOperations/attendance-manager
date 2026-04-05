@@ -7,6 +7,7 @@ import { VotingController } from '../voting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingService } from '@/meeting/meeting.service';
 import { VOTING_TYPES } from '@/utils/consts';
+import * as apiAuth from '@/utils/api-auth';
 
 jest.setTimeout(20000);
 
@@ -554,6 +555,17 @@ describe('VotingController', () => {
 describe('GET /api/voting-event', () => {
   let routeTestMeetingId: string;
   let routeTestVotingEventId: string;
+  let requireAuthSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    requireAuthSpy = jest
+      .spyOn(apiAuth, 'requireAuth')
+      .mockResolvedValue({ user: { role: { roleType: 'EBOARD' } } as any, error: null });
+  });
+
+  afterAll(() => {
+    requireAuthSpy.mockRestore();
+  });
 
   beforeAll(async () => {
     // Create a test meeting
