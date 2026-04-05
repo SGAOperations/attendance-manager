@@ -57,9 +57,7 @@ export const VotingRecordService = {
       where: { votingRecordId: data.votingRecordId },
       data: {
         result: data.result,
-        ...(data.updatedBy !== undefined
-          ? { updatedBy: data.updatedBy }
-          : {}),
+        ...(data.updatedBy !== undefined ? { updatedBy: data.updatedBy } : {}),
       },
       include: {
         votingEvent: {

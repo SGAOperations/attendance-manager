@@ -124,9 +124,7 @@ const EditVotingRecordsModal: React.FC<EditVotingRecordsModalProps> = ({
         </h3>
         <p className='mb-4 text-sm text-gray-600'>{event?.name ?? '…'}</p>
 
-        {loading && (
-          <p className='text-sm text-gray-500'>Loading records…</p>
-        )}
+        {loading && <p className='text-sm text-gray-500'>Loading records…</p>}
 
         {!loading && error && (
           <p className='mb-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600'>
@@ -156,7 +154,8 @@ const EditVotingRecordsModal: React.FC<EditVotingRecordsModalProps> = ({
               </thead>
               <tbody>
                 {rows.map((row) => {
-                  const dirty = row.result !== initialResults[row.votingRecordId];
+                  const dirty =
+                    row.result !== initialResults[row.votingRecordId];
                   const optionList = choices.includes(row.result)
                     ? choices
                     : [...choices, row.result];
@@ -187,9 +186,7 @@ const EditVotingRecordsModal: React.FC<EditVotingRecordsModalProps> = ({
                       <td className='px-4 py-3 text-right align-middle'>
                         <button
                           type='button'
-                          disabled={
-                            !dirty || savingId === row.votingRecordId
-                          }
+                          disabled={!dirty || savingId === row.votingRecordId}
                           onClick={() => saveRow(row)}
                           className='rounded-lg bg-[#C8102E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#A8102E] disabled:cursor-not-allowed disabled:opacity-60'
                         >

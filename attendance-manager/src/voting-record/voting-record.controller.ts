@@ -3,7 +3,7 @@ import { prisma } from '../lib/prisma';
 import { VOTING_TYPES, YES_NO_OPTIONS } from '../utils/consts';
 import { VotingRecordService } from './voting-record.service';
 
-const ROLL_CALL_STYLE_RESULTS = new Set<string>([
+const rollCallStyleResults = new Set<string>([
   ...Object.values(YES_NO_OPTIONS),
   'YES',
   'NO',
@@ -16,12 +16,12 @@ function isValidVotingRecordResult(
   result: string,
 ): boolean {
   if (voteType === VOTING_TYPES.ROLL_CALL.key) {
-    return ROLL_CALL_STYLE_RESULTS.has(result);
+    return rollCallStyleResults.has(result);
   }
   if (options.length > 0) {
     return options.includes(result);
   }
-  return ROLL_CALL_STYLE_RESULTS.has(result);
+  return rollCallStyleResults.has(result);
 }
 
 export const VotingRecordController = {
@@ -185,7 +185,9 @@ export const VotingRecordController = {
       return NextResponse.json(updated);
     } catch (error: unknown) {
       const message =
-        error instanceof Error ? error.message : 'Failed to update voting record';
+        error instanceof Error
+          ? error.message
+          : 'Failed to update voting record';
       return NextResponse.json({ error: message }, { status: 400 });
     }
   },

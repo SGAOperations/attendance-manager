@@ -1,4 +1,4 @@
-// labels for vote result strings 
+// labels for vote result strings
 export function formatResultLabel(result: string): string {
   switch (result) {
     case 'YES':
