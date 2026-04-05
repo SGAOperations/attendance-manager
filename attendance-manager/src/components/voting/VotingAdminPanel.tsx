@@ -36,13 +36,7 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ end: true, updatedBy: user.id }),
       });
-      if (!res.ok) {
-        setEndErrors((prev) => ({
-          ...prev,
-          [votingEventId]: 'Failed to end voting event.',
-        }));
-        return;
-      }
+      if (!res.ok) throw new Error();
       await refreshActiveEvent();
       await onVotingEventsMutated?.();
     } catch {
