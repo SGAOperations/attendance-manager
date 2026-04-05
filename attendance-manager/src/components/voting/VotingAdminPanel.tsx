@@ -198,10 +198,20 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
                 key={event.votingEventId}
                 className='rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm'
               >
-                <div className='flex items-start justify-between gap-2 mb-2'>
-                  <span className='font-medium text-gray-900'>
-                    {event.name}
-                  </span>
+                <div className='flex items-start justify-between gap-2'>
+                  <div className='min-w-0'>
+                    <span className='font-medium text-gray-900'>
+                      {event.name}
+                    </span>
+                    <span className='ml-2 text-gray-400'>
+                      {[
+                        voteTypeLabel,
+                        meeting && `${meeting.date} — ${meeting.name}`,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  </div>
                   <button
                     type='button'
                     onClick={() => handleEnd(event.votingEventId)}
@@ -210,14 +220,6 @@ const VotingAdminPanel: React.FC<VotingAdminPanelProps> = ({
                     Close Vote
                   </button>
                 </div>
-                <p className='text-gray-500'>
-                  {[
-                    meeting && `${meeting.date} — ${meeting.name}`,
-                    voteTypeLabel,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </p>
                 <div className='mt-3 pt-3 border-t border-gray-200 flex items-center gap-2 flex-wrap'>
                   <span className='font-semibold text-gray-900'>
                     {totalVotes} total
