@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { VotingService, formatVotingEventForApi } from './voting.service';
 import { VOTING_TYPES } from '@/utils/consts';
+import { requireAuth } from '@/utils/api-auth';
 
 const optionsSchema = z.array(z.string());
 const REQUIRED_SECRET_BALLOT_OPTIONS = ['No Confidence', 'Abstain'] as const;
@@ -27,7 +28,10 @@ export const VotingController = {
   },
 
   async getAllVotingEvents() {
-    const votingEvents = await VotingService.getAllVotingEvents();
+    const { user, error } = await requireAuth();
+    if (error) return error;
+    const isEboard = user!.role.roleType === 'EBOARD';
+    const votingEvents = await VotingService.getAllVotingEvents({ isEboard });
     return NextResponse.json(votingEvents);
   },
 

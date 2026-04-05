@@ -7,6 +7,7 @@ import { VotingController } from '../voting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingService } from '@/meeting/meeting.service';
 import { VOTING_TYPES } from '@/utils/consts';
+import * as apiAuth from '@/utils/api-auth';
 
 jest.setTimeout(20000);
 
@@ -131,7 +132,7 @@ describe('VotingService', () => {
   });
 
   it('should fetch all voting events', async () => {
-    const votingEvents = await VotingService.getAllVotingEvents();
+    const votingEvents = await VotingService.getAllVotingEvents({ isEboard: true });
     expect(Array.isArray(votingEvents)).toBe(true);
     expect(votingEvents.length).toBeGreaterThan(0);
   });
@@ -238,11 +239,9 @@ describe('VotingController', () => {
         voteType: 'YES_NO',
       });
 
-      const response = await VotingController.getAllVotingEvents();
-      expect(response).toBeDefined();
-      const responseData = await response.json();
-      expect(Array.isArray(responseData)).toBe(true);
-      expect(responseData.length).toBeGreaterThan(0);
+      const events = await VotingService.getAllVotingEvents({ isEboard: true });
+      expect(Array.isArray(events)).toBe(true);
+      expect(events.length).toBeGreaterThan(0);
       await VotingService.deleteVotingEvent(testVotingEvent.votingEventId);
     });
   });
@@ -556,6 +555,17 @@ describe('VotingController', () => {
 describe('GET /api/voting-event', () => {
   let routeTestMeetingId: string;
   let routeTestVotingEventId: string;
+  let requireAuthSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    requireAuthSpy = jest
+      .spyOn(apiAuth, 'requireAuth')
+      .mockResolvedValue({ user: { role: { roleType: 'EBOARD' } } as any, error: null });
+  });
+
+  afterAll(() => {
+    requireAuthSpy.mockRestore();
+  });
 
   beforeAll(async () => {
     // Create a test meeting
@@ -788,7 +798,7 @@ describe('Per-voter voting results include voter names (non-secret ballot)', () 
 
   // same enrichment as GET [id], but via getAllVotingEvents()
   it('getAllVotingEvents returns votingRecords with user first/last names for ROLL_CALL', async () => {
-    const events = await VotingService.getAllVotingEvents();
+    const events = await VotingService.getAllVotingEvents({ isEboard: true });
     const data = events.find(
       (e) => e != null && e.votingEventId === votingEventId,
     );
@@ -1023,7 +1033,7 @@ describe('Secret ballot results (aggregates only)', () => {
   });
 
   it('getAllVotingEvents omits votingRecords for secret ballot with aggregates', async () => {
-    const events = await VotingService.getAllVotingEvents();
+    const events = await VotingService.getAllVotingEvents({ isEboard: true });
     const row = events.find(
       (e) => e != null && e.votingEventId === secretVotingEventId,
     );
