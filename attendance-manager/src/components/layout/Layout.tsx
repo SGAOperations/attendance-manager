@@ -59,23 +59,17 @@ const Layout: React.FC = () => {
         }
 
         // Check if user has already voted for this event
-        const votingRecordsRes = await fetch(
-          `/api/voting-record/by-voting-event/${activeEvent.votingEventId}`,
+        const hasVotedRes = await fetch(
+          `/api/voting-record/has-voted/${activeEvent.votingEventId}`,
         );
 
-        if (!votingRecordsRes.ok) {
+        if (!hasVotedRes.ok) {
           throw new Error('Failed to fetch voting records');
         }
-
-        const votingRecords: Array<{
-          userId: string;
-        }> = await votingRecordsRes.json();
-        const hasAlreadyVoted = votingRecords.some(
-          (record) => record.userId === user.id,
-        );
+        const hasAlreadyVoted = await hasVotedRes.json();
 
         if (!isCancelled) {
-          setCanVoteInActiveEvent(!hasAlreadyVoted);
+          setCanVoteInActiveEvent(!hasAlreadyVoted.hasVoted);
         }
       } catch {
         if (!isCancelled) {
