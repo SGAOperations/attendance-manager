@@ -77,7 +77,7 @@ const Layout: React.FC = () => {
         if (!isCancelled) {
           setCanVoteInActiveEvent(!hasAlreadyVoted);
         }
-      } catch (error) {
+      } catch {
         if (!isCancelled) {
           setCanVoteInActiveEvent(false);
         }
