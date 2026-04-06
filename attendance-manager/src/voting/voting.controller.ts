@@ -28,7 +28,10 @@ export const VotingController = {
   },
 
   async getAllVotingEvents() {
-    const votingEvents = await VotingService.getAllVotingEvents();
+    const { user, error } = await requireAuth();
+    if (error) return error;
+    const isEboard = user!.role.roleType === 'EBOARD';
+    const votingEvents = await VotingService.getAllVotingEvents({ isEboard });
     return NextResponse.json(votingEvents);
   },
 

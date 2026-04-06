@@ -78,8 +78,7 @@ const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
                   (sum, n) => sum + n,
                   0,
                 );
-                const isSecret =
-                  event.voteType === votingTypes.secretBallot;
+                const isSecret = event.voteType === votingTypes.secretBallot;
 
                 return (
                   <tr
