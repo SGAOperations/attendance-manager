@@ -11,6 +11,7 @@ describe('VotingRecordService', () => {
   let testMeetingId: string;
   let testVotingEventId: string;
   let testUserId: string;
+  let testUserId2: string;
   let testVotingRecordId: string;
   let testRoleId: string;
 
@@ -35,6 +36,21 @@ describe('VotingRecordService', () => {
       },
     });
     testUserId = user.userId;
+
+    // Create second test user (for create/fetch tests to avoid duplicate-vote conflicts)
+    const user2 = await prisma.user.create({
+      data: {
+        userId: 'test-voting-record-user-1b',
+        supabaseAuthId: 'test-supabase-auth-id-1b',
+        nuid: '001234572',
+        email: 'votingrecorduser1b@example.com',
+        firstName: 'Test1b',
+        lastName: 'User1b',
+        roleId: role.roleId,
+        password: null,
+      },
+    });
+    testUserId2 = user2.userId;
 
     // Create test meeting
     const meeting = await prisma.meeting.create({
@@ -75,6 +91,7 @@ describe('VotingRecordService', () => {
     await VotingRecordService.deleteVotingRecord(testVotingRecordId);
     await VotingService.deleteVotingEvent(testVotingEventId);
     await MeetingService.deleteMeeting(testMeetingId);
+    await UsersService.deleteUser(testUserId2);
     await UsersService.deleteUser(testUserId);
     await UsersService.deleteRole(testRoleId);
   });
@@ -82,7 +99,7 @@ describe('VotingRecordService', () => {
   it('should create a new voting record', async () => {
     const newVotingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: testVotingEventId,
-      userId: testUserId,
+      userId: testUserId2,
       result: 'NO',
       updatedBy: 'test-user-2',
     });
@@ -91,23 +108,23 @@ describe('VotingRecordService', () => {
     expect(newVotingRecord.result).toBe('NO');
     expect(newVotingRecord.votingRecordId).toBeDefined();
     expect(newVotingRecord.votingEventId).toBe(testVotingEventId);
-    expect(newVotingRecord.userId).toBe(testUserId);
+    expect(newVotingRecord.userId).toBe(testUserId2);
     expect(newVotingRecord.updatedBy).toBe('test-user-2');
     expect(newVotingRecord.createdAt).toBeDefined();
     expect(newVotingRecord.updatedAt).toBeDefined();
     await VotingRecordService.deleteVotingRecord(
       newVotingRecord.votingRecordId,
     );
+  });
 
-    it('should not allow a user to vote twice for the same event', async () => {
-      await expect(
-        VotingRecordService.createVotingRecord({
-          votingEventId: testVotingEventId,
-          userId: testUserId,
-          result: 'YES'
-        })
-      ).rejects.toThrow('User has already voted for this event');
-    });
+  it('should not allow a user to vote twice for the same event', async () => {
+    await expect(
+      VotingRecordService.createVotingRecord({
+        votingEventId: testVotingEventId,
+        userId: testUserId,
+        result: 'YES',
+      })
+    ).rejects.toThrow('User has already voted for this event');
   });
 
   it('should fetch all voting records', async () => {
@@ -117,10 +134,10 @@ describe('VotingRecordService', () => {
   });
 
   it('should fetch voting records by voting event', async () => {
-    // Create another voting record for the same voting event
+    // Create another voting record for the same voting event using a second user
     const votingRecord = await VotingRecordService.createVotingRecord({
       votingEventId: testVotingEventId,
-      userId: testUserId,
+      userId: testUserId2,
       result: 'ABSTAIN',
     });
 
@@ -168,6 +185,7 @@ describe('VotingRecordController', () => {
   let testMeetingId: string;
   let testVotingEventId: string;
   let testUserId: string;
+  let testUserId2: string;
   let testVotingRecordId: string;
   let testRoleId: string;
 
@@ -192,6 +210,21 @@ describe('VotingRecordController', () => {
       },
     });
     testUserId = user.userId;
+
+    // Create second test user (for POST/GET tests to avoid duplicate-vote conflicts)
+    const user2 = await prisma.user.create({
+      data: {
+        userId: 'test-voting-record-user-2b',
+        supabaseAuthId: 'test-supabase-auth-id-2b',
+        nuid: '001234573',
+        email: 'votingrecorduser2b@example.com',
+        firstName: 'Test2b',
+        lastName: 'User2b',
+        roleId: role.roleId,
+        password: null,
+      },
+    });
+    testUserId2 = user2.userId;
 
     // Create test meeting
     const meeting = await prisma.meeting.create({
@@ -229,6 +262,7 @@ describe('VotingRecordController', () => {
     await VotingRecordService.deleteVotingRecord(testVotingRecordId);
     await VotingService.deleteVotingEvent(testVotingEventId);
     await MeetingService.deleteMeeting(testMeetingId);
+    await UsersService.deleteUser(testUserId2);
     await UsersService.deleteUser(testUserId);
     await UsersService.deleteRole(testRoleId);
   });
@@ -245,10 +279,10 @@ describe('VotingRecordController', () => {
 
   describe('GET by VotingEvent', () => {
     it('should return voting records filtered by voting event', async () => {
-      // Create another voting record for the same voting event
+      // Create another voting record for the same voting event using a second user
       const votingRecord = await VotingRecordService.createVotingRecord({
         votingEventId: testVotingEventId,
-        userId: testUserId,
+        userId: testUserId2,
         result: 'NO',
       });
 
@@ -284,7 +318,7 @@ describe('VotingRecordController', () => {
     it('should create a new voting record via controller', async () => {
       const createData = {
         votingEventId: testVotingEventId,
-        userId: testUserId,
+        userId: testUserId2,
         result: 'YES',
         updatedBy: 'test-user',
       };
@@ -300,7 +334,7 @@ describe('VotingRecordController', () => {
       const responseData = await response.json();
       expect(responseData.result).toBe('YES');
       expect(responseData.votingEventId).toBe(testVotingEventId);
-      expect(responseData.userId).toBe(testUserId);
+      expect(responseData.userId).toBe(testUserId2);
       expect(responseData.votingRecordId).toBeDefined();
       expect(responseData.updatedBy).toBe('test-user');
       await VotingRecordService.deleteVotingRecord(responseData.votingRecordId);
@@ -346,7 +380,7 @@ describe('VotingRecordController', () => {
     it('should handle optional updatedBy field', async () => {
       const createData = {
         votingEventId: testVotingEventId,
-        userId: testUserId,
+        userId: testUserId2,
         result: 'NO',
         // updatedBy is optional
       };
@@ -362,6 +396,25 @@ describe('VotingRecordController', () => {
       const responseData = await response.json();
       expect(responseData.updatedBy).toBeNull();
       await VotingRecordService.deleteVotingRecord(responseData.votingRecordId);
+    });
+
+    it('should return 409 when user has already voted for this event', async () => {
+      const createData = {
+        votingEventId: testVotingEventId,
+        userId: testUserId,
+        result: 'NO',
+      };
+
+      const mockRequest = {
+        json: async () => createData,
+      } as Request;
+
+      const response =
+        await VotingRecordController.createVotingRecord(mockRequest);
+
+      expect(response.status).toBe(409);
+      const responseData = await response.json();
+      expect(responseData.error).toContain('already voted');
     });
   });
 
@@ -562,6 +615,7 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
   let routeTestVotingEventId: string;
   let routeTestVotingEvent2Id: string;
   let routeTestUserId: string;
+  let routeTestUserId2: string;
   let routeTestVotingRecordId: string;
   let routeTestVotingRecord2Id: string;
   let routeTestRoleId: string;
@@ -586,6 +640,21 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
       },
     });
     routeTestUserId = user.userId;
+
+    // Create second test user (so two records can exist for the same voting event)
+    const user2 = await prisma.user.create({
+      data: {
+        userId: 'test-voting-record-user-4b',
+        supabaseAuthId: 'test-supabase-auth-id-4b',
+        nuid: '001234574',
+        email: 'votingrecorduser4b@example.com',
+        firstName: 'Test4b',
+        lastName: 'User4b',
+        roleId: role.roleId,
+        password: null,
+      },
+    });
+    routeTestUserId2 = user2.userId;
 
     // Create test meetings
     const meeting = await prisma.meeting.create({
@@ -629,7 +698,7 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
 
     const votingRecord2 = await VotingRecordService.createVotingRecord({
       votingEventId: routeTestVotingEventId,
-      userId: routeTestUserId,
+      userId: routeTestUserId2,
       result: 'NO',
     });
     routeTestVotingRecord2Id = votingRecord2.votingRecordId;
@@ -641,6 +710,7 @@ describe('GET /api/voting-record/by-voting-event/[votingEventId]', () => {
     await VotingService.deleteVotingEvent(routeTestVotingEventId);
     await VotingService.deleteVotingEvent(routeTestVotingEvent2Id);
     await MeetingService.deleteMeeting(routeTestMeetingId);
+    await UsersService.deleteUser(routeTestUserId2);
     await UsersService.deleteUser(routeTestUserId);
     await UsersService.deleteRole(routeTestRoleId);
   });
@@ -839,6 +909,28 @@ describe('POST /api/voting-record', () => {
 
     expect(response.status).toBe(400);
     expect(data.error).toContain('Missing required fields');
+  });
+
+  it('should return 409 when user has already voted for the event', async () => {
+    const { POST } = await import('../../app/api/voting-record/route');
+    // routeTestUserId already voted in the previous test
+    const requestBody = {
+      votingEventId: routeTestVotingEventId,
+      userId: routeTestUserId,
+      result: 'NO',
+    };
+
+    const req = new Request('http://localhost/api/voting-record', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(409);
+    expect(data.error).toContain('already voted');
   });
 });
 
