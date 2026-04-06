@@ -6,10 +6,10 @@ export const VotingRecordService = {
       include: {
         votingEvent: {
           include: {
-            meeting: true
-          }
-        }
-      }
+            meeting: true,
+          },
+        },
+      },
     });
   },
 
@@ -19,16 +19,16 @@ export const VotingRecordService = {
       include: {
         votingEvent: {
           include: {
-            meeting: true
-          }
-        }
-      }
+            meeting: true,
+          },
+        },
+      },
     });
   },
 
   async hasUserVotedForEvent(userId: string, votingEventId: string) {
     const existing = await prisma.votingRecord.findFirst({
-      where: { userId, votingEventId }
+      where: { userId, votingEventId },
     });
     return existing !== null;
   },
@@ -41,7 +41,7 @@ export const VotingRecordService = {
   }) {
     const alreadyVoted = await this.hasUserVotedForEvent(
       data.userId,
-      data.votingEventId
+      data.votingEventId,
     );
     if (alreadyVoted) {
       throw new Error('User has already voted for this event');
@@ -52,15 +52,15 @@ export const VotingRecordService = {
         votingEventId: data.votingEventId,
         userId: data.userId,
         result: data.result,
-        updatedBy: data.updatedBy
+        updatedBy: data.updatedBy,
       },
       include: {
         votingEvent: {
           include: {
-            meeting: true
-          }
-        }
-      }
+            meeting: true,
+          },
+        },
+      },
     });
   },
   async updateVotingRecord(data: {
@@ -88,5 +88,5 @@ export const VotingRecordService = {
     return prisma.votingRecord.delete({
       where: { votingRecordId },
     });
-  }
+  },
 };
