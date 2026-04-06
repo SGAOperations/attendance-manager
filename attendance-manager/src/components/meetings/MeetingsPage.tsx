@@ -103,7 +103,7 @@ const MeetingsPage: React.FC = () => {
         setMeetings(json);
       })
       // eslint-disable-next-line
-      .catch(error => console.error(error));
+      .catch((error) => console.error(error));
   };
 
   useEffect(() => {
@@ -211,7 +211,7 @@ const MeetingsPage: React.FC = () => {
         setMembers(data);
       })
       // eslint-disable-next-line
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   }, []);
 
   const nonEboardMembers = useMemo(

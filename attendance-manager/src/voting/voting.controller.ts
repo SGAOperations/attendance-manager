@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { VotingService, formatVotingEventForApi } from './voting.service';
 import { VOTING_TYPES } from '@/utils/consts';
+import { requireAuth } from '@/utils/api-auth';
 
 const optionsSchema = z.array(z.string());
 const REQUIRED_SECRET_BALLOT_OPTIONS = ['No Confidence', 'Abstain'] as const;
@@ -21,8 +22,16 @@ function normalizeCreateOptionsForSecretBallot(
 }
 
 export const VotingController = {
+  async getActiveVotingEvents() {
+    const votingEvents = await VotingService.getActiveVotingEvents();
+    return NextResponse.json(votingEvents);
+  },
+
   async getAllVotingEvents() {
-    const votingEvents = await VotingService.getAllVotingEvents();
+    const { user, error } = await requireAuth();
+    if (error) return error;
+    const isEboard = user!.role.roleType === 'EBOARD';
+    const votingEvents = await VotingService.getAllVotingEvents({ isEboard });
     return NextResponse.json(votingEvents);
   },
 
@@ -151,6 +160,7 @@ export const VotingController = {
       'options',
       'updatedBy',
       'deletedAt',
+      'end',
     ];
     const updateKeys = Object.keys(updates);
     const hasValidUpdate = updateKeys.some((key) =>
@@ -230,7 +240,16 @@ export const VotingController = {
       );
     }
 
+    // End voting event
     try {
+      if (updates.end === true) {
+        const ended = await VotingService.endVotingEvent(
+          params.votingEventId,
+          updates.updatedBy,
+        );
+        return NextResponse.json(ended);
+      }
+
       const updatedVotingEvent = await VotingService.updateVotingEvent(
         params.votingEventId,
         updates,

@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { VotingEventApiData } from '@/types';
+import { useCallback, useEffect, useState } from 'react';
+import { VotingEventWithRelations } from '@/types';
 
 interface UseActiveVotingEventOptions {
   pollIntervalMs?: number;
 }
 
 interface UseActiveVotingEventResult {
-  activeEvent: VotingEventApiData | null;
+  activeEvent: VotingEventWithRelations | null;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -15,35 +15,32 @@ interface UseActiveVotingEventResult {
 /**
  * Polls the backend for the currently active voting event
  * "active" is defined as the most recently created VotingEvent
- * with deletedAt === null
+ * with deletedAt === null and endedAt === null
  */
 export function useActiveVotingEvent(
   options: UseActiveVotingEventOptions = {},
 ): UseActiveVotingEventResult {
-  const { pollIntervalMs = 10000 } = options;
-  const [activeEvent, setActiveEvent] = useState<VotingEventApiData | null>(
-    null,
-  );
+  const { pollIntervalMs = 3000 } = options;
+  const [activeEvent, setActiveEvent] =
+    useState<VotingEventWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActiveEvent = async () => {
+  const fetchActiveEvent = useCallback(async () => {
     try {
       setError(null);
-      const res = await fetch('/api/voting-event');
+      const res = await fetch('/api/voting-event/active');
       if (!res.ok) {
-        throw new Error(`Failed to fetch voting events (${res.status})`);
+        throw new Error(`Failed to fetch active voting event (${res.status})`);
       }
-      const events: VotingEventApiData[] = await res.json();
+      const events: VotingEventWithRelations[] = await res.json();
 
-      const activeEvents = events.filter((e) => !e.deletedAt);
-
-      if (activeEvents.length === 0) {
+      if (events.length === 0) {
         setActiveEvent(null);
         return;
       }
 
-      const sorted = [...activeEvents].sort(
+      const sorted = [...events].sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
@@ -54,19 +51,17 @@ export function useActiveVotingEvent(
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchActiveEvent();
 
-    const id = window.setInterval(() => {
-      fetchActiveEvent();
-    }, pollIntervalMs);
+    const id = window.setInterval(fetchActiveEvent, pollIntervalMs);
 
     return () => {
       window.clearInterval(id);
     };
-  }, [pollIntervalMs]);
+  }, [fetchActiveEvent, pollIntervalMs]);
 
   return {
     activeEvent,

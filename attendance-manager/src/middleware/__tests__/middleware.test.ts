@@ -15,7 +15,7 @@ describe('Middleware', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockSupabaseClient = {
       auth: {
         getSession: mockGetSession,
@@ -29,21 +29,27 @@ describe('Middleware', () => {
     const url = new URL(`http://localhost${pathname}`);
     const request = new NextRequest(url, {
       headers: {
-        cookie: cookies.map(c => `${c.name}=${c.value}`).join('; '),
+        cookie: cookies.map((c) => `${c.name}=${c.value}`).join('; '),
       },
     });
-    
+
     // Mock cookies.getAll
     request.cookies.getAll = jest.fn().mockReturnValue(cookies);
     request.cookies.set = jest.fn();
-    
+
     return request;
   };
 
   describe('Protected routes', () => {
-    const protectedRoutes = ['/dashboard', '/meetings', '/attendance', '/profile', '/homepage'];
+    const protectedRoutes = [
+      '/dashboard',
+      '/meetings',
+      '/attendance',
+      '/profile',
+      '/homepage',
+    ];
 
-    protectedRoutes.forEach(route => {
+    protectedRoutes.forEach((route) => {
       it(`should redirect to /login when accessing ${route} without session`, async () => {
         mockGetSession.mockResolvedValue({
           data: { session: null },
@@ -104,7 +110,9 @@ describe('Middleware', () => {
       const response = await middleware(request);
 
       expect(response.status).toBe(307);
-      expect(response.headers.get('location')).toBe('http://localhost/homepage');
+      expect(response.headers.get('location')).toBe(
+        'http://localhost/homepage',
+      );
     });
 
     it('should allow access to /login when no session exists', async () => {
@@ -129,7 +137,7 @@ describe('Middleware', () => {
       });
 
       const publicRoutes = ['/', '/about', '/contact'];
-      
+
       for (const route of publicRoutes) {
         const request = createMockRequest(route);
         const response = await middleware(request);
@@ -172,9 +180,8 @@ describe('Middleware', () => {
             getAll: expect.any(Function),
             setAll: expect.any(Function),
           }),
-        })
+        }),
       );
     });
   });
 });
-

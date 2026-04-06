@@ -1,51 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import {
-  MeetingApiData,
-  VotingEventApiData,
-  VotingRecordApiData,
-} from '@/types';
+import React, { useCallback, useEffect, useState } from 'react';
+import { MeetingApiData, VotingEventWithRelations } from '@/types';
 import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
+import OngoingVotingPanel from '@/components/voting/OngoingVotingPanel';
 import VotingResultsPanel from '@/components/voting/VotingResultsPanel';
-
-type VotingEventWithRelations = VotingEventApiData & {
-  meeting?: {
-    name: string;
-    date: string;
-  };
-  votingRecords?: VotingRecordApiData[];
-};
+import DeleteVotingModal from '@/components/voting/DeleteVotingModal';
 
 const VotingPage: React.FC = () => {
   const [meetings, setMeetings] = useState<MeetingApiData[]>([]);
   const [events, setEvents] = useState<VotingEventWithRelations[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [deleteEvent, setDeleteEvent] =
+    useState<VotingEventWithRelations | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [ongoingRefreshTrigger, setOngoingRefreshTrigger] = useState(0);
+
+  const loadMeetingsAndEvents = useCallback(async () => {
+    setEventsLoading(true);
+    try {
+      const [meetingsRes, eventsRes] = await Promise.all([
+        fetch('/api/meeting'),
+        fetch('/api/voting-event'),
+      ]);
+
+      if (meetingsRes.ok) {
+        const meetingsData: MeetingApiData[] = await meetingsRes.json();
+        setMeetings(meetingsData);
+      }
+
+      if (eventsRes.ok) {
+        const eventsData: VotingEventWithRelations[] = await eventsRes.json();
+        setEvents(eventsData);
+      }
+      setOngoingRefreshTrigger((n) => n + 1);
+    } catch (error) {
+      globalThis.console?.error('Failed to load meetings and events', error);
+    } finally {
+      setEventsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [meetingsRes, eventsRes] = await Promise.all([
-          fetch('/api/meeting'),
-          fetch('/api/voting-event'),
-        ]);
+    loadMeetingsAndEvents();
+  }, [loadMeetingsAndEvents]);
 
-        if (meetingsRes.ok) {
-          const meetingsData: MeetingApiData[] = await meetingsRes.json();
-          setMeetings(meetingsData);
-        }
+  const handleDeleteVotingEvent = async (votingEventId?: string | null) => {
+    if (!votingEventId) return;
+    try {
+      setDeleteLoading(true);
 
-        if (eventsRes.ok) {
-          const eventsData: VotingEventWithRelations[] = await eventsRes.json();
-          setEvents(eventsData);
-        }
-      } catch {
-        /* 'Error loading user profile:', error */
-      } finally {
-        setEventsLoading(false);
+      const res = await fetch(`/api/voting-event/${votingEventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deletedAt: new Date().toISOString() }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Unknown' }));
+        throw new Error(err.error || 'Failed to delete voting event');
       }
-    };
 
-    load();
-  }, []);
+      await loadMeetingsAndEvents();
+    } catch (err) {
+      globalThis.console?.error('Failed to delete voting event', err);
+      alert('Failed to delete voting event.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   return (
     <div className='flex-1 p-6 bg-gray-50'>
@@ -56,8 +77,25 @@ const VotingPage: React.FC = () => {
           see a modal to submit their vote.
         </p>
       </div>
-      <VotingAdminPanel meetings={meetings} />
-      <VotingResultsPanel events={events} loading={eventsLoading} />
+      <VotingAdminPanel
+        meetings={meetings}
+        onVotingEventsMutated={loadMeetingsAndEvents}
+      />
+      <OngoingVotingPanel refreshTrigger={ongoingRefreshTrigger} />
+      <VotingResultsPanel
+        events={events}
+        loading={eventsLoading}
+        setDeleteEvent={setDeleteEvent}
+      />
+
+      {deleteEvent && (
+        <DeleteVotingModal
+          deleteEvent={deleteEvent}
+          onDeleteEvent={handleDeleteVotingEvent}
+          setDeleteEvent={setDeleteEvent}
+          deleteLoading={deleteLoading}
+        />
+      )}
     </div>
   );
 };
