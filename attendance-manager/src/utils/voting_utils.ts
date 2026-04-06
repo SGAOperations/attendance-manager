@@ -1,10 +1,10 @@
 import { VotingEventWithRelations } from '@/types';
-import { VOTING_TYPES } from '@/utils/consts';
+import { VoteType } from '@/utils/consts';
 
 export function getVoteCounts(
   event: VotingEventWithRelations,
 ): Record<string, number> {
-  if (event.voteType === VOTING_TYPES.SECRET_BALLOT.key) {
+  if (event.voteType === VoteType.secretBallot) {
     return event.resultCounts ?? {};
   }
   return (event.votingRecords ?? [])

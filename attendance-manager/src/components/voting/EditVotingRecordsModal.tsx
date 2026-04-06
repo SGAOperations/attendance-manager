@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { VotingEventApiData, VotingRecordApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { VOTING_TYPES, YES_NO_OPTIONS } from '@/utils/consts';
+import { VoteType, yesNoOptions } from '@/utils/consts';
 import { formatResultLabel } from './votingDisplayUtils';
 
 interface EditVotingRecordsModalProps {
@@ -13,8 +13,8 @@ interface EditVotingRecordsModalProps {
 }
 
 function choiceOptionsForEvent(event: VotingEventApiData): string[] {
-  if (event.voteType === VOTING_TYPES.ROLL_CALL.key) {
-    return Object.values(YES_NO_OPTIONS);
+  if (event.voteType === VoteType.rollCall) {
+    return Object.values(yesNoOptions);
   }
   if (event.options && event.options.length > 0) {
     return event.options;

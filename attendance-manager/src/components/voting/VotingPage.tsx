@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { MeetingApiData, VotingEventWithRelations } from '@/types';
 import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
-import OngoingVotingPanel from '@/components/voting/OngoingVotingPanel';
 import VotingResultsPanel from '@/components/voting/VotingResultsPanel';
 import DeleteVotingModal from '@/components/voting/DeleteVotingModal';
 
@@ -12,13 +11,12 @@ const VotingPage: React.FC = () => {
   const [deleteEvent, setDeleteEvent] =
     useState<VotingEventWithRelations | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [ongoingRefreshTrigger, setOngoingRefreshTrigger] = useState(0);
 
   const loadMeetingsAndEvents = useCallback(async () => {
     setEventsLoading(true);
     try {
       const [meetingsRes, eventsRes] = await Promise.all([
-        fetch('/api/meeting'),
+        fetch('/api/meeting/upcoming'),
         fetch('/api/voting-event'),
       ]);
 
@@ -31,7 +29,6 @@ const VotingPage: React.FC = () => {
         const eventsData: VotingEventWithRelations[] = await eventsRes.json();
         setEvents(eventsData);
       }
-      setOngoingRefreshTrigger((n) => n + 1);
     } catch (error) {
       globalThis.console?.error('Failed to load meetings and events', error);
     } finally {
@@ -81,7 +78,6 @@ const VotingPage: React.FC = () => {
         meetings={meetings}
         onVotingEventsMutated={loadMeetingsAndEvents}
       />
-      <OngoingVotingPanel refreshTrigger={ongoingRefreshTrigger} />
       <VotingResultsPanel
         events={events}
         loading={eventsLoading}
