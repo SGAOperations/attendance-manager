@@ -1,6 +1,7 @@
 import React from 'react';
 import { VotingEventWithRelations } from '@/types';
-import { getVoteCounts, getVoteTypeLabel } from '@/utils/voting_utils';
+import { VoteType, getVoteTypeLabel } from '@/utils/consts';
+import { getVoteCounts } from '@/utils/voting_utils';
 import { Building2, Calendar, ClipboardList } from 'lucide-react';
 import VoteBreakdown from './VoteBreakdown';
 
@@ -18,7 +19,7 @@ const ActiveVoteCard: React.FC<ActiveVoteCardProps> = ({
   endError,
 }) => {
   const meeting = event.meeting;
-  const voteTypeLabel = getVoteTypeLabel(event.voteType);
+  const voteTypeLabel = getVoteTypeLabel(event.voteType as VoteType);
   const voteCounts = getVoteCounts(event);
   const totalVotes = Object.values(voteCounts).reduce((sum, n) => sum + n, 0);
 

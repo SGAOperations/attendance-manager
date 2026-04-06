@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { VotingService, formatVotingEventForApi } from './voting.service';
-import { votingTypes } from '@/utils/consts';
+import { VoteType } from '@/utils/consts';
 import { requireAuth } from '@/utils/api-auth';
 
 const optionsSchema = z.array(z.string());
@@ -11,7 +11,7 @@ function normalizeCreateOptionsForSecretBallot(
   voteType: string,
   options: string[] | undefined,
 ): string[] | undefined {
-  if (voteType !== votingTypes.secretBallot) return options;
+  if (voteType !== VoteType.secretBallot) return options;
   const merged = [...(options ?? [])];
   for (const required of REQUIRED_SECRET_BALLOT_OPTIONS) {
     if (!merged.includes(required)) {

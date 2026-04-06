@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { MeetingApiData } from '@/types';
-import { votingTypes, VoteType } from '@/utils/consts';
-import { getVoteTypeLabel } from '@/utils/voting_utils';
+import { VoteType, getVoteTypeLabel } from '@/utils/consts';
 import { X } from 'lucide-react';
 
 const FIXED_OPTIONS = ['Abstain', 'No Confidence'] as const;
@@ -20,7 +19,7 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
   // Form fields
   const [meetingId, setMeetingId] = useState('');
   const [name, setName] = useState('');
-  const [voteType, setVoteType] = useState<VoteType>(votingTypes.rollCall);
+  const [voteType, setVoteType] = useState<VoteType>(VoteType.rollCall);
   const [options, setOptions] = useState<string[]>([]);
 
   // Submission state
@@ -58,7 +57,7 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
           voteType,
           updatedBy: userId,
           options:
-            voteType === votingTypes.secretBallot
+            voteType === VoteType.secretBallot
               ? [...FIXED_OPTIONS, ...options]
               : options,
         }),
@@ -122,7 +121,7 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
           onChange={(e) => setVoteType(e.target.value as VoteType)}
           className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary'
         >
-          {Object.values(votingTypes).map((key) => (
+          {Object.values(VoteType).map((key) => (
             <option key={key} value={key}>
               {getVoteTypeLabel(key)}
             </option>
@@ -130,7 +129,7 @@ const CreateVoteForm: React.FC<CreateVoteFormProps> = ({
         </select>
       </div>
 
-      {voteType === votingTypes.secretBallot && (
+      {voteType === VoteType.secretBallot && (
         <div>
           <label className='block text-sm font-medium text-gray-700 mb-1'>
             Options

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../lib/prisma';
-import { votingTypes, yesNoOptions } from '../utils/consts';
+import { VoteType, yesNoOptions } from '../utils/consts';
 import { VotingRecordService } from './voting-record.service';
 
 const rollCallStyleResults = new Set<string>([
@@ -15,7 +15,7 @@ function isValidVotingRecordResult(
   options: string[],
   result: string,
 ): boolean {
-  if (voteType === votingTypes.rollCall) {
+  if (voteType === VoteType.rollCall) {
     return rollCallStyleResults.has(result);
   }
   if (options.length > 0) {
@@ -38,7 +38,7 @@ export const VotingRecordController = {
     if (!votingEvent) {
       return NextResponse.json([]);
     }
-    if (votingEvent.voteType === votingTypes.secretBallot) {
+    if (votingEvent.voteType === VoteType.secretBallot) {
       return NextResponse.json(
         {
           error:
@@ -159,7 +159,7 @@ export const VotingRecordController = {
       );
     }
 
-    if (event.voteType === votingTypes.secretBallot) {
+    if (event.voteType === VoteType.secretBallot) {
       return NextResponse.json(
         {
           error: 'Voting records cannot be edited for secret ballot events',

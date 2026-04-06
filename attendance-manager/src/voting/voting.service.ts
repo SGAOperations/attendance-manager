@@ -1,7 +1,7 @@
 import { prisma } from '../lib/prisma';
-import { votingTypes } from '../utils/consts';
+import { VoteType } from '../utils/consts';
 
-const SECRET_BALLOT = votingTypes.secretBallot;
+const secretBallot = VoteType.secretBallot;
 
 export function computeVotePassedFromCounts(
   counts: Record<string, number>,
@@ -102,7 +102,7 @@ function redactSecretBallotForResults<
     secretBallotOutcomeKind?: SecretBallotOutcomeKind;
   },
 >(event: T): T {
-  if (event.voteType !== SECRET_BALLOT) return event;
+  if (event.voteType !== secretBallot) return event;
 
   const records = event.votingRecords || [];
   const hasRecords = records.some((r: any) => r && !r.deletedAt);
@@ -138,7 +138,7 @@ async function attachVoterNamesToVotingEvent<
   T extends { voteType: string; votingRecords?: any[] },
 >(event: T | null): Promise<T | null> {
   if (!event) return event;
-  if (event.voteType === SECRET_BALLOT) return event;
+  if (event.voteType === secretBallot) return event;
   if (!event.votingRecords || event.votingRecords.length === 0) return event;
 
   const userIds = Array.from(
@@ -216,7 +216,7 @@ export const VotingService = {
     // For ROLL_CALL: attach user names
     const withUsers = await attachVoterNamesToVotingEvent(event);
 
-    // Always format for API: aggregates for SECRET_BALLOT, etc.
+    // Always format for API: aggregates for secretBallot, etc.
     return formatVotingEventForApi(withUsers);
   },
 

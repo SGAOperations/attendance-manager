@@ -1,21 +1,10 @@
 import { VotingEventWithRelations } from '@/types';
-import { votingTypes } from '@/utils/consts';
-
-const voteTypeLabels: Record<string, string> = {
-  [votingTypes.rollCall]: 'Roll Call',
-  [votingTypes.secretBallot]: 'Secret Ballot',
-  [votingTypes.unanimousConsent]: 'Unanimous Consent',
-  [votingTypes.placard]: 'Placard',
-};
-
-export function getVoteTypeLabel(voteType: string): string {
-  return voteTypeLabels[voteType] ?? voteType;
-}
+import { VoteType } from '@/utils/consts';
 
 export function getVoteCounts(
   event: VotingEventWithRelations,
 ): Record<string, number> {
-  if (event.voteType === votingTypes.secretBallot) {
+  if (event.voteType === VoteType.secretBallot) {
     return event.resultCounts ?? {};
   }
   return (event.votingRecords ?? [])

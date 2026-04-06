@@ -6,7 +6,7 @@ import {
 import { VotingController } from '../voting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingService } from '@/meeting/meeting.service';
-import { votingTypes } from '@/utils/consts';
+import { VoteType } from '@/utils/consts';
 import * as apiAuth from '@/utils/api-auth';
 
 jest.setTimeout(20000);
@@ -192,8 +192,13 @@ describe('VotingController', () => {
   let testMeetingId: string;
   let testMeeting2Id: string;
   let _testVotingEventId: string;
+  let requireAuthSpy: jest.SpyInstance;
 
   beforeAll(async () => {
+    requireAuthSpy = jest.spyOn(apiAuth, 'requireAuth').mockResolvedValue({
+      user: { role: { roleType: 'EBOARD' } } as any,
+      error: null,
+    });
     // Create test meetings
     const meeting = await prisma.meeting.create({
       data: {
@@ -221,6 +226,7 @@ describe('VotingController', () => {
   });
 
   afterAll(async () => {
+    requireAuthSpy.mockRestore();
     await prisma.votingEvent.deleteMany({
       where: {
         meetingId: {
@@ -559,8 +565,13 @@ describe('VotingController', () => {
 describe('GET /api/voting-event', () => {
   let routeTestMeetingId: string;
   let routeTestVotingEventId: string;
+  let requireAuthSpy: jest.SpyInstance;
 
   beforeAll(async () => {
+    requireAuthSpy = jest.spyOn(apiAuth, 'requireAuth').mockResolvedValue({
+      user: { role: { roleType: 'EBOARD' } } as any,
+      error: null,
+    });
     // Create a test meeting
     const meeting = await prisma.meeting.create({
       data: {
@@ -584,6 +595,7 @@ describe('GET /api/voting-event', () => {
   });
 
   afterAll(async () => {
+    requireAuthSpy.mockRestore();
     await VotingService.deleteVotingEvent(routeTestVotingEventId);
     await MeetingService.deleteMeeting(routeTestMeetingId);
   });
@@ -975,7 +987,7 @@ describe('Secret ballot results (aggregates only)', () => {
       data: {
         meetingId: testMeetingId,
         name: 'Budget approval (secret)',
-        voteType: votingTypes.secretBallot,
+        voteType: VoteType.secretBallot,
         notes: 'Motion notes for the secret ballot',
         options: ['Yes', 'No', 'Abstain', 'No Confidence'],
         deletedAt: new Date(),
@@ -1016,7 +1028,7 @@ describe('Secret ballot results (aggregates only)', () => {
     expect(response.status).toBe(200);
 
     const data = await response.json();
-    expect(data.voteType).toBe(votingTypes.secretBallot);
+    expect(data.voteType).toBe(VoteType.secretBallot);
     expect(data.notes).toBe('Motion notes for the secret ballot');
     expect(data.resultCounts).toEqual({ Yes: 2, No: 1 });
     expect(data.votePassed).toBe(true);
@@ -1042,10 +1054,10 @@ describe('Secret ballot results (aggregates only)', () => {
     const { GET } =
       await import('../../app/api/voting-event/by-type/[voteType]/route');
     const req = new Request(
-      `http://localhost/api/voting-event/by-type/${votingTypes.secretBallot}`,
+      `http://localhost/api/voting-event/by-type/${VoteType.secretBallot}`,
     );
     const params = Promise.resolve({
-      voteType: votingTypes.secretBallot,
+      voteType: VoteType.secretBallot,
     });
     const response = await GET(req, { params });
     expect(response.status).toBe(200);
@@ -1230,7 +1242,7 @@ describe('POST /api/voting-event', () => {
     const requestBody = {
       meetingId: routeTestMeetingId,
       name: 'POST Secret Ballot Defaults',
-      voteType: votingTypes.secretBallot,
+      voteType: VoteType.secretBallot,
       options: ['Candidate 1', 'Candidate 2'],
       updatedBy: 'test-user',
     };
@@ -1261,7 +1273,7 @@ describe('POST /api/voting-event', () => {
     const requestBody = {
       meetingId: routeTestMeetingId,
       name: 'POST Route Invalid Options',
-      voteType: votingTypes.secretBallot,
+      voteType: VoteType.secretBallot,
       options: ['Candidate 1', 123],
       updatedBy: 'test-user',
     };

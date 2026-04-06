@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { votingTypes } from '@/utils/consts';
+import { VoteType } from '@/utils/consts';
 import { getVoteCounts } from '@/utils/voting_utils';
 import { useActiveVotingEvents } from '@/hooks/useActiveVotingEvents';
 import { formatResultLabel } from './votingDisplayUtils';
@@ -78,7 +78,7 @@ const OngoingVotingPanel: React.FC<OngoingVotingPanelProps> = ({
                   (sum, n) => sum + n,
                   0,
                 );
-                const isSecret = event.voteType === votingTypes.secretBallot;
+                const isSecret = event.voteType === VoteType.secretBallot;
 
                 return (
                   <tr
