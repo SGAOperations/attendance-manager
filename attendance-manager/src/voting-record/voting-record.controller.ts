@@ -30,6 +30,29 @@ export const VotingRecordController = {
     return NextResponse.json(votingRecords);
   },
 
+  async getHasUserVoted(params: { votingEventId: string; userId: string }) {
+    const votingEvent = await prisma.votingEvent.findUnique({
+      where: { votingEventId: params.votingEventId },
+      select: { votingEventId: true },
+    });
+
+    if (!votingEvent) {
+      return NextResponse.json({ hasVoted: false });
+    }
+
+    const record = await prisma.votingRecord.findFirst({
+      where: {
+        votingEventId: params.votingEventId,
+        userId: params.userId,
+      },
+      select: { userId: true },
+    });
+
+    return NextResponse.json({
+      hasVoted: !!record,
+    });
+  },
+
   async getVotingRecordsByVotingEvent(params: { votingEventId: string }) {
     const votingEvent = await prisma.votingEvent.findUnique({
       where: { votingEventId: params.votingEventId },
