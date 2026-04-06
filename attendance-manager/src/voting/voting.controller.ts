@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { VotingService, formatVotingEventForApi } from './voting.service';
-import { VOTING_TYPES } from '@/utils/consts';
+import { VoteType } from '@/utils/consts';
+import { requireAuth } from '@/utils/api-auth';
 
 const optionsSchema = z.array(z.string());
 const REQUIRED_SECRET_BALLOT_OPTIONS = ['No Confidence', 'Abstain'] as const;
@@ -10,7 +11,7 @@ function normalizeCreateOptionsForSecretBallot(
   voteType: string,
   options: string[] | undefined,
 ): string[] | undefined {
-  if (voteType !== VOTING_TYPES.SECRET_BALLOT.key) return options;
+  if (voteType !== VoteType.secretBallot) return options;
   const merged = [...(options ?? [])];
   for (const required of REQUIRED_SECRET_BALLOT_OPTIONS) {
     if (!merged.includes(required)) {
@@ -27,7 +28,10 @@ export const VotingController = {
   },
 
   async getAllVotingEvents() {
-    const votingEvents = await VotingService.getAllVotingEvents();
+    const { user, error } = await requireAuth();
+    if (error) return error;
+    const isEboard = user!.role.roleType === 'EBOARD';
+    const votingEvents = await VotingService.getAllVotingEvents({ isEboard });
     return NextResponse.json(votingEvents);
   },
 

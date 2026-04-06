@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { MeetingApiData, VotingEventWithRelations } from '@/types';
 import VotingAdminPanel from '@/components/voting/VotingAdminPanel';
 import VotingResultsPanel from '@/components/voting/VotingResultsPanel';
@@ -12,11 +12,11 @@ const VotingPage: React.FC = () => {
     useState<VotingEventWithRelations | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const refreshVotingData = async () => {
+  const loadMeetingsAndEvents = useCallback(async () => {
+    setEventsLoading(true);
     try {
-      setEventsLoading(true);
       const [meetingsRes, eventsRes] = await Promise.all([
-        fetch('/api/meeting'),
+        fetch('/api/meeting/upcoming'),
         fetch('/api/voting-event'),
       ]);
 
@@ -29,18 +29,17 @@ const VotingPage: React.FC = () => {
         const eventsData: VotingEventWithRelations[] = await eventsRes.json();
         setEvents(eventsData);
       }
-    } catch (err) {
-      globalThis.console?.error('Failed to refresh voting data:', err);
+    } catch (error) {
+      globalThis.console?.error('Failed to load meetings and events', error);
     } finally {
       setEventsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    refreshVotingData();
   }, []);
 
-  // Soft-delete handler: sets deletedAt on the vote and refreshes list
+  useEffect(() => {
+    loadMeetingsAndEvents();
+  }, [loadMeetingsAndEvents]);
+
   const handleDeleteVotingEvent = async (votingEventId?: string | null) => {
     if (!votingEventId) return;
     try {
@@ -57,8 +56,7 @@ const VotingPage: React.FC = () => {
         throw new Error(err.error || 'Failed to delete voting event');
       }
 
-      // Refresh the data
-      await refreshVotingData();
+      await loadMeetingsAndEvents();
     } catch (err) {
       globalThis.console?.error('Failed to delete voting event', err);
       alert('Failed to delete voting event.');
@@ -76,7 +74,10 @@ const VotingPage: React.FC = () => {
           see a modal to submit their vote.
         </p>
       </div>
-      <VotingAdminPanel meetings={meetings} />
+      <VotingAdminPanel
+        meetings={meetings}
+        onVotingEventsMutated={loadMeetingsAndEvents}
+      />
       <VotingResultsPanel
         events={events}
         loading={eventsLoading}

@@ -88,17 +88,13 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                     }}
                   >
                     <td className='py-2 px-3 align-top'>
-                      <div className='flex items-start justify-between'>
-                        <div>
-                          <div className='text-gray-900 font-medium'>
-                            {event.meeting?.name ?? 'Unknown meeting'}
-                          </div>
-                          <div className='text-xs text-gray-500'>
-                            {event.meeting?.date
-                              ? event.meeting.date
-                              : new Date(event.createdAt).toLocaleDateString()}
-                          </div>
-                        </div>
+                      <div className='text-gray-900 font-medium'>
+                        {event.meeting?.name ?? 'Unknown meeting'}
+                      </div>
+                      <div className='text-xs text-gray-500'>
+                        {event.meeting?.date
+                          ? event.meeting.date
+                          : new Date(event.createdAt).toLocaleDateString()}
                       </div>
                     </td>
                     <td className='py-3 px-4 align-top'>
@@ -161,7 +157,7 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                         </div>
                       )}
                       {/* Delete button for past events */}
-                      <div className='ml-1 flex-shrink-0'>
+                      <div className='ml-1'>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

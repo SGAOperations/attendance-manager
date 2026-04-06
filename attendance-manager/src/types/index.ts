@@ -17,6 +17,7 @@ export interface MeetingApiData {
   notes: string;
   type: MeetingType;
   attendance: AttendanceApiData[];
+  eligibleCount?: number;
 }
 
 export interface AttendanceRecord {

@@ -6,6 +6,7 @@ interface UseActiveVotingEventOptions {
 }
 
 interface UseActiveVotingEventResult {
+  activeEvents: VotingEventWithRelations[];
   activeEvent: VotingEventWithRelations | null;
   loading: boolean;
   error: string | null;
@@ -13,60 +14,56 @@ interface UseActiveVotingEventResult {
 }
 
 /**
- * Polls the backend for the currently active voting event
- * "active" is defined as the most recently created VotingEvent
- * with deletedAt === null and endedAt === null
+ * Polls the backend for currently active voting events.
+ * "active" is defined as VotingEvents with deletedAt === null and endedAt === null.
  */
 export function useActiveVotingEvent(
   options: UseActiveVotingEventOptions = {},
 ): UseActiveVotingEventResult {
   const { pollIntervalMs = 3000 } = options;
-  const [activeEvent, setActiveEvent] =
-    useState<VotingEventWithRelations | null>(null);
+  const [activeEvents, setActiveEvents] = useState<VotingEventWithRelations[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActiveEvent = useCallback(async () => {
+  const fetchActiveEvents = useCallback(async () => {
     try {
       setError(null);
       const res = await fetch('/api/voting-event/active');
       if (!res.ok) {
-        throw new Error(`Failed to fetch active voting event (${res.status})`);
-      }
-      const events: VotingEventWithRelations[] = await res.json();
-
-      if (events.length === 0) {
-        setActiveEvent(null);
+        setError('Failed to load active voting events.');
         return;
       }
+      const events: VotingEventWithRelations[] = await res.json();
 
       const sorted = [...events].sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
-      setActiveEvent(sorted[0]);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      setError(message);
+      setActiveEvents(sorted);
+    } catch {
+      setError('Failed to load active voting events.');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchActiveEvent();
+    fetchActiveEvents();
 
-    const id = window.setInterval(fetchActiveEvent, pollIntervalMs);
+    const id = window.setInterval(fetchActiveEvents, pollIntervalMs);
 
     return () => {
       window.clearInterval(id);
     };
-  }, [fetchActiveEvent, pollIntervalMs]);
+  }, [fetchActiveEvents, pollIntervalMs]);
 
   return {
-    activeEvent,
+    activeEvents,
+    activeEvent: activeEvents[0] ?? null,
     loading,
     error,
-    refresh: fetchActiveEvent,
+    refresh: fetchActiveEvents,
   };
 }
