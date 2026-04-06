@@ -26,12 +26,27 @@ export const VotingRecordService = {
     });
   },
 
+  async hasUserVotedForEvent(userId: string, votingEventId: string) {
+    const existing = await prisma.votingRecord.findFirst({
+      where: { userId, votingEventId },
+    });
+    return existing !== null;
+  },
+
   async createVotingRecord(data: {
     votingEventId: string;
     userId: string;
     result: string;
     updatedBy?: string;
   }) {
+    const alreadyVoted = await this.hasUserVotedForEvent(
+      data.userId,
+      data.votingEventId,
+    );
+    if (alreadyVoted) {
+      throw new Error('User has already voted for this event');
+    }
+
     return await prisma.votingRecord.create({
       data: {
         votingEventId: data.votingEventId,
