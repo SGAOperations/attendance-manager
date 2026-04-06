@@ -60,7 +60,7 @@ const Layout: React.FC = () => {
 
         // Check if user has already voted for this event
         const votingRecordsRes = await fetch(
-          `/api/voting-record/by-voting-event/${activeEvent.votingEventId}`
+          `/api/voting-record/by-voting-event/${activeEvent.votingEventId}`,
         );
 
         if (!votingRecordsRes.ok) {
@@ -71,14 +71,13 @@ const Layout: React.FC = () => {
           userId: string;
         }> = await votingRecordsRes.json();
         const hasAlreadyVoted = votingRecords.some(
-          record => record.userId === user.id
+          (record) => record.userId === user.id,
         );
 
         if (!isCancelled) {
           setCanVoteInActiveEvent(!hasAlreadyVoted);
         }
       } catch (error) {
-        console.error('Failed to verify vote eligibility:', error);
         if (!isCancelled) {
           setCanVoteInActiveEvent(false);
         }

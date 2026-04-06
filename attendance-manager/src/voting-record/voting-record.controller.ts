@@ -72,10 +72,7 @@ export const VotingRecordController = {
       return NextResponse.json(newVotingRecord, { status: 201 });
     } catch (error: any) {
       if (error.message === 'User has already voted for this event') {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 409 }
-        );
+        return NextResponse.json({ error: error.message }, { status: 409 });
       }
       return NextResponse.json(
         { error: error.message || 'Failed to create voting record' },
