@@ -33,6 +33,39 @@ export const MeetingService = {
     });
   },
 
+  async getUpcomingMeetings() {
+    const today = new Date().toISOString().slice(0, 10);
+    const include = {
+      attendance: {
+        where: { status: 'PRESENT' as const },
+        select: { attendanceId: true },
+      },
+    };
+    const toResult = ({
+      attendance,
+      ...m
+    }: {
+      attendance: unknown[];
+      [key: string]: unknown;
+    }) => ({
+      ...m,
+      eligibleCount: attendance.length,
+    });
+    const upcoming = await prisma.meeting.findMany({
+      where: { deletedAt: null, date: { gte: today } },
+      orderBy: { date: 'asc' },
+      include,
+    });
+    if (upcoming.length > 0) return upcoming.map(toResult);
+    // Fallback: no upcoming meetings, return all so the dropdown is never empty
+    const all = await prisma.meeting.findMany({
+      where: { deletedAt: null },
+      orderBy: { date: 'desc' },
+      include,
+    });
+    return all.map(toResult);
+  },
+
   async getAllMeetingByDate() {
     const meetings = await prisma.meeting.findMany({
       where: {
@@ -120,8 +153,21 @@ export const MeetingService = {
   },
 
   async deleteMeeting(meetingId: string) {
+    const events = await prisma.votingEvent.findMany({
+      where: { meetingId },
+      select: { votingEventId: true },
+    });
+
+    const eventIds = events.map((e) => e.votingEventId);
+    if (eventIds.length > 0) {
+      await prisma.votingRecord.deleteMany({
+        where: { votingEventId: { in: eventIds } },
+      });
+    }
+
     await prisma.votingEvent.deleteMany({ where: { meetingId } });
-    // Delete attendance records first to avoid foreign key constraint
+
+    // Delete attendance records
     await prisma.attendance.deleteMany({
       where: { meetingId },
     });

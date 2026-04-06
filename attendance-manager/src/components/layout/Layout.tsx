@@ -16,7 +16,7 @@ const Layout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'dashboard' | 'meetings' | 'voting' | 'attendance' | 'profile'
   >('dashboard');
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const isAdmin = user?.role === 'EBOARD';
   const { activeEvent } = useActiveVotingEvent();
   const [canVoteInActiveEvent, setCanVoteInActiveEvent] = useState(false);
@@ -51,8 +51,25 @@ const Layout: React.FC = () => {
           (record) => record.userId === user.id && record.status === 'PRESENT',
         );
 
+        if (!isPresent) {
+          if (!isCancelled) {
+            setCanVoteInActiveEvent(false);
+          }
+          return;
+        }
+
+        // Check if user has already voted for this event
+        const hasVotedRes = await fetch(
+          `/api/voting-record/has-voted/${activeEvent.votingEventId}`,
+        );
+
+        if (!hasVotedRes.ok) {
+          throw new Error('Failed to fetch voting records');
+        }
+        const hasAlreadyVoted = await hasVotedRes.json();
+
         if (!isCancelled) {
-          setCanVoteInActiveEvent(isPresent);
+          setCanVoteInActiveEvent(!hasAlreadyVoted.hasVoted);
         }
       } catch {
         if (!isCancelled) {
@@ -121,6 +138,14 @@ const Layout: React.FC = () => {
         return <Dashboard />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
+        <p className='text-sm text-gray-600'>Loading…</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return <LoginPage />;

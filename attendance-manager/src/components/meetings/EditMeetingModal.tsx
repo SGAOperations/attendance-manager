@@ -85,7 +85,7 @@ const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
       .then((response) => response.json())
       .then((json) => setUsers(json))
       // eslint-disable-next-line
-      .catch(error => console.error(error));
+      .catch((error) => console.error(error));
   };
 
   useEffect(() => {

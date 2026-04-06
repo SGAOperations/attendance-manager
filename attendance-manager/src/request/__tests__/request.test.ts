@@ -50,8 +50,8 @@ describe('RequestController', () => {
         firstName: 'Request',
         lastName: 'User',
         roleId: testRoleId,
-        password: null
-      }
+        password: null,
+      },
     });
     testUserId = user.userId;
 
@@ -65,8 +65,8 @@ describe('RequestController', () => {
         firstName: 'Other',
         lastName: 'Request',
         roleId: testRoleId,
-        password: null
-      }
+        password: null,
+      },
     });
     secondTestUserId = secondUser.userId;
 
@@ -78,8 +78,8 @@ describe('RequestController', () => {
         startTime: '13:00',
         endTime: '14:00',
         notes: 'Meeting for request tests',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     testMeetingId = meeting.meetingId;
 
@@ -88,8 +88,8 @@ describe('RequestController', () => {
       data: {
         userId: testUserId,
         meetingId: testMeetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
     testAttendanceId = attendance.attendanceId;
 
@@ -98,8 +98,8 @@ describe('RequestController', () => {
       data: {
         userId: secondTestUserId,
         meetingId: testMeetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
     secondTestAtendanceId = secondAttendance.attendanceId;
 
@@ -110,8 +110,8 @@ describe('RequestController', () => {
         reason: 'Initial test reason',
         attendanceMode: 'ONLINE',
         timeAdjustment: 'ARRIVING_LATE',
-        isLate: false
-      }
+        isLate: false,
+      },
     });
     testRequestId = request.requestId;
 
@@ -122,8 +122,8 @@ describe('RequestController', () => {
         reason: 'Initial test reason',
         attendanceMode: 'IN_PERSON',
         timeAdjustment: 'LEAVING_EARLY',
-        isLate: false
-      }
+        isLate: false,
+      },
     });
     secondTestRequestId = secondRequest.requestId;
   });
@@ -171,15 +171,15 @@ describe('RequestController', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Additional meeting for requests',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     const attendance2 = await prisma.attendance.create({
       data: {
         userId: testUserId,
         meetingId: newMeeting.meetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
     const testAttendanceId2 = attendance2.attendanceId;
 
@@ -187,7 +187,7 @@ describe('RequestController', () => {
       attendanceId: testAttendanceId2,
       reason: 'New request reason',
       attendanceMode: 'IN_PERSON',
-      timeAdjustment: 'LEAVING_EARLY'
+      timeAdjustment: 'LEAVING_EARLY',
     };
     const newRequest = await RequestController.createRequest(data);
     expect(newRequest).toBeDefined();
@@ -215,22 +215,22 @@ describe('RequestController', () => {
           .slice(0, 5),
         endTime: '23:59',
         notes: 'Soon meeting',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
 
     const attendance = await prisma.attendance.create({
       data: {
         userId: testUserId,
         meetingId: soonMeeting.meetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
 
     const request = await RequestController.createRequest({
       attendanceId: attendance.attendanceId,
       reason: 'Late request test',
-      attendanceMode: 'ONLINE'
+      attendanceMode: 'ONLINE',
     });
 
     expect(request.isLate).toBe(true);
@@ -250,22 +250,22 @@ describe('RequestController', () => {
         startTime: '12:00',
         endTime: '13:00',
         notes: 'Far future meeting',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
 
     const attendance = await prisma.attendance.create({
       data: {
         userId: testUserId,
         meetingId: futureMeeting.meetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
 
     const request = await RequestController.createRequest({
       attendanceId: attendance.attendanceId,
       reason: 'On-time request',
-      attendanceMode: 'ONLINE'
+      attendanceMode: 'ONLINE',
     });
 
     expect(request.isLate).toBe(false);
@@ -277,7 +277,7 @@ describe('RequestController', () => {
   it('should update a requests reason', async () => {
     const newReason = 'Updated reason';
     const updated = await RequestController.updateRequest(testRequestId, {
-      reason: newReason
+      reason: newReason,
     });
     expect(updated).toBeDefined();
     expect(updated.reason).toBe(newReason);
@@ -285,29 +285,29 @@ describe('RequestController', () => {
 
   it('should throw error when updating with invalid reason', async () => {
     await expect(
-      RequestController.updateRequest(testRequestId, { reason: ' ' })
+      RequestController.updateRequest(testRequestId, { reason: ' ' }),
     ).rejects.toThrow('Invalid request reason');
   });
 
   it('should throw error when creating with invalid data', async () => {
     await expect(RequestController.createRequest({})).rejects.toThrow(
-      'Invalid input data for creating request'
+      'Invalid input data for creating request',
     );
     await expect(
-      RequestController.createRequest({ attendanceId: testAttendanceId })
+      RequestController.createRequest({ attendanceId: testAttendanceId }),
     ).rejects.toThrow('Invalid input data for creating request');
     await expect(
       RequestController.createRequest({
         attendanceId: testAttendanceId,
-        reason: ''
-      })
+        reason: '',
+      }),
     ).rejects.toThrow('Invalid input data for creating request');
     await expect(
       RequestController.createRequest({
         attendanceId: testAttendanceId,
         reason: 'Valid reason',
-        attendanceMode: 'INVALID'
-      })
+        attendanceMode: 'INVALID',
+      }),
     ).rejects.toThrow('Invalid input data for creating request');
   });
 
@@ -319,15 +319,15 @@ describe('RequestController', () => {
         startTime: '10:00',
         endTime: '11:00',
         notes: 'Additional meeting for requests',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     const attendance2 = await prisma.attendance.create({
       data: {
         userId: testUserId,
         meetingId: newMeeting.meetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
     const testAttendanceId2 = attendance2.attendanceId;
 
@@ -337,14 +337,14 @@ describe('RequestController', () => {
         attendanceId: testAttendanceId2,
         reason: 'To be deleted',
         attendanceMode: 'ONLINE',
-        isLate: false
-      }
+        isLate: false,
+      },
     });
 
     await RequestController.deleteRequest(requestToDelete.requestId);
 
     const deleted = await prisma.request.findUnique({
-      where: { requestId: requestToDelete.requestId }
+      where: { requestId: requestToDelete.requestId },
     });
     expect(deleted).toBeNull();
     await AttendanceService.deleteAttendance(testAttendanceId2);
@@ -372,8 +372,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         firstName: 'Request',
         lastName: 'Route',
         roleId: routeTestRoleId,
-        password: null
-      }
+        password: null,
+      },
     });
     routeTestUserId = user.userId;
 
@@ -384,8 +384,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         startTime: '14:00',
         endTime: '15:00',
         notes: 'Meeting for route endpoint tests',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
     routeTestMeetingId = newMeeting.meetingId;
 
@@ -393,8 +393,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       data: {
         userId: routeTestUserId,
         meetingId: routeTestMeetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
     routeTestAttendanceId = attendance.attendanceId;
   });
@@ -410,7 +410,7 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
     const requestBody = {
       reason: 'Test reason from route',
       attendanceMode: 'ONLINE',
-      timeAdjustment: 'ARRIVING_LATE'
+      timeAdjustment: 'ARRIVING_LATE',
     };
 
     const req = new Request(
@@ -418,8 +418,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
@@ -445,21 +445,21 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         startTime: '15:00',
         endTime: '16:00',
         notes: 'Second meeting for route tests',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
 
     const attendance2 = await prisma.attendance.create({
       data: {
         userId: routeTestUserId,
         meetingId: meeting2.meetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
 
     const requestBody = {
       reason: 'Test reason without time adjustment',
-      attendanceMode: 'IN_PERSON'
+      attendanceMode: 'IN_PERSON',
     };
 
     const req = new Request(
@@ -467,8 +467,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ attendanceId: attendance2.attendanceId });
@@ -487,7 +487,7 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
 
   it('should return 400 when reason is missing', async () => {
     const requestBody = {
-      attendanceMode: 'ONLINE'
+      attendanceMode: 'ONLINE',
     };
 
     const req = new Request(
@@ -495,8 +495,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
@@ -509,7 +509,7 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
 
   it('should return 400 when attendanceMode is missing', async () => {
     const requestBody = {
-      reason: 'Test reason'
+      reason: 'Test reason',
     };
 
     const req = new Request(
@@ -517,8 +517,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
@@ -537,8 +537,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
@@ -558,21 +558,21 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
         startTime: '16:00',
         endTime: '17:00',
         notes: 'Third meeting for route tests',
-        type: 'REGULAR'
-      }
+        type: 'REGULAR',
+      },
     });
 
     const attendance3 = await prisma.attendance.create({
       data: {
         userId: routeTestUserId,
         meetingId: meeting3.meetingId,
-        status: 'EXCUSED_ABSENCE'
-      }
+        status: 'EXCUSED_ABSENCE',
+      },
     });
 
     const requestBody = {
       reason: 'Test with attendanceId from URL',
-      attendanceMode: 'ONLINE'
+      attendanceMode: 'ONLINE',
     };
 
     const req = new Request(
@@ -580,8 +580,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ attendanceId: attendance3.attendanceId });
@@ -598,7 +598,7 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
   it('should return 500 when controller throws an error', async () => {
     const requestBody = {
       reason: 'Test reason',
-      attendanceMode: 'INVALID_MODE'
+      attendanceMode: 'INVALID_MODE',
     };
 
     const req = new Request(
@@ -606,8 +606,8 @@ describe('POST /api/attendance/[attendanceId]/requests', () => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
+        body: JSON.stringify(requestBody),
+      },
     );
 
     const params = Promise.resolve({ attendanceId: routeTestAttendanceId });
