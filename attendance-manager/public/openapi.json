@@ -108,9 +108,7 @@
             "description": "Attendance Id"
           }
         },
-        "required": [
-          "attendanceId"
-        ]
+        "required": ["attendanceId"]
       },
       "AttendanceResponse": {
         "type": "object",
@@ -136,12 +134,7 @@
             "description": "Status of the attendance"
           }
         },
-        "required": [
-          "attendanceId",
-          "userId",
-          "meetingId",
-          "status"
-        ]
+        "required": ["attendanceId", "userId", "meetingId", "status"]
       },
       "GetAttendanceMeetingParams": {
         "type": "object",
@@ -151,9 +144,7 @@
             "description": "Meeting Id"
           }
         },
-        "required": [
-          "meetingId"
-        ]
+        "required": ["meetingId"]
       },
       "GetMeetingAttendanceResponse": {
         "type": "array",
@@ -182,11 +173,7 @@
             "description": "Status of the attendance"
           }
         },
-        "required": [
-          "userId",
-          "meetingId",
-          "status"
-        ]
+        "required": ["userId", "meetingId", "status"]
       },
       "UpdateAttendanceRequestParams": {
         "type": "object",
@@ -204,10 +191,7 @@
             "description": "Status of the attendance"
           }
         },
-        "required": [
-          "requestId",
-          "status"
-        ]
+        "required": ["requestId", "status"]
       },
       "GetUserAttendanceParams": {
         "type": "object",
@@ -217,9 +201,7 @@
             "description": "User Id"
           }
         },
-        "required": [
-          "userId"
-        ]
+        "required": ["userId"]
       },
       "GetRemainingAbscencesResponse": {
         "type": "object",
@@ -240,11 +222,7 @@
                 "description": "Number of regular absences remaining"
               }
             },
-            "required": [
-              "used",
-              "allowed",
-              "remaining"
-            ]
+            "required": ["used", "allowed", "remaining"]
           },
           "fullBody": {
             "type": "object",
@@ -262,17 +240,10 @@
                 "description": "Number of full body absences remaining"
               }
             },
-            "required": [
-              "used",
-              "allowed",
-              "remaining"
-            ]
+            "required": ["used", "allowed", "remaining"]
           }
         },
-        "required": [
-          "regular",
-          "fullBody"
-        ]
+        "required": ["regular", "fullBody"]
       },
       "GetUserMeetingParams": {},
       "GetUserAttendanceResponse": {
@@ -342,33 +313,19 @@
       },
       "AttendanceStatus": {
         "type": "string",
-        "enum": [
-          "PRESENT",
-          "UNEXCUSED_ABSENCE",
-          "EXCUSED_ABSENCE",
-          "PENDING"
-        ]
+        "enum": ["PRESENT", "UNEXCUSED_ABSENCE", "EXCUSED_ABSENCE", "PENDING"]
       },
       "AttendanceMode": {
         "type": "string",
-        "enum": [
-          "ONLINE",
-          "IN_PERSON"
-        ]
+        "enum": ["ONLINE", "IN_PERSON"]
       },
       "TimeAdjustment": {
         "type": "string",
-        "enum": [
-          "ARRIVING_LATE",
-          "LEAVING_EARLY"
-        ]
+        "enum": ["ARRIVING_LATE", "LEAVING_EARLY"]
       },
       "MeetingTypeEnum": {
         "type": "string",
-        "enum": [
-          "REGULAR",
-          "FULL_BODY"
-        ]
+        "enum": ["REGULAR", "FULL_BODY"]
       },
       "RoleSchema": {
         "type": "object",
@@ -382,10 +339,7 @@
             "description": "Role Type"
           }
         },
-        "required": [
-          "roleId",
-          "roleType"
-        ]
+        "required": ["roleId", "roleType"]
       },
       "UserSchema": {
         "type": "string"
@@ -670,9 +624,7 @@
         "operationId": "get-{slug}",
         "summary": "",
         "description": "",
-        "tags": [
-          "{slug}"
-        ],
+        "tags": ["{slug}"],
         "parameters": [],
         "responses": {
           "400": {
@@ -689,9 +641,7 @@
         "operationId": "post-attendance",
         "summary": "Posts an Attendance",
         "description": "Creates a new Attendance Record with params",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "requestBody": {
           "content": {
@@ -727,9 +677,7 @@
         "operationId": "patch-attendance-{attendanceId}",
         "summary": "Updates an Attendance",
         "description": "Updates an Attendance Record by attendanceId",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "requestBody": {
           "content": {
@@ -763,9 +711,7 @@
         "operationId": "delete-attendance-{attendanceId}",
         "summary": "Deletes an Attendance",
         "description": "Deletes an Attendance Record by attendanceId",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "responses": {
           "204": {
@@ -785,9 +731,7 @@
         "operationId": "put-attendance-status",
         "summary": "Updates an Attendance Status based on request",
         "description": "Updates an Attendance Record's Status by attendanceId",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "requestBody": {
           "content": {
@@ -823,9 +767,7 @@
         "operationId": "post-attendance-{attendanceId}-requests",
         "summary": "Create a new Request",
         "description": "Creates a new Request for specific attendanceId",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "requestBody": {
           "content": {
@@ -861,9 +803,7 @@
         "operationId": "get-attendance-meeting-{meetingId}",
         "summary": "Get Meeting Attendance",
         "description": "Gets all attendances associated with a meeting",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "responses": {
           "200": {
@@ -890,9 +830,7 @@
         "operationId": "get-attendance-user-{userId}",
         "summary": "Get User Attendance",
         "description": "Gets all attendances associated with a user",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "responses": {
           "200": {
@@ -919,9 +857,7 @@
         "operationId": "get-attendance-user-{userId}-remaining-absences",
         "summary": "Get Remaining Abscences",
         "description": "Gets remaining abscences for a user",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "responses": {
           "200": {
@@ -948,9 +884,7 @@
         "operationId": "get-attendance-user-requests-{userId}",
         "summary": "Get User Requests",
         "description": "Gets requests associated with a user",
-        "tags": [
-          "Attendance"
-        ],
+        "tags": ["Attendance"],
         "parameters": [],
         "responses": {
           "200": {
@@ -977,9 +911,7 @@
         "operationId": "post-auth-signup",
         "summary": "",
         "description": "",
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "parameters": [],
         "responses": {
           "400": {
@@ -996,9 +928,7 @@
         "operationId": "get-meeting",
         "summary": "",
         "description": "",
-        "tags": [
-          "Meeting"
-        ],
+        "tags": ["Meeting"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1013,9 +943,7 @@
         "operationId": "post-meeting",
         "summary": "",
         "description": "",
-        "tags": [
-          "Meeting"
-        ],
+        "tags": ["Meeting"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1032,9 +960,7 @@
         "operationId": "get-meeting-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Meeting"
-        ],
+        "tags": ["Meeting"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1049,9 +975,7 @@
         "operationId": "put-meeting-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Meeting"
-        ],
+        "tags": ["Meeting"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1066,9 +990,7 @@
         "operationId": "delete-meeting-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Meeting"
-        ],
+        "tags": ["Meeting"],
         "parameters": [],
         "responses": {
           "204": {
@@ -1088,9 +1010,7 @@
         "operationId": "get-meeting-by-date",
         "summary": "",
         "description": "",
-        "tags": [
-          "Meeting"
-        ],
+        "tags": ["Meeting"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1107,9 +1027,7 @@
         "operationId": "get-meeting-{id}-users",
         "summary": "",
         "description": "",
-        "tags": [
-          "Meeting"
-        ],
+        "tags": ["Meeting"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1124,9 +1042,7 @@
         "operationId": "put-meeting-{id}-users",
         "summary": "",
         "description": "",
-        "tags": [
-          "Meeting"
-        ],
+        "tags": ["Meeting"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1143,9 +1059,7 @@
         "operationId": "get-requests",
         "summary": "GET all requests (for admins)",
         "description": "",
-        "tags": [
-          "Requests"
-        ],
+        "tags": ["Requests"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1160,9 +1074,7 @@
         "operationId": "post-requests",
         "summary": "POST create new request",
         "description": "",
-        "tags": [
-          "Requests"
-        ],
+        "tags": ["Requests"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1179,9 +1091,7 @@
         "operationId": "get-requests-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Requests"
-        ],
+        "tags": ["Requests"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1196,9 +1106,7 @@
         "operationId": "put-requests-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Requests"
-        ],
+        "tags": ["Requests"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1213,9 +1121,7 @@
         "operationId": "delete-requests-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Requests"
-        ],
+        "tags": ["Requests"],
         "parameters": [],
         "responses": {
           "204": {
@@ -1235,9 +1141,7 @@
         "operationId": "get-users",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1252,9 +1156,7 @@
         "operationId": "post-users",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1271,9 +1173,7 @@
         "operationId": "get-users-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1288,9 +1188,7 @@
         "operationId": "put-users-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1305,9 +1203,7 @@
         "operationId": "delete-users-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "204": {
@@ -1327,9 +1223,7 @@
         "operationId": "put-users-attendance_update",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1346,9 +1240,7 @@
         "operationId": "get-users-only-name",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1365,9 +1257,7 @@
         "operationId": "post-users-role",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1382,9 +1272,7 @@
         "operationId": "get-users-role",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1401,9 +1289,7 @@
         "operationId": "get-users-validate-nuid",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1420,9 +1306,7 @@
         "operationId": "get-users-by-supabase-id-{supabaseAuthId}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1439,9 +1323,7 @@
         "operationId": "get-users-get-user-by-email-{email}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1458,9 +1340,7 @@
         "operationId": "get-users-get-user-by-nuid-{nuid}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1477,9 +1357,7 @@
         "operationId": "delete-users-role-roleId",
         "summary": "DELETE /api/user/role/:roleId",
         "description": "",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "parameters": [],
         "responses": {
           "204": {
@@ -1499,9 +1377,7 @@
         "operationId": "get-voting-event",
         "summary": "",
         "description": "",
-        "tags": [
-          "Voting-event"
-        ],
+        "tags": ["Voting-event"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1516,9 +1392,7 @@
         "operationId": "post-voting-event",
         "summary": "",
         "description": "",
-        "tags": [
-          "Voting-event"
-        ],
+        "tags": ["Voting-event"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1535,9 +1409,7 @@
         "operationId": "get-voting-event-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Voting-event"
-        ],
+        "tags": ["Voting-event"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1552,9 +1424,7 @@
         "operationId": "put-voting-event-{id}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Voting-event"
-        ],
+        "tags": ["Voting-event"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1571,9 +1441,7 @@
         "operationId": "get-voting-event-by-type-{voteType}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Voting-event"
-        ],
+        "tags": ["Voting-event"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1590,9 +1458,7 @@
         "operationId": "get-voting-record",
         "summary": "",
         "description": "",
-        "tags": [
-          "Voting-record"
-        ],
+        "tags": ["Voting-record"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1607,9 +1473,7 @@
         "operationId": "post-voting-record",
         "summary": "",
         "description": "",
-        "tags": [
-          "Voting-record"
-        ],
+        "tags": ["Voting-record"],
         "parameters": [],
         "responses": {
           "400": {
@@ -1626,9 +1490,7 @@
         "operationId": "get-voting-record-by-voting-event-{votingEventId}",
         "summary": "",
         "description": "",
-        "tags": [
-          "Voting-record"
-        ],
+        "tags": ["Voting-record"],
         "parameters": [],
         "responses": {
           "400": {

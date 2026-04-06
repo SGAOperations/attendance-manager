@@ -48,6 +48,27 @@ export const VotingRecordService = {
       },
     });
   },
+  async updateVotingRecord(data: {
+    votingRecordId: string;
+    result: string;
+    updatedBy?: string;
+  }) {
+    return prisma.votingRecord.update({
+      where: { votingRecordId: data.votingRecordId },
+      data: {
+        result: data.result,
+        ...(data.updatedBy !== undefined ? { updatedBy: data.updatedBy } : {}),
+      },
+      include: {
+        votingEvent: {
+          include: {
+            meeting: true,
+          },
+        },
+      },
+    });
+  },
+
   async deleteVotingRecord(votingRecordId: string) {
     return prisma.votingRecord.delete({
       where: { votingRecordId },

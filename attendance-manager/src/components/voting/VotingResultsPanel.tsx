@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
-import { VotingEventApiData, VotingRecordApiData } from '@/types';
+import { VotingEventWithRelations } from '@/types';
+import { getVoteCounts } from '@/utils/voting_utils';
 import VotingResultsModal from './VotingResultsModal';
-
-type VotingEventWithRelations = VotingEventApiData & {
-  meeting?: {
-    name: string;
-    date: string;
-  };
-  votingRecords?: VotingRecordApiData[];
-};
 
 interface VotingResultsPanelProps {
   events: VotingEventWithRelations[];
   loading: boolean;
+  setDeleteEvent: (event: VotingEventWithRelations | null) => void;
 }
 
 const formatResultLabel = (result: string) => {
@@ -31,12 +25,13 @@ const formatResultLabel = (result: string) => {
 const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
   events,
   loading,
+  setDeleteEvent,
 }) => {
   const endedEvents = events
-    .filter((e) => e.deletedAt)
+    .filter((e) => !e.deletedAt && !!e.endedAt)
     .sort((a, b) => {
-      const aDate = a.deletedAt ?? a.createdAt;
-      const bDate = b.deletedAt ?? b.createdAt;
+      const aDate = a.endedAt ?? a.deletedAt ?? a.createdAt;
+      const bDate = b.endedAt ?? b.deletedAt ?? b.createdAt;
       return new Date(bDate).getTime() - new Date(aDate).getTime();
     });
   const [selectedVote, setSelectedVote] = useState<string>('');
@@ -75,15 +70,7 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
             </thead>
             <tbody>
               {endedEvents.map((event) => {
-                const records =
-                  (event.votingRecords || []).filter((r) => !r.deletedAt) || [];
-                const counts =
-                  event.voteType === 'SECRET_BALLOT' && event.resultCounts
-                    ? event.resultCounts
-                    : records.reduce<Record<string, number>>((acc, record) => {
-                        acc[record.result] = (acc[record.result] || 0) + 1;
-                        return acc;
-                      }, {});
+                const counts = getVoteCounts(event);
                 const totalVotes = Object.values(counts).reduce(
                   (sum, n) => sum + n,
                   0,
@@ -100,7 +87,7 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                       }
                     }}
                   >
-                    <td className='py-3 px-4 align-top'>
+                    <td className='py-2 px-3 align-top'>
                       <div className='text-gray-900 font-medium'>
                         {event.meeting?.name ?? 'Unknown meeting'}
                       </div>
@@ -169,6 +156,18 @@ const VotingResultsPanel: React.FC<VotingResultsPanelProps> = ({
                             )}
                         </div>
                       )}
+                      {/* Delete button for past events */}
+                      <div className='ml-1'>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteEvent(event);
+                          }}
+                          className='text-red-400 hover:text-red-600 text-xs font-medium'
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

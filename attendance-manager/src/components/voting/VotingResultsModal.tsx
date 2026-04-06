@@ -75,7 +75,7 @@ const VotingResultsModal: React.FC<VotingResultsModalProps> = ({
             </div>
           )}
 
-          <div className='flex space-x-3 pt-6 border-t border-gray-200 mt-6'>
+          <div className='flex pt-6 border-t border-gray-200 mt-6'>
             <button
               type='button'
               onClick={() => {
