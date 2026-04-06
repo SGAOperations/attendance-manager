@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '../lib/prisma';
+import { VOTING_TYPES } from '../utils/consts';
 import { VotingRecordService } from './voting-record.service';
 
 export const VotingRecordController = {
@@ -8,7 +10,26 @@ export const VotingRecordController = {
   },
 
   async getVotingRecordsByVotingEvent(params: { votingEventId: string }) {
-    const votingRecords = await VotingRecordService.getVotingRecordsByVotingEvent(params.votingEventId);
+    const votingEvent = await prisma.votingEvent.findUnique({
+      where: { votingEventId: params.votingEventId },
+      select: { voteType: true },
+    });
+    if (!votingEvent) {
+      return NextResponse.json([]);
+    }
+    if (votingEvent.voteType === VOTING_TYPES.SECRET_BALLOT.key) {
+      return NextResponse.json(
+        {
+          error:
+            'Per-voter voting records are not available for secret ballot votes',
+        },
+        { status: 403 },
+      );
+    }
+    const votingRecords =
+      await VotingRecordService.getVotingRecordsByVotingEvent(
+        params.votingEventId,
+      );
     return NextResponse.json(votingRecords);
   },
 
@@ -18,8 +39,11 @@ export const VotingRecordController = {
     // Validate required fields
     if (!body.votingEventId || !body.userId || !body.result) {
       return NextResponse.json(
-        { error: 'Missing required fields: votingEventId, userId, and result are required' },
-        { status: 400 }
+        {
+          error:
+            'Missing required fields: votingEventId, userId, and result are required',
+        },
+        { status: 400 },
       );
     }
 
@@ -30,8 +54,11 @@ export const VotingRecordController = {
       typeof body.result !== 'string'
     ) {
       return NextResponse.json(
-        { error: 'Invalid field types: votingEventId, userId, and result must be strings' },
-        { status: 400 }
+        {
+          error:
+            'Invalid field types: votingEventId, userId, and result must be strings',
+        },
+        { status: 400 },
       );
     }
 
@@ -52,7 +79,7 @@ export const VotingRecordController = {
       }
       return NextResponse.json(
         { error: error.message || 'Failed to create voting record' },
-        { status: 400 }
+        { status: 400 },
       );
     }
   },

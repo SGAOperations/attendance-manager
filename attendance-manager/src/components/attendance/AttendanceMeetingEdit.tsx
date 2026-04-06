@@ -1,4 +1,6 @@
 import { UserApiData, AttendanceApiData, MeetingApiData } from '@/types';
+import React from 'react';
+import { CircleCheck } from 'lucide-react';
 
 interface AttendanceMeetingSelectProps {
   attendanceUsers: UserApiData[];
@@ -6,12 +8,17 @@ interface AttendanceMeetingSelectProps {
   selectedMeeting: MeetingApiData;
   toggleAttendanceStatus: (
     attendanceId: string,
+
     currentStatus: string,
+
     userId: string,
-    meetingId: string
+
+    meetingId: string,
   ) => void;
   isLoadingAttendance: boolean;
+
   setShowEditAttendanceModal: (show: boolean) => void;
+
   setSelectedMeeting: (meeting: MeetingApiData | null) => void;
 }
 
@@ -22,7 +29,7 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
   toggleAttendanceStatus,
   isLoadingAttendance,
   setShowEditAttendanceModal,
-  setSelectedMeeting
+  setSelectedMeeting,
 }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -47,7 +54,7 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                 </p>
                 <p className='text-sm text-gray-600'>
                   {attendanceRecord[selectedMeeting.meetingId]?.filter(
-                    record => record.status === 'PRESENT'
+                    (record) => record.status === 'PRESENT',
                   ).length ?? 0}
                   {' / '}
                   {attendanceUsers.length} present
@@ -63,13 +70,13 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                 </p>
               ) : (
                 <div className='divide-y divide-gray-200'>
-                  {attendanceUsers.map(user => {
+                  {attendanceUsers.map((user) => {
                     const isPresent = attendanceRecord[
                       selectedMeeting.meetingId
                     ]?.some(
-                      record =>
+                      (record) =>
                         record.userId === user.userId &&
-                        record.status === 'PRESENT'
+                        record.status === 'PRESENT',
                     );
 
                     return (
@@ -83,19 +90,19 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                           type='checkbox'
                           checked={isPresent}
                           onChange={() => {
-                            console.log('user', user);
-                            const hasAttendanceForMeeting = user.attendance.find(
-                              attendance =>
-                                attendance.meetingId ===
-                                selectedMeeting.meetingId
-                            );
+                            const hasAttendanceForMeeting =
+                              user.attendance.find(
+                                (attendance) =>
+                                  attendance.meetingId ===
+                                  selectedMeeting.meetingId,
+                              );
 
                             if (hasAttendanceForMeeting) {
                               toggleAttendanceStatus(
                                 hasAttendanceForMeeting.attendanceId,
                                 hasAttendanceForMeeting.status,
                                 user.userId,
-                                hasAttendanceForMeeting.meetingId
+                                hasAttendanceForMeeting.meetingId,
                               );
                             }
                           }}
@@ -119,17 +126,7 @@ const AttendanceMeetingEdit: React.FC<AttendanceMeetingSelectProps> = ({
                         </div>
                         {isPresent && (
                           <div className='flex-shrink-0'>
-                            <svg
-                              className='w-6 h-6 text-green-600'
-                              fill='currentColor'
-                              viewBox='0 0 20 20'
-                            >
-                              <path
-                                fillRule='evenodd'
-                                d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-                                clipRule='evenodd'
-                              />
-                            </svg>
+                            <CircleCheck className='w-6 h-6 text-green-600' />
                           </div>
                         )}
                       </label>

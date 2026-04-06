@@ -1,9 +1,62 @@
-import { VotingService } from '../voting.service';
+import {
+  VotingService,
+  computeVotePassedFromCounts,
+  deriveSecretBallotOutcome,
+} from '../voting.service';
 import { VotingController } from '../voting.controller';
 import { prisma } from '../../lib/prisma';
 import { MeetingService } from '@/meeting/meeting.service';
+import { VOTING_TYPES } from '@/utils/consts';
 
 jest.setTimeout(20000);
+
+describe('computeVotePassedFromCounts', () => {
+  it('Yes beats No using display labels; YES/NO uppercase supported', () => {
+    expect(
+      computeVotePassedFromCounts(
+        { Yes: 2, No: 1 },
+        ['Yes', 'No', 'Abstain', 'No Confidence']
+      )
+    ).toBe(true);
+    expect(computeVotePassedFromCounts({ YES: 1, NO: 2 }, [])).toBe(false);
+  });
+});
+
+describe('deriveSecretBallotOutcome', () => {
+  it('uses Passed/Failed semantics for Yes/No motion tallies', () => {
+    const o = deriveSecretBallotOutcome({ Yes: 2, No: 1 }, [
+      'Yes',
+      'No',
+      'Abstain',
+    ]);
+    expect(o.outcomeKind).toBe('motion_pass_fail');
+    expect(o.votePassed).toBe(true);
+    expect(o.winningResult).toBeNull();
+  });
+
+  it('uses option winner when tallies use arbitrary option strings (not Yes/No)', () => {
+    const o = deriveSecretBallotOutcome({ 'Candidate 2': 1 }, [
+      'Candidate 1',
+      'Candidate 2',
+    ]);
+    expect(o.outcomeKind).toBe('option_winner');
+    expect(o.winningResult).toBe('Candidate 2');
+    expect(o.votePassed).toBe(false);
+  });
+
+  it('reports tie when top options are tied', () => {
+    const o = deriveSecretBallotOutcome({ Yes: 1, No: 1 }, []);
+    expect(o.outcomeKind).toBe('tie');
+    expect(o.winningResult).toBeNull();
+  });
+
+  it('returns null kind when there are no votes', () => {
+    const o = deriveSecretBallotOutcome({}, ['A', 'B']);
+    expect(o.outcomeKind).toBeNull();
+    expect(o.winningResult).toBeNull();
+    expect(o.votePassed).toBeNull();
+  });
+});
 
 describe('VotingService', () => {
   let testMeetingId: string;
@@ -614,6 +667,386 @@ describe('GET /api/voting-event/[id]', () => {
   });
 });
 
+describe('ROLL_CALL results include voter names', () => {
+  let testMeetingId: string;
+  let testRoleId: string;
+  let user1Id: string;
+  let user2Id: string;
+  let votingEventId: string;
+
+  beforeAll(async () => {
+    const role = await prisma.role.create({
+      data: { roleType: 'MEMBER' },
+    });
+    testRoleId = role.roleId;
+
+    const user1 = await prisma.user.create({
+      data: {
+        userId: 'test-roll-call-user-1',
+        supabaseAuthId: 'test-roll-call-supabase-auth-1',
+        nuid: '009900001',
+        email: 'rollcall1@example.com',
+        firstName: 'Roll',
+        lastName: 'CallOne',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user1Id = user1.userId;
+
+    const user2 = await prisma.user.create({
+      data: {
+        userId: 'test-roll-call-user-2',
+        supabaseAuthId: 'test-roll-call-supabase-auth-2',
+        nuid: '009900002',
+        email: 'rollcall2@example.com',
+        firstName: 'Roll',
+        lastName: 'CallTwo',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user2Id = user2.userId;
+
+    const meeting = await prisma.meeting.create({
+      data: {
+        name: 'Roll Call Results Meeting',
+        date: '2025-08-04',
+        startTime: '10:00',
+        endTime: '11:00',
+        notes: 'Test notes',
+        type: 'REGULAR',
+      },
+    });
+    testMeetingId = meeting.meetingId;
+
+    const votingEvent = await prisma.votingEvent.create({
+      data: {
+        meetingId: testMeetingId,
+        name: 'Roll Call Vote',
+        voteType: 'ROLL_CALL',
+        deletedAt: new Date(), 
+      },
+    });
+    votingEventId = votingEvent.votingEventId;
+
+    await prisma.votingRecord.createMany({
+      data: [
+        {
+          votingEventId,
+          userId: user1Id,
+          result: 'YES',
+        },
+        {
+          votingEventId,
+          userId: user2Id,
+          result: 'NO',
+        },
+      ],
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.votingRecord.deleteMany({ where: { votingEventId } });
+    await prisma.votingEvent.deleteMany({ where: { votingEventId } });
+    await prisma.meeting.deleteMany({ where: { meetingId: testMeetingId } });
+    await prisma.user.deleteMany({ where: { userId: { in: [user1Id, user2Id] } } });
+    await prisma.role.deleteMany({ where: { roleId: testRoleId } });
+  });
+
+  // concluded ROLL_CALL returns each voter's name and result
+  it('returns votingRecords with user first/last names', async () => {
+    const { GET } = await import('../../app/api/voting-event/[id]/route');
+    const req = new Request(`http://localhost/api/voting-event/${votingEventId}`);
+    const params = Promise.resolve({ id: votingEventId });
+
+    const response = await GET(req, { params });
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.voteType).toBe('ROLL_CALL');
+    expect(Array.isArray(data.votingRecords)).toBe(true);
+
+    const record1 = data.votingRecords.find((r: any) => r.userId === user1Id);
+    const record2 = data.votingRecords.find((r: any) => r.userId === user2Id);
+
+    expect(record1).toBeDefined();
+    expect(record1.result).toBe('YES');
+    expect(record1.user).toBeDefined();
+    expect(record1.user.firstName).toBe('Roll');
+    expect(record1.user.lastName).toBe('CallOne');
+
+    expect(record2).toBeDefined();
+    expect(record2.result).toBe('NO');
+    expect(record2.user).toBeDefined();
+    expect(record2.user.firstName).toBe('Roll');
+    expect(record2.user.lastName).toBe('CallTwo');
+  });
+
+  // same enrichment as GET [id], but via getAllVotingEvents() 
+  it('getAllVotingEvents returns votingRecords with user first/last names for ROLL_CALL', async () => {
+    const events = await VotingService.getAllVotingEvents();
+    const data = events.find((e) => e != null && e.votingEventId === votingEventId);
+    expect(data).toBeDefined();
+    expect(data!.voteType).toBe('ROLL_CALL');
+    expect(Array.isArray(data!.votingRecords)).toBe(true);
+
+    const record1 = data!.votingRecords.find((r: any) => r.userId === user1Id) as any;
+    const record2 = data!.votingRecords.find((r: any) => r.userId === user2Id) as any;
+
+    expect(record1).toBeDefined();
+    expect(record1.result).toBe('YES');
+    expect(record1.user).toBeDefined();
+    expect(record1.user.firstName).toBe('Roll');
+    expect(record1.user.lastName).toBe('CallOne');
+
+    expect(record2).toBeDefined();
+    expect(record2.result).toBe('NO');
+    expect(record2.user).toBeDefined();
+    expect(record2.user.firstName).toBe('Roll');
+    expect(record2.user.lastName).toBe('CallTwo');
+  });
+
+  // non-ROLL_CALL events should not receive user name data
+  it('does not inject user names for non-ROLL_CALL events', async () => {
+    const nonRollCallEvent = await prisma.votingEvent.create({
+      data: {
+        meetingId: testMeetingId,
+        name: 'Non Roll Call Vote',
+        voteType: 'YES_NO',
+        deletedAt: new Date(),
+      },
+    });
+
+    await prisma.votingRecord.create({
+      data: {
+        votingEventId: nonRollCallEvent.votingEventId,
+        userId: user1Id,
+        result: 'YES',
+      },
+    });
+
+    const { GET } = await import('../../app/api/voting-event/[id]/route');
+    const req = new Request(
+      `http://localhost/api/voting-event/${nonRollCallEvent.votingEventId}`
+    );
+    const params = Promise.resolve({ id: nonRollCallEvent.votingEventId });
+    const response = await GET(req, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.voteType).toBe('YES_NO');
+    expect(Array.isArray(data.votingRecords)).toBe(true);
+    expect(data.votingRecords[0]).not.toHaveProperty('user');
+
+    await prisma.votingRecord.deleteMany({
+      where: { votingEventId: nonRollCallEvent.votingEventId },
+    });
+    await prisma.votingEvent.delete({
+      where: { votingEventId: nonRollCallEvent.votingEventId },
+    });
+  });
+
+  // missing user row should not break response (user is null)
+  it('returns user as null when a roll call voter user record is missing', async () => {
+    const missingUserEvent = await prisma.votingEvent.create({
+      data: {
+        meetingId: testMeetingId,
+        name: 'Roll Call Missing User Vote',
+        voteType: 'ROLL_CALL',
+        deletedAt: new Date(),
+      },
+    });
+
+    await prisma.votingRecord.create({
+      data: {
+        votingEventId: missingUserEvent.votingEventId,
+        userId: 'missing-roll-call-user',
+        result: 'ABSTAIN',
+      },
+    });
+
+    const { GET } = await import('../../app/api/voting-event/[id]/route');
+    const req = new Request(
+      `http://localhost/api/voting-event/${missingUserEvent.votingEventId}`
+    );
+    const params = Promise.resolve({ id: missingUserEvent.votingEventId });
+    const response = await GET(req, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.voteType).toBe('ROLL_CALL');
+    expect(Array.isArray(data.votingRecords)).toBe(true);
+    expect(data.votingRecords[0].result).toBe('ABSTAIN');
+    expect(data.votingRecords[0].user).toBeNull();
+
+    await prisma.votingRecord.deleteMany({
+      where: { votingEventId: missingUserEvent.votingEventId },
+    });
+    await prisma.votingEvent.delete({
+      where: { votingEventId: missingUserEvent.votingEventId },
+    });
+  });
+});
+
+describe('Secret ballot results (aggregates only)', () => {
+  let testMeetingId: string;
+  let secretVotingEventId: string;
+  let testRoleId: string;
+  let user1Id: string;
+  let user2Id: string;
+  let user3Id: string;
+
+  beforeAll(async () => {
+    const role = await prisma.role.create({
+      data: { roleType: 'MEMBER' },
+    });
+    testRoleId = role.roleId;
+
+    const u1 = await prisma.user.create({
+      data: {
+        userId: 'test-secret-ballot-user-1',
+        supabaseAuthId: 'test-secret-supabase-1',
+        nuid: '009901001',
+        email: 'secret1@example.com',
+        firstName: 'Secret',
+        lastName: 'VoterOne',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user1Id = u1.userId;
+
+    const u2 = await prisma.user.create({
+      data: {
+        userId: 'test-secret-ballot-user-2',
+        supabaseAuthId: 'test-secret-supabase-2',
+        nuid: '009901002',
+        email: 'secret2@example.com',
+        firstName: 'Secret',
+        lastName: 'VoterTwo',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user2Id = u2.userId;
+
+    const u3 = await prisma.user.create({
+      data: {
+        userId: 'test-secret-ballot-user-3',
+        supabaseAuthId: 'test-secret-supabase-3',
+        nuid: '009901003',
+        email: 'secret3@example.com',
+        firstName: 'Secret',
+        lastName: 'VoterThree',
+        roleId: testRoleId,
+        password: null,
+      },
+    });
+    user3Id = u3.userId;
+
+    const meeting = await prisma.meeting.create({
+      data: {
+        name: 'Secret Ballot Meeting',
+        date: '2025-09-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        notes: 'Test',
+        type: 'REGULAR',
+      },
+    });
+    testMeetingId = meeting.meetingId;
+
+    const ve = await prisma.votingEvent.create({
+      data: {
+        meetingId: testMeetingId,
+        name: 'Budget approval (secret)',
+        voteType: VOTING_TYPES.SECRET_BALLOT.key,
+        notes: 'Motion notes for the secret ballot',
+        options: ['Yes', 'No', 'Abstain', 'No Confidence'],
+        deletedAt: new Date(),
+      },
+    });
+    secretVotingEventId = ve.votingEventId;
+
+    await prisma.votingRecord.createMany({
+      data: [
+        { votingEventId: secretVotingEventId, userId: user1Id, result: 'Yes' },
+        { votingEventId: secretVotingEventId, userId: user2Id, result: 'Yes' },
+        { votingEventId: secretVotingEventId, userId: user3Id, result: 'No' },
+      ],
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.votingRecord.deleteMany({
+      where: { votingEventId: secretVotingEventId },
+    });
+    await prisma.votingEvent.deleteMany({
+      where: { votingEventId: secretVotingEventId },
+    });
+    await prisma.meeting.deleteMany({ where: { meetingId: testMeetingId } });
+    await prisma.user.deleteMany({
+      where: { userId: { in: [user1Id, user2Id, user3Id] } },
+    });
+    await prisma.role.deleteMany({ where: { roleId: testRoleId } });
+  });
+
+  it('GET /api/voting-event/[id] returns resultCounts, votePassed, notes — no votingRecords', async () => {
+    const { GET } = await import('../../app/api/voting-event/[id]/route');
+    const req = new Request(
+      `http://localhost/api/voting-event/${secretVotingEventId}`
+    );
+    const params = Promise.resolve({ id: secretVotingEventId });
+    const response = await GET(req, { params });
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.voteType).toBe(VOTING_TYPES.SECRET_BALLOT.key);
+    expect(data.notes).toBe('Motion notes for the secret ballot');
+    expect(data.resultCounts).toEqual({ Yes: 2, No: 1 });
+    expect(data.votePassed).toBe(true);
+    expect(data.secretBallotOutcomeKind).toBe('motion_pass_fail');
+    expect(data.winningResult).toBeNull();
+    expect(data).not.toHaveProperty('votingRecords');
+  });
+
+  it('getAllVotingEvents omits votingRecords for secret ballot with aggregates', async () => {
+    const events = await VotingService.getAllVotingEvents();
+    const row = events.find(
+      (e) => e != null && e.votingEventId === secretVotingEventId
+    );
+    expect(row).toBeDefined();
+    expect((row as any).resultCounts).toEqual({ Yes: 2, No: 1 });
+    expect((row as any).votePassed).toBe(true);
+    expect((row as any).secretBallotOutcomeKind).toBe('motion_pass_fail');
+    expect((row as any).winningResult).toBeNull();
+    expect(row).not.toHaveProperty('votingRecords');
+  });
+
+  it('GET /api/voting-event/by-type returns aggregates only for SECRET_BALLOT', async () => {
+    const { GET } = await import(
+      '../../app/api/voting-event/by-type/[voteType]/route'
+    );
+    const req = new Request(
+      `http://localhost/api/voting-event/by-type/${VOTING_TYPES.SECRET_BALLOT.key}`
+    );
+    const params = Promise.resolve({
+      voteType: VOTING_TYPES.SECRET_BALLOT.key,
+    });
+    const response = await GET(req, { params });
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(Array.isArray(data)).toBe(true);
+    const row = data.find((e: any) => e.votingEventId === secretVotingEventId);
+    expect(row).toBeDefined();
+    expect(row.resultCounts).toEqual({ Yes: 2, No: 1 });
+    expect(row.secretBallotOutcomeKind).toBe('motion_pass_fail');
+    expect(row.winningResult).toBeNull();
+    expect(row).not.toHaveProperty('votingRecords');
+  });
+});
+
 describe('GET /api/voting-event/by-type/[voteType]', () => {
   let routeTestMeetingId: string;
   let routeTestMeeting2Id: string;
@@ -757,6 +1190,79 @@ describe('POST /api/voting-event', () => {
     await VotingService.deleteVotingEvent(data.votingEventId);
   });
 
+  it('should persist notes when creating a voting event', async () => {
+    const { POST } = await import('../../app/api/voting-event/route');
+    const requestBody = {
+      meetingId: routeTestMeetingId,
+      name: 'POST Route Test Event With Notes',
+      voteType: 'YES_NO',
+      notes: 'Create notes test',
+      updatedBy: 'test-user',
+    };
+
+    const req = new Request('http://localhost/api/voting-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(data.notes).toBe('Create notes test');
+    await VotingService.deleteVotingEvent(data.votingEventId);
+  });
+
+  it('should auto-include No Confidence and Abstain for SECRET_BALLOT create', async () => {
+    const { POST } = await import('../../app/api/voting-event/route');
+    const requestBody = {
+      meetingId: routeTestMeetingId,
+      name: 'POST Secret Ballot Defaults',
+      voteType: VOTING_TYPES.SECRET_BALLOT.key,
+      options: ['Candidate 1', 'Candidate 2'],
+      updatedBy: 'test-user'
+    };
+
+    const req = new Request('http://localhost/api/voting-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(data.options).toEqual(
+      expect.arrayContaining(['Candidate 1', 'Candidate 2', 'No Confidence', 'Abstain'])
+    );
+    await VotingService.deleteVotingEvent(data.votingEventId);
+  });
+
+  it('should return 400 when options contains non-string values', async () => {
+    const { POST } = await import('../../app/api/voting-event/route');
+    const requestBody = {
+      meetingId: routeTestMeetingId,
+      name: 'POST Route Invalid Options',
+      voteType: VOTING_TYPES.SECRET_BALLOT.key,
+      options: ['Candidate 1', 123],
+      updatedBy: 'test-user'
+    };
+
+    const req = new Request('http://localhost/api/voting-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('options must be an array of strings');
+  });
+
   it('should return 400 when required fields are missing', async () => {
     const { POST } = await import('../../app/api/voting-event/route');
     const requestBody = {
@@ -838,6 +1344,30 @@ describe('PUT /api/voting-event/[id]', () => {
     expect(data.updatedBy).toBe('test-updater');
     expect(data.votingEventId).toBe(routeTestVotingEventId);
     expect(data.updatedAt).toBeDefined();
+  });
+
+  it('should allow admin to update voting event notes', async () => {
+    const { PUT } = await import('../../app/api/voting-event/[id]/route');
+    const requestBody = {
+      notes: 'Updated notes from PUT test',
+      updatedBy: 'test-updater'
+    };
+
+    const req = new Request(
+      `http://localhost/api/voting-event/${routeTestVotingEventId}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      }
+    );
+
+    const params = Promise.resolve({ id: routeTestVotingEventId });
+    const response = await PUT(req, { params });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.notes).toBe('Updated notes from PUT test');
   });
 
   it('should return 404 when voting event is not found', async () => {

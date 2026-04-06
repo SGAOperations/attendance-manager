@@ -1,13 +1,16 @@
 import { RequestApiData } from '@/types';
+import { Calendar, Clock, FileText } from 'lucide-react';
+import React from 'react';
 
 interface ViewRequestsModalProps {
   myRequests: RequestApiData[];
+
   setShowMyRequestsModal: (show: boolean) => void;
 }
 
 const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
   myRequests,
-  setShowMyRequestsModal
+  setShowMyRequestsModal,
 }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -19,19 +22,7 @@ const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
         {myRequests.length === 0 ? (
           <div className='text-center py-12'>
             <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <svg
-                className='w-8 h-8 text-gray-400'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                />
-              </svg>
+              <FileText className='w-8 h-8 text-gray-400' />
             </div>
             <p className='text-gray-500 text-lg font-medium'>
               No requests found
@@ -42,7 +33,7 @@ const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
           </div>
         ) : (
           <div className='space-y-4'>
-            {myRequests.map(request => (
+            {myRequests.map((request) => (
               <div
                 key={request.requestId}
                 className='border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow'
@@ -56,39 +47,15 @@ const ViewRequestsModal: React.FC<ViewRequestsModalProps> = ({
                       </h4>
                       <div className='flex items-center space-x-4 text-sm text-gray-600 mb-2'>
                         <div className='flex items-center space-x-1'>
-                          <svg
-                            className='w-4 h-4'
-                            fill='none'
-                            stroke='currentColor'
-                            viewBox='0 0 24 24'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth={2}
-                              d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z'
-                            />
-                          </svg>
+                          <Calendar className='w-4 h-4' />
                           <span>
                             {new Date(
-                              request.attendance.meeting.date
+                              request.attendance.meeting.date,
                             ).toLocaleDateString()}
                           </span>
                         </div>
                         <div className='flex items-center space-x-1'>
-                          <svg
-                            className='w-4 h-4'
-                            fill='none'
-                            stroke='currentColor'
-                            viewBox='0 0 24 24'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth={2}
-                              d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                            />
-                          </svg>
+                          <Clock className='w-4 h-4' />
                           <span>
                             {request.attendance.meeting.startTime} -{' '}
                             {request.attendance.meeting.endTime}

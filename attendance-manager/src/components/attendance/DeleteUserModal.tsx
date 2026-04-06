@@ -1,16 +1,19 @@
 import { UserApiData } from '@/types';
 import { CircleAlert } from 'lucide-react';
+import React from 'react';
 
 interface DeleteUserModalProps {
   deleteUser: UserApiData;
+
   onDeleteUser: (userId: string) => void;
+
   setDeleteUser: (user: UserApiData | null) => void;
 }
 
 const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
   deleteUser,
   onDeleteUser,
-  setDeleteUser
+  setDeleteUser,
 }) => {
   const fullName = `${deleteUser.firstName} ${deleteUser.lastName}`;
 

@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface ViewMeetingModalProps {
   meeting: {
     name: string;
@@ -7,12 +9,13 @@ interface ViewMeetingModalProps {
     notes: string;
     type: 'FULL_BODY' | 'REGULAR';
   };
+
   setShowViewMeetingModal: (show: boolean) => void;
 }
 
 const ViewMeetingModal: React.FC<ViewMeetingModalProps> = ({
   meeting,
-  setShowViewMeetingModal
+  setShowViewMeetingModal,
 }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
@@ -35,19 +38,25 @@ const ViewMeetingModal: React.FC<ViewMeetingModalProps> = ({
           {/* Date and Time */}
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>Date</label>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Date
+              </label>
               <p className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900'>
                 {meeting.date}
               </p>
             </div>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>Start Time</label>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Start Time
+              </label>
               <p className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900'>
                 {meeting.startTime}
               </p>
             </div>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>End Time</label>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                End Time
+              </label>
               <p className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900'>
                 {meeting.endTime}
               </p>
@@ -56,7 +65,9 @@ const ViewMeetingModal: React.FC<ViewMeetingModalProps> = ({
 
           {/* Meeting Type */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>Meeting Type</label>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              Meeting Type
+            </label>
             <p className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900'>
               {meeting.type === 'FULL_BODY' ? 'Full Body' : 'Regular'}
             </p>
@@ -64,7 +75,9 @@ const ViewMeetingModal: React.FC<ViewMeetingModalProps> = ({
 
           {/* Notes */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>Notes</label>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              Notes
+            </label>
             <p className='w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 whitespace-pre-wrap'>
               {meeting.notes}
             </p>

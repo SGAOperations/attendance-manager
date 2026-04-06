@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { RequestController } from '@/request/request.controller';
 
-// POST create new request for a specific attendance
+/**
+ * Create a new Request
+ * @description Creates a new Request for specific attendanceId
+ * @body CreateAttendanceRequestParams
+ * @response CreateAttendanceRequestResponse
+ * @openapi
+ */
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ attendanceId: string }> }
+  { params }: { params: Promise<{ attendanceId: string }> },
 ) {
   try {
     const { attendanceId } = await params;
@@ -13,7 +19,7 @@ export async function POST(
     if (!reason || !attendanceMode) {
       return NextResponse.json(
         { error: 'reason and attendanceMode are required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -26,11 +32,8 @@ export async function POST(
 
     return NextResponse.json(newRequest, { status: 201 });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to create request';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to create request';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-

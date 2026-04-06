@@ -65,7 +65,7 @@ export const VotingRecordService = {
   },
   async deleteVotingRecord(votingRecordId: string) {
     return prisma.votingRecord.delete({
-      where: { votingRecordId }
+      where: { votingRecordId },
     });
   }
 };

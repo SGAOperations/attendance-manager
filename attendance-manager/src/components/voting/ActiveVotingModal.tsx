@@ -2,20 +2,19 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { VotingEventApiData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { YES_NO_OPTIONS } from '@/utils/consts';
 
 interface ActiveVotingModalProps {
   event: VotingEventApiData;
   onVoted?: () => void;
 }
 
-type VoteChoice = 'YES' | 'NO' | 'ABSTAIN';
-
 const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
   event,
-  onVoted
+  onVoted,
 }) => {
   const { user } = useAuth();
-  const [choice, setChoice] = useState<VoteChoice | null>(null);
+  const [choice, setChoice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
@@ -42,14 +41,14 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
       const res = await fetch('/api/voting-record', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           votingEventId: event.votingEventId,
           userId: user.id,
           result: choice,
-          updatedBy: user.id
-        })
+          updatedBy: user.id,
+        }),
       });
 
       if (!res.ok) {
@@ -73,9 +72,7 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
       <div className='bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4 relative'>
         <div className='flex items-start justify-between mb-2'>
-          <h2 className='text-xl font-semibold text-gray-900'>
-            Active Vote
-          </h2>
+          <h2 className='text-xl font-semibold text-gray-900'>Active Vote</h2>
           <button
             type='button'
             onClick={handleDismiss}
@@ -88,47 +85,49 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
         <p className='text-sm text-gray-600 mb-4'>
           {event.name || 'A new voting event is in progress.'}
         </p>
+        <p className='text-sm text-gray-600 mb-4'>
+          {event.voteType || 'A new voting event is in progress.'}
+        </p>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
           <fieldset className='space-y-2'>
             <legend className='text-sm font-medium text-gray-900'>
               Please select your vote:
             </legend>
-            <div className='space-y-1'>
-              <label className='flex items-center space-x-2 text-sm text-gray-800'>
-                <input
-                  type='radio'
-                  name='vote'
-                  value='YES'
-                  checked={choice === 'YES'}
-                  onChange={() => setChoice('YES')}
-                  className='h-4 w-4 text-[#C8102E] border-gray-300 focus:ring-[#C8102E]'
-                />
-                <span>Yes</span>
-              </label>
-              <label className='flex items-center space-x-2 text-sm text-gray-800'>
-                <input
-                  type='radio'
-                  name='vote'
-                  value='NO'
-                  checked={choice === 'NO'}
-                  onChange={() => setChoice('NO')}
-                  className='h-4 w-4 text-[#C8102E] border-gray-300 focus:ring-[#C8102E]'
-                />
-                <span>No</span>
-              </label>
-              <label className='flex items-center space-x-2 text-sm text-gray-800'>
-                <input
-                  type='radio'
-                  name='vote'
-                  value='ABSTAIN'
-                  checked={choice === 'ABSTAIN'}
-                  onChange={() => setChoice('ABSTAIN')}
-                  className='h-4 w-4 text-[#C8102E] border-gray-300 focus:ring-[#C8102E]'
-                />
-                <span>Abstain</span>
-              </label>
-            </div>
+            {event.voteType === 'ROLL_CALL' ? (
+              Object.values(YES_NO_OPTIONS).map((option) => (
+                <label
+                  key={option}
+                  className='flex items-center space-x-2 text-sm text-gray-800'
+                >
+                  <input
+                    type='radio'
+                    name='vote'
+                    value={option}
+                    checked={choice === option}
+                    onChange={() => setChoice(option)}
+                    className='h-4 w-4 text-[#C8102E] border-gray-300 focus:ring-[#C8102E]'
+                  />
+                  <span>{option}</span>
+                </label>
+              ))
+            ) : (
+              <div className='space-y-1'>
+                {event.options.map((option) => (
+                  <label className='flex items-center space-x-2 text-sm text-gray-800'>
+                    <input
+                      type='radio'
+                      name='vote'
+                      value={option}
+                      checked={choice === option}
+                      onChange={() => setChoice(option)}
+                      className='h-4 w-4 text-[#C8102E] border-gray-300 focus:ring-[#C8102E]'
+                    />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </fieldset>
 
           {error && (
@@ -153,4 +152,3 @@ const ActiveVotingModal: React.FC<ActiveVotingModalProps> = ({
 };
 
 export default ActiveVotingModal;
-

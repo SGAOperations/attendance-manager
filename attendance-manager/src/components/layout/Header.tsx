@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { UserRound } from 'lucide-react';
 
 interface HeaderProps {
   onProfileClick: () => void;
@@ -10,32 +11,30 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onProfileClick, onLogoClick }) => {
   const { user } = useAuth();
 
-/* Maps enum value to appropriate plain text */
-const rolePlainText = (role?: string) => {
-  switch (role) {
-    case 'EBOARD':
-      return 'E-Board';
-    case 'MEMBER':
-      return 'Member';
-    default:
-      return role;
-  }
-};
+  /* Maps enum value to appropriate plain text */
+  const rolePlainText = (role?: string) => {
+    switch (role) {
+      case 'EBOARD':
+        return 'E-Board';
+      case 'MEMBER':
+        return 'Member';
+      default:
+        return role;
+    }
+  };
 
   return (
     <header className='bg-white shadow-lg border-b border-gray-200 w-full'>
       <div className='w-full px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
           {/* Left side - SGA (always on far left) */}
-          <div className="flex flex-row items-end flex-shrink-0">
+          <div className='flex flex-row items-end flex-shrink-0'>
             <Link href='homepage' onClick={onLogoClick}>
               <div className='text-2xl font-bold text-[#C8102E] tracking-wider'>
-              SGA
-            </div>
+                SGA
+              </div>
             </Link>
-            <div style={{paddingLeft: '8px'}} >
-              Version 2.1.0
-            </div>
+            <div style={{ paddingLeft: '8px' }}>Version 2.1.3</div>
           </div>
 
           {/* Right side - Profile (always on far right) */}
@@ -60,19 +59,7 @@ const rolePlainText = (role?: string) => {
                     </span>
                   </div>
                   <div className='hidden sm:block'>
-                    <svg
-                      className='w-4 h-4 text-gray-600'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
-                      />
-                    </svg>
+                    <UserRound className='w-4 h-4 text-gray-600' />
                   </div>
                 </button>
               </div>

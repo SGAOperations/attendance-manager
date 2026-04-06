@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AttendanceController } from '../../../../../attendance/attendance.controller';
 
+/**
+ * Get User Attendance
+ * @description Gets all attendances associated with a user
+ * @body GetUserAttendanceParams
+ * @response GetUserAttendanceResponse
+ * @openapi
+ */
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> },

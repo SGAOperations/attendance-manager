@@ -31,7 +31,7 @@ export const MeetingController = {
 
   async createMeeting(request: Request) {
     const body = await request.json();
-    
+
     // Validate required fields
     if (
       !body.name ||
@@ -43,58 +43,62 @@ export const MeetingController = {
     ) {
       const requiredFields = ['name', 'startTime', 'date', 'endTime', 'type'];
       const missingFields = requiredFields.filter((field) => {
-      const value = body[field];
+        const value = body[field];
         return value === undefined || value === null || value === '';
       });
       return NextResponse.json(
         { error: 'Missing required fields', missingFields },
-        { status: 400 }
+        { status: 400 },
       );
     }
-  
+
     // Validate type enum
     if (body.type !== 'FULL_BODY' && body.type !== 'REGULAR') {
       return NextResponse.json(
         { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
-        { status: 400 }
+        { status: 400 },
       );
     }
-  
+
     // Validate attendeeIds if provided
     if (body.attendeeIds && !Array.isArray(body.attendeeIds)) {
       return NextResponse.json(
         { error: 'attendeeIds must be an array' },
-        { status: 400 }
+        { status: 400 },
       );
     }
-  
-    const newMeeting = await MeetingService.createMeeting(body, body.attendeeIds || []);
+
+    const newMeeting = await MeetingService.createMeeting(
+      body,
+      body.attendeeIds || [],
+    );
     return NextResponse.json(newMeeting, { status: 201 });
   },
 
   async updateMeeting(request: Request, params: { meetingId: string }) {
     const updates = await request.json();
-    
+
     // Validate type enum if provided
     if (updates.type && !Object.values(MeetingType).includes(updates.type)) {
       return NextResponse.json(
         { error: 'Invalid meeting type. Must be FULL_BODY or REGULAR' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const updatedMeeting = await MeetingService.updateMeeting(
       params.meetingId,
-      updates
+      updates,
     );
     return NextResponse.json(updatedMeeting);
   },
 
   async deleteMeeting(params: { meetingId: string }) {
-    await MeetingService.deleteMeeting(params.meetingId);
+    await MeetingService.softDeleteMeeting(params.meetingId);
+
     return NextResponse.json(
-      { message: 'Meeting deleted successfully' },
-      { status: 204 }
+      { message: 'Meeting soft deleted successfully' },
+      { status: 200 },
     );
-  }
+  },
 };
