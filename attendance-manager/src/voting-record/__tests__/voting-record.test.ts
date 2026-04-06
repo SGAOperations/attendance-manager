@@ -98,6 +98,16 @@ describe('VotingRecordService', () => {
     await VotingRecordService.deleteVotingRecord(
       newVotingRecord.votingRecordId
     );
+
+    it('should not allow a user to vote twice for the same event', async () => {
+      await expect(
+        VotingRecordService.createVotingRecord({
+          votingEventId: testVotingEventId,
+          userId: testUserId,
+          result: 'YES'
+        })
+      ).rejects.toThrow('User has already voted for this event');
+    });
   });
 
   it('should fetch all voting records', async () => {
