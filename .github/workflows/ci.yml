@@ -32,6 +32,10 @@ jobs:
         working-directory: attendance-manager
         run: npx prisma generate
 
+      - name: Run Migrations
+        working-directory: attendance-manager
+        run: npx prisma migrate deploy
+
       - name: Lint
         working-directory: attendance-manager
         run: npm run lint
