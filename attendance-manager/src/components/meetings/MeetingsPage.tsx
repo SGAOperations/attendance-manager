@@ -500,9 +500,10 @@ const MeetingsPage: React.FC = () => {
   };
 
   // visibleMeetings are meetings post-type-filter - sorted by most recent date
-  const visibleMeetings = (typeFilter
-    ? filteredMeetings.filter(m => m.type === typeFilter)
-    : filteredMeetings
+  const visibleMeetings = (
+    typeFilter
+      ? filteredMeetings.filter((m) => m.type === typeFilter)
+      : filteredMeetings
   ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // Determine banner color based on remaining absences
