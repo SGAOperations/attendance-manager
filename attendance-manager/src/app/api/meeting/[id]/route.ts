@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { MeetingController } from '@/meeting/meeting.controller';
 import { requireAuth } from '@/utils/api-auth';
-import { checkCanEditMeetings, checkCanManageMeetings } from '@/utils/permissions';
+import {
+  checkCanEditMeetings,
+  checkCanManageMeetings,
+} from '@/utils/permissions';
 
 export async function GET(
   request: Request,

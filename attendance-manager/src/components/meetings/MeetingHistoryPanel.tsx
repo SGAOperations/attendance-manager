@@ -170,7 +170,7 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
                   </div>
                 </td>
                 <td className='py-3 px-4 text-center'>
-                  {isEboard && (
+                  {canEditMeetings && (
                     <div className='flex items-center gap-2'>
                       <button
                         onClick={() => handleEditMeeting(meeting)}
