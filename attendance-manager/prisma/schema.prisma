@@ -79,6 +79,7 @@ model VotingEvent {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime?       @updatedAt
   deletedAt      DateTime?
+  endedAt       DateTime?
   updatedBy      String?
   meeting        Meeting         @relation(fields: [meetingId], references: [meetingId])
   votingRecords  VotingRecord[]

@@ -16,9 +16,9 @@ describe('MeetingServices', () => {
         date: '7/30/2025',
         endTime: '8:13:15 PM',
         notes: 'notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
     expect(newMeeting).toBeDefined();
     expect(newMeeting.name).toBe('test2');
@@ -39,7 +39,7 @@ describe('MeetingServices', () => {
   it('should fetch a meetings by id', async () => {
     const [newMeeting] = await MeetingService.getAllMeeting();
     const fetchedMeeting = await MeetingService.getMeetingById(
-      newMeeting.meetingId
+      newMeeting.meetingId,
     );
     expect(fetchedMeeting?.meetingId).toBe(newMeeting.meetingId);
   });
@@ -54,8 +54,8 @@ describe('MeetingServices', () => {
         date: '7/29/2025',
         endTime: '8:08:15 PM',
         notes: 'notes',
-        type: MeetingType.FULL_BODY
-      }
+        type: MeetingType.FULL_BODY,
+      },
     );
 
     expect(updatedMeeting.name).toBe('test');
@@ -71,7 +71,7 @@ describe('MeetingServices', () => {
     const [newMeeting] = await MeetingService.getAllMeeting();
     await MeetingService.deleteMeeting(newMeeting.meetingId);
     const deletedMeeting = await MeetingService.getMeetingById(
-      newMeeting.meetingId
+      newMeeting.meetingId,
     );
     expect(deletedMeeting).toBeNull();
   });
@@ -84,26 +84,26 @@ describe('MeetingServices', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Test notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
 
     await MeetingService.softDeleteMeeting(meeting.meetingId);
 
     const fetchedMeeting = await MeetingService.getMeetingById(
-      meeting.meetingId
+      meeting.meetingId,
     );
     expect(fetchedMeeting).toBeNull();
 
     const allMeetings = await MeetingService.getAllMeeting();
     const existsInList = allMeetings.find(
-      m => m.meetingId === meeting.meetingId
+      (m) => m.meetingId === meeting.meetingId,
     );
     expect(existsInList).toBeUndefined();
 
     const rawMeeting = await prisma.meeting.findUnique({
-      where: { meetingId: meeting.meetingId }
+      where: { meetingId: meeting.meetingId },
     });
     expect(rawMeeting).not.toBeNull();
     expect(rawMeeting?.deletedAt).not.toBeNull();
@@ -123,9 +123,9 @@ describe('MeetingController', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Test notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
 
     const updateData = {
@@ -134,15 +134,15 @@ describe('MeetingController', () => {
       date: '2025-12-02',
       endTime: '15:00',
       notes: 'Updated notes',
-      type: MeetingType.FULL_BODY
+      type: MeetingType.FULL_BODY,
     };
 
     const mockRequest = {
-      json: async () => updateData
+      json: async () => updateData,
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId
+      meetingId: testMeeting.meetingId,
     });
 
     expect(response).toBeDefined();
@@ -165,21 +165,21 @@ describe('MeetingController', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Test notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
 
     const updateData = {
-      type: 'INVALID_TYPE'
+      type: 'INVALID_TYPE',
     };
 
     const mockRequest = {
-      json: async () => updateData
+      json: async () => updateData,
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId
+      meetingId: testMeeting.meetingId,
     });
 
     expect(response.status).toBe(400);
@@ -197,21 +197,21 @@ describe('MeetingController', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Original notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
 
     const updateData = {
-      name: 'Partially Updated Name'
+      name: 'Partially Updated Name',
     };
 
     const mockRequest = {
-      json: async () => updateData
+      json: async () => updateData,
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId
+      meetingId: testMeeting.meetingId,
     });
 
     expect(response).toBeDefined();
@@ -225,17 +225,17 @@ describe('MeetingController', () => {
 
   it('should handle non-existent meetingId', async () => {
     const updateData = {
-      name: 'Non-existent Meeting'
+      name: 'Non-existent Meeting',
     };
 
     const mockRequest = {
-      json: async () => updateData
+      json: async () => updateData,
     } as Request;
 
     await expect(
       MeetingController.updateMeeting(mockRequest, {
-        meetingId: 'non-existent-id-12345'
-      })
+        meetingId: 'non-existent-id-12345',
+      }),
     ).rejects.toThrow();
   });
 
@@ -247,19 +247,19 @@ describe('MeetingController', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Test notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
 
     const updateData = {};
 
     const mockRequest = {
-      json: async () => updateData
+      json: async () => updateData,
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId
+      meetingId: testMeeting.meetingId,
     });
 
     expect(response).toBeDefined();
@@ -277,21 +277,21 @@ describe('MeetingController', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Test notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
 
-    const mockRequest = ({
+    const mockRequest = {
       json: async () => {
         throw new Error('Invalid JSON');
-      }
-    } as unknown) as Request;
+      },
+    } as unknown as Request;
 
     await expect(
       MeetingController.updateMeeting(mockRequest, {
-        meetingId: testMeeting.meetingId
-      })
+        meetingId: testMeeting.meetingId,
+      }),
     ).rejects.toThrow('Invalid JSON');
 
     await MeetingService.deleteMeeting(testMeeting.meetingId);
@@ -305,21 +305,21 @@ describe('MeetingController', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Test notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
 
     const updateData = {
-      type: MeetingType.FULL_BODY
+      type: MeetingType.FULL_BODY,
     };
 
     const mockRequest = {
-      json: async () => updateData
+      json: async () => updateData,
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId
+      meetingId: testMeeting.meetingId,
     });
 
     expect(response).toBeDefined();
@@ -337,21 +337,21 @@ describe('MeetingController', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Test notes',
-        type: MeetingType.FULL_BODY
+        type: MeetingType.FULL_BODY,
       },
-      []
+      [],
     );
 
     const updateData = {
-      type: MeetingType.REGULAR
+      type: MeetingType.REGULAR,
     };
 
     const mockRequest = {
-      json: async () => updateData
+      json: async () => updateData,
     } as Request;
 
     const response = await MeetingController.updateMeeting(mockRequest, {
-      meetingId: testMeeting.meetingId
+      meetingId: testMeeting.meetingId,
     });
 
     expect(response).toBeDefined();
@@ -368,9 +368,9 @@ describe('MeetingController', () => {
         date: '7/30/2025',
         endTime: '8:13:15 PM',
         notes: 'notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
     const testMeetingId = newMeeting.meetingId;
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
@@ -383,8 +383,8 @@ describe('MeetingController', () => {
         firstName: 'Test',
         lastName: 'User',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
 
     const user2 = await prisma.user.create({
@@ -396,19 +396,19 @@ describe('MeetingController', () => {
         firstName: 'Test2',
         lastName: 'User2',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     const attendance = await prisma.attendance.create({
       data: {
         userId: user.userId,
         meetingId: testMeetingId,
         status: 'EXCUSED_ABSENCE',
-        request: {}
-      }
+        request: {},
+      },
     });
     const response = await MeetingController.getUsers({
-      meetingId: testMeetingId
+      meetingId: testMeetingId,
     });
     const responseData = await response.json();
     expect(responseData).toHaveLength(1);
@@ -428,9 +428,9 @@ describe('MeetingController', () => {
         date: '7/30/2025',
         endTime: '8:13:15 PM',
         notes: 'notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
     const testMeetingId = newMeeting.meetingId;
     const role = await prisma.role.create({ data: { roleType: 'MEMBER' } });
@@ -443,8 +443,8 @@ describe('MeetingController', () => {
         firstName: 'Test',
         lastName: 'User',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
 
     const user2 = await prisma.user.create({
@@ -456,27 +456,27 @@ describe('MeetingController', () => {
         firstName: 'Test2',
         lastName: 'User2',
         roleId: role.roleId,
-        password: null
-      }
+        password: null,
+      },
     });
     const attendance = await prisma.attendance.create({
       data: {
         userId: user.userId,
         meetingId: testMeetingId,
         status: 'EXCUSED_ABSENCE',
-        request: {}
-      }
+        request: {},
+      },
     });
     const attendance2 = await prisma.attendance.create({
       data: {
         userId: user2.userId,
         meetingId: testMeetingId,
         status: 'EXCUSED_ABSENCE',
-        request: {}
-      }
+        request: {},
+      },
     });
     const response = await MeetingController.getUsers({
-      meetingId: testMeetingId
+      meetingId: testMeetingId,
     });
     const responseData = await response.json();
     expect(responseData).toHaveLength(2);
@@ -498,13 +498,13 @@ describe('MeetingController', () => {
         date: '2025-12-01',
         endTime: '11:00',
         notes: 'Test notes',
-        type: MeetingType.REGULAR
+        type: MeetingType.REGULAR,
       },
-      []
+      [],
     );
 
     const response = await MeetingController.deleteMeeting({
-      meetingId: meeting.meetingId
+      meetingId: meeting.meetingId,
     });
 
     expect(response.status).toBe(200);

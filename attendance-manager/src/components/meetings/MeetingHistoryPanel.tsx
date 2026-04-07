@@ -137,66 +137,58 @@ const MeetingHistoryPanel: React.FC<MeetingHistoryPanelProps> = ({
             </tr>
           </thead>
           <tbody>
-            {visibleMeetings.length === 0 ? (
-              <tr>
-                <td colSpan={5} className='text-center py-8 text-gray-500'>
-                  No meetings found
+          {visibleMeetings.map((meeting) => (
+              <tr
+                key={meeting.meetingId}
+                className='border-b border-gray-100 hover:bg-gray-50'
+              >
+                <td className='py-3 px-4'>
+                  <div className='text-sm text-gray-900'>{meeting.date}</div>
+                  <div className='text-xs text-gray-500'>
+                    {meeting.startTime} - {meeting.endTime}
+                  </div>
+                </td>
+                <td className='py-3 px-4'>
+                  <div className='text-sm font-medium text-gray-900'>
+                    {meeting.name}
+                  </div>
+                  <div className='text-xs text-gray-500'>
+                    {formatMeetingType(meeting.type)}
+                  </div>
+                </td>
+                <td className='py-3 px-4'>
+                  <div className='text-sm text-gray-600'>{meeting.notes}</div>
+                </td>
+                <td className='py-3 px-4'>
+                  <div className='text-sm font-medium text-gray-900'>
+                    {formatMeetingType(meeting.type)}
+                  </div>
+                </td>
+                <td className='py-3 px-4 text-right'>
+                  <div className='text-sm font-medium text-gray-900'>
+                    {meeting.attendance?.length || 0}
+                  </div>
+                </td>
+                <td className='py-3 px-4 text-center'>
+                  {isEboard && (
+                    <div className='flex items-center gap-2'>
+                      <button
+                        onClick={() => handleEditMeeting(meeting)}
+                        className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMeeting(meeting)}
+                        className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
-            ) : (
-              visibleMeetings.map((meeting) => (
-                <tr
-                  key={meeting.meetingId}
-                  className='border-b border-gray-100 hover:bg-gray-50'
-                >
-                  <td className='py-3 px-4'>
-                    <div className='text-sm text-gray-900'>{meeting.date}</div>
-                    <div className='text-xs text-gray-500'>
-                      {meeting.startTime} - {meeting.endTime}
-                    </div>
-                  </td>
-                  <td className='py-3 px-4'>
-                    <div className='text-sm font-medium text-gray-900'>
-                      {meeting.name}
-                    </div>
-                    <div className='text-xs text-gray-500'>
-                      {formatMeetingType(meeting.type)}
-                    </div>
-                  </td>
-                  <td className='py-3 px-4'>
-                    <div className='text-sm text-gray-600'>{meeting.notes}</div>
-                  </td>
-                  <td className='py-3 px-4'>
-                    <div className='text-sm font-medium text-gray-900'>
-                      {formatMeetingType(meeting.type)}
-                    </div>
-                  </td>
-                  <td className='py-3 px-4 text-right'>
-                    <div className='text-sm font-medium text-gray-900'>
-                      {meeting.attendance?.length || 0}
-                    </div>
-                  </td>
-                  <td className='py-3 px-4 text-center'>
-                    {canEditMeetings && (
-                      <div className='flex items-center gap-2'>
-                        <button
-                          onClick={() => handleEditMeeting(meeting)}
-                          className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteMeeting(meeting)}
-                          className='px-3 py-1 bg-[#C8102E] text-white text-sm rounded-lg hover:bg-[#A8102E] transition-colors'
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
+            ))}
           </tbody>
         </table>
       </div>

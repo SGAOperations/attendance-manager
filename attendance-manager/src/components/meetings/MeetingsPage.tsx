@@ -107,7 +107,7 @@ const MeetingsPage: React.FC = () => {
         setMeetings(json);
       })
       // eslint-disable-next-line
-      .catch(error => console.error(error));
+      .catch((error) => console.error(error));
   };
 
   useEffect(() => {
@@ -215,7 +215,7 @@ const MeetingsPage: React.FC = () => {
         setMembers(data);
       })
       // eslint-disable-next-line
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   }, []);
 
   const nonEboardMembers = useMemo(
@@ -499,10 +499,11 @@ const MeetingsPage: React.FC = () => {
     }
   };
 
-  // visibleMeetings are meetings post-type-filter
-  const visibleMeetings = typeFilter
+  // visibleMeetings are meetings post-type-filter - sorted by most recent date
+  const visibleMeetings = (typeFilter
     ? filteredMeetings.filter(m => m.type === typeFilter)
-    : filteredMeetings;
+    : filteredMeetings
+  ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // Determine banner color based on remaining absences
   const getBannerColor = () => {

@@ -8,6 +8,11 @@ export const MeetingController = {
     return NextResponse.json(meeting);
   },
 
+  async listUpcomingMeetings() {
+    const meetings = await MeetingService.getUpcomingMeetings();
+    return NextResponse.json(meetings);
+  },
+
   async listMeetingsByDate() {
     const meeting = await MeetingService.getAllMeetingByDate();
     return NextResponse.json(meeting);
