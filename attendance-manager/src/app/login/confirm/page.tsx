@@ -34,14 +34,12 @@ function ConfirmContent() {
               Press the button below to proceed — do not share this page with
               anyone.
             </p>
-            <button
-              onClick={() => {
-                window.location.href = url!;
-              }}
-              className='w-full py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 shadow-lg hover:shadow-xl'
+            <a
+              href={url ?? ''}
+              className='block w-full py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 shadow-lg hover:shadow-xl'
             >
               {isRecovery ? 'Reset Password' : 'Confirm Email'}
-            </button>
+            </a>
           </>
         ) : (
           <>
